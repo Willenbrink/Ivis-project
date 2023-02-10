@@ -1,0 +1,21 @@
+// Custom colors
+$primary: #264353;
+$danger: #d62828;
+$info: #f77f00;
+$warning: #fcbf49;
+$success: #588157;
+
+@import "../node_modules/bootstrap/scss/functions";
+@import "../node_modules/bootstrap/scss/variables";
+
+$theme-colors: (
+  "primary":    $primary,
+  "secondary":  $secondary,
+  "success":    $success,
+  "info":       $info,
+  "warning":    $warning,
+  "danger":     $danger,
+  "light":      $light,
+);
+
+@import "../node_modules/bootstrap/scss/bootstrap";
