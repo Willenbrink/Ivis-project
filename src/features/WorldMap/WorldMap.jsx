@@ -1,6 +1,9 @@
 import React from 'react';
 import * as d3 from 'd3';
 
+// Adapted from:
+// https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
+
 export default function WorldMap(){
 
   const randoms = Float64Array.from({length: 2000}, d3.randomNormal(1.0, 2));
