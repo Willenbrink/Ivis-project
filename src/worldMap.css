@@ -1,0 +1,23 @@
+.mark .country { 
+	
+}
+
+.mark .country:hover { 
+  stroke: #36c94d;
+  stroke-width: 2px;
+}
+
+.mark .interiorBorders {
+  fill: none;
+  stroke: #36c94d;
+  stroke-width: 0.5px;
+}
+
+.mark .earthSphere {
+  fill: #eeeeee;
+}
+
+.mark .graticule {
+  fill: none;
+  stroke: #cccccc;
+}
