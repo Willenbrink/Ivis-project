@@ -8,7 +8,6 @@ const mapJSON = "https://unpkg.com/world-atlas@2.0.2/countries-110m.json";
 export const parseJSON = () => {
   const [data, setData] = useState(null);
 
-  console.log(data);
   useEffect(() => {
     
     json(mapJSON).then((jsonData) => {
@@ -32,7 +31,7 @@ export const parseJSON = () => {
       setData({
         iso_countries,
         non_iso_countries,
-        interiorBorders: mesh(jsonData, jsonData.objects.countries, (a, b) => a !== b),
+        interiorBorders: mesh(jsonData, jsonData.objects.countries),
       });
     });
   }, []);
