@@ -1,145 +1,75 @@
-import React from 'react';
-import * as d3 from 'd3';
+import React, { useState, useCallback, useEffect } from "react";
+import ReactDom from "react-dom";
+import { parseJSON } from "./parseMapJSON";
+import { LineDraw } from "./lineDraw";
+import { zoom, select, interpolateRgb } from "d3";
+import { get_country_value, country_values_range } from "../../model/dumbDataHandler";
+import { Form, InputGroup } from "react-bootstrap";
+/*export let selected = "";
+export const setSelected = (id) => {
+  selected = id;
+  //this.setState({selected: id});
+  
+  useEffect
+};*/
 
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
 
-export default function WorldMap(){
+const canvasWidth = 960;
+const canvasHeight = 500;
+const categories = ['Omission --> Commission', 'Passengers --> Pedestrians', 'Law: Illegal --> Legal', 'Gender: Male --> Female', 'Fitness: Large --> Fit', 'Social Status: Low --> High', 'Age: Elderly --> Young', 'Number of Characters: Less --> More', 'Species: Pets --> Humans' ]
 
-  const randoms = Float64Array.from({length: 2000}, d3.randomNormal(1.0, 2));
-  console.log(Histogram(randoms));
-  return(
-    <>
-      {
-      Histogram(randoms)
-      }
-    </>
+export default function WorldMap() {
+  //currently selected country (alpha3)
+  const [selected, setSelected] = useState(null);
+  //TODO interactive cathegory selection. (cathegory index)
+  const [category, setCategory] = useState(0);
+  function valToColor(raw_value, alpha3_for_reference) {
+    //value is as in the original data set.
+    // c.color = c.alpha3 == selected ? "red" : "green"; 
+    const selectedValue = get_country_value(selected, category);
+    const relative_value = (raw_value - selectedValue) / country_values_range(category);
+    const extreme_color = relative_value > 0 ? "red" : "green";
+    //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
+    const absolute_value = Math.abs(relative_value);
+    return interpolateRgb("white", extreme_color)(absolute_value).toString();
+  }
+  const mapData = parseJSON();
+  if (!mapData) {
+    return <pre>Loading...</pre>;
+  }
+  let svg = (
+    <svg width={canvasWidth} height={canvasHeight}>
+      <LineDraw
+        data={{ ...mapData, iso_countries: mapData.iso_countries.map(c => ({...c, color: valToColor(get_country_value(c.alpha3, category),c.alpha3)})) }}
+        selectCountry={setSelected}
+      />
+    </svg>
   );
+  return (
+    <div>
+      <InputGroup>
+          <InputGroup.Text id='basic-addon2' className='bg-white'>Categories:</InputGroup.Text>
+          <Form.Select 
+          aria-label="Default select example"
+          onChange={((e) => setCategory(e.target.value))}
+          value={category}
+          >
+            {categories.map((cat, idx) => 
+            <option key={`option_${idx}`} value={idx}>{cat}</option> )}
+          </Form.Select>
+        </InputGroup>
+      {svg}
+    </div>);
 }
 
 export const useD3 = (renderChartFn, dependencies) => {
-    const ref = React.useRef();
+  const ref = React.useRef();
 
-    React.useEffect(() => {
-        renderChartFn(d3.select(ref.current));
-        return () => {};
-      }, dependencies);
-    return ref;
-}
-
-function Histogram(data, {
-  value = d => d, // convenience alias for x
-  domain, // convenience alias for xDomain
-  label, // convenience alias for xLabel
-  format, // convenience alias for xFormat
-  type = d3.scaleLinear, // convenience alias for xType
-  x = value, // given d in data, returns the (quantitative) x-value
-  y = () => 1, // given d in data, returns the (quantitative) weight
-  thresholds = 40, // approximate number of bins to generate, or threshold function
-  normalize, // whether to normalize values to a total of 100%
-  marginTop = 20, // top margin, in pixels
-  marginRight = 30, // right margin, in pixels
-  marginBottom = 30, // bottom margin, in pixels
-  marginLeft = 40, // left margin, in pixels
-  width = 640, // outer width of chart, in pixels
-  height = 400, // outer height of chart, in pixels
-  insetLeft = 0.5, // inset left edge of bar
-  insetRight = 0.5, // inset right edge of bar
-  xType = type, // type of x-scale
-  xDomain = domain, // [xmin, xmax]
-  xRange = [marginLeft, width - marginRight], // [left, right]
-  xLabel = label, // a label for the x-axis
-  xFormat = format, // a format specifier string for the x-axis
-  yType = d3.scaleLinear, // type of y-scale
-  yDomain, // [ymin, ymax]
-  yRange = [height - marginBottom, marginTop], // [bottom, top]
-  yLabel = "↑ Frequency", // a label for the y-axis
-  yFormat = normalize ? "%" : undefined, // a format specifier string for the y-axis
-  color = "currentColor" // bar fill color
-} = {}) {
-  const ref = useD3(
-    (svg) => {
-  // Compute values.
-  const X = d3.map(data, x);
-  const Y0 = d3.map(data, y);
-  const I = d3.range(X.length);
-
-  // Compute bins.
-  const bins = d3.bin().thresholds(thresholds).value(i => X[i])(I);
-  const Y = Array.from(bins, I => d3.sum(I, i => Y0[i]));
-  if (normalize) {
-    const total = d3.sum(Y);
-    for (let i = 0; i < Y.length; ++i) Y[i] /= total;
-  }
-
-  // Compute default domains.
-  if (xDomain === undefined) xDomain = [bins[0].x0, bins[bins.length - 1].x1];
-  if (yDomain === undefined) yDomain = [0, d3.max(Y)];
-
-  // Construct scales and axes.
-  const xScale = xType(xDomain, xRange);
-  const yScale = yType(yDomain, yRange);
-  const xAxis = d3.axisBottom(xScale).ticks(width / 80, xFormat).tickSizeOuter(0);
-  const yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
-  yFormat = yScale.tickFormat(100, yFormat);
-
-  // const svg = d3.create("svg")
-  //     .attr("width", width)
-  //     .attr("height", height)
-  //     .attr("viewBox", [0, 0, width, height])
-  //     .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
-
-  svg.append("g")
-      .attr("transform", `translate(${marginLeft},0)`)
-      .call(yAxis)
-      .call(g => g.select(".domain").remove())
-      .call(g => g.selectAll(".tick line").clone()
-          .attr("x2", width - marginLeft - marginRight)
-          .attr("stroke-opacity", 0.1))
-      .call(g => g.append("text")
-          .attr("x", -marginLeft)
-          .attr("y", 10)
-          .attr("fill", "currentColor")
-          .attr("text-anchor", "start")
-          .text(yLabel));
-
-  svg.append("g")
-      .attr("fill", color)
-    .selectAll("rect")
-    .data(bins)
-    .join("rect")
-      .attr("x", d => xScale(d.x0) + insetLeft)
-      .attr("width", d => Math.max(0, xScale(d.x1) - xScale(d.x0) - insetLeft - insetRight))
-      .attr("y", (d, i) => yScale(Y[i]))
-      .attr("height", (d, i) => yScale(0) - yScale(Y[i]))
-    .append("title")
-      .text((d, i) => [`${d.x0} ≤ x < ${d.x1}`, yFormat(Y[i])].join("\n"));
-
-  svg.append("g")
-      .attr("transform", `translate(0,${height - marginBottom})`)
-      .call(xAxis)
-      .call(g => g.append("text")
-          .attr("x", width - marginRight)
-          .attr("y", 27)
-          .attr("fill", "currentColor")
-          .attr("text-anchor", "end")
-          .text(xLabel));
-    },
-    [data.length]
-  );
-return (
-    <svg
-      ref={ref}
-      style={{
-        height: 500,
-        width: "100%",
-        marginRight: "0px",
-        marginLeft: "0px",
-      }}
-    >
-      <g className="plot-area" />
-      <g className="x-axis" />
-      <g className="y-axis" />
-    </svg>
-  );
-}
+  React.useEffect(() => {
+    renderChartFn(d3.select(ref.current));
+    return () => {};
+  }, dependencies);
+  return ref;
+};

@@ -67,3 +67,28 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.mark .country { 
+	fill: #018f17;
+}
+
+.mark .country:hover { 
+	fill: #018f17;
+  stroke: #36c94d;
+  stroke-width: 2px;
+}
+
+.mark .interiorBorders {
+  fill: none;
+  stroke: #36c94d;
+  stroke-width: 0.5px;
+}
+
+.mark .earthSphere {
+  fill: #eeeeee;
+}
+
+.mark .graticule {
+  fill: none;
+  stroke: #cccccc;
+}
