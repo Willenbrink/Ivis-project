@@ -7,8 +7,8 @@ function App() {
   return (
     <div className="vh-100 w-100" style={{minHeight: '100vh', maxHeight: '100vh'}}>
       <TabSwitch>
-        <WorldMap icon="" title="World map"/>
-        <div icon="" title="Tab 2">Hello</div>
+        <WorldMap icon="" title="PerCathegoryViz"/>
+        <div icon="" title="RelativeToCountryViz">Hello</div>
         <AboutTab icon="" title="About"/>
       </TabSwitch>
     </div>
