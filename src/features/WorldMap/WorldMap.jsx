@@ -10,9 +10,12 @@ import { useRef } from "react";
 export const setSelected = (id) => {
   selected = id;
   //this.setState({selected: id});
-
+  
   useEffect
 };*/
+
+// Adapted from:
+// https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
 
 const canvasWidth = 960;
 const canvasHeight = 500;
