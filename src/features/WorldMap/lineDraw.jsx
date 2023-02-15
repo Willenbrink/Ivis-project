@@ -18,6 +18,7 @@ export function LineDraw({
         //example country: {"color": "#040", "alpha3": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
         iso_countries.map(c => (
           <path
+            key={c.alpha3}
             id={c.alpha3}
             fill={c.color}
             className="country"
@@ -29,8 +30,9 @@ export function LineDraw({
         ))
       }{
         //example country: {"geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
-        non_iso_countries.map(c => (
+        non_iso_countries.map((c, idx) => (
           <path
+            key={`no_iso_country_${idx}`}
             fill="#555"
             className="no_iso_country"
             d={path(c.geometry)}
