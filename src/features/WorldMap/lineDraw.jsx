@@ -1,4 +1,4 @@
-import { geoNaturalEarth1, geoPath, geoGraticule, event, select, zoom } from "d3";
+import { geoNaturalEarth1, geoPath, geoGraticule, select, zoom } from "d3";
 import React, { useState, useCallback, useEffect } from "react";
 import { useRef } from "react";
 //import { selected, setSelected } from "./WorldMap";
@@ -12,14 +12,19 @@ export function LineDraw({
   data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry, svgRef
 }) {
   const gRef = useRef()
+  const legendRef = useRef()
   useEffect(()=>{
-    const svg = select(svgRef.current)
-    svg.call(zoom().on('zoom', () => {
-      g.attr('transform', event.transform);
-    }));
+    if (svgRef && gRef) {
+      const svg = select(svgRef.current)
+      const g = select(gRef.current)
+      svg.call(zoom().on('zoom', (event) => {
+        g.attr('transform', event.transform);
+      }))
+  }
   }, [])
 
   return (
+    <>
     <g className="mark" ref={gRef}>
       <path className="earthSphere" d={path({ type: "Sphere" })} />
       <path className="graticule" d={path(graticule())} />
@@ -50,5 +55,9 @@ export function LineDraw({
       }
       <path className="interiorBorders" d={path(interiorBorders)} />
     </g>
+    <g className='' ref={legendRef}>
+      {/* <rect x="275.62" y="471" width="52" height="10" fill="#fff7ec" stroke="#333" stroke-width="0.3"></rect> */}
+    </g>
+    </>
   );
 }
