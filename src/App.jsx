@@ -1,6 +1,7 @@
 import './scss/bootstrap.scss'
 import TabSwitch from './features/TabSwitch/TabSwitch'
 import WorldMap from './features/WorldMap/WorldMap'
+import AboutTab from './features/AboutTab/AboutTab'
 
 function App() {
   return (
@@ -8,7 +9,7 @@ function App() {
       <TabSwitch>
         <WorldMap icon="" title="World map"/>
         <div icon="" title="Tab 2">Hello</div>
-        <div icon="" title="Tab 3">Hello</div>
+        <AboutTab icon="" title="About"/>
       </TabSwitch>
     </div>
   )
