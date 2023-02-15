@@ -5,6 +5,7 @@ import { LineDraw } from "./lineDraw";
 import { zoom, select, interpolateRgb } from "d3";
 import { get_country_value, country_values_range } from "../../model/dumbDataHandler";
 import { Form, InputGroup } from "react-bootstrap";
+import { useRef } from "react";
 /*export let selected = "";
 export const setSelected = (id) => {
   selected = id;
@@ -22,6 +23,8 @@ export default function WorldMap() {
   const [selected, setSelected] = useState(null);
   //TODO interactive cathegory selection. (cathegory index)
   const [category, setCategory] = useState(0);
+  const svgRef = useRef()
+
   function valToColor(raw_value, alpha3_for_reference) {
     //value is as in the original data set.
     // c.color = c.alpha3 == selected ? "red" : "green"; 
@@ -37,10 +40,10 @@ export default function WorldMap() {
     return <pre>Loading...</pre>;
   }
   let svg = (
-    <svg width={canvasWidth} height={canvasHeight}>
+    <svg width={canvasWidth} height={canvasHeight} ref={svgRef}>
       <LineDraw
         data={{ ...mapData, iso_countries: mapData.iso_countries.map(c => ({...c, color: valToColor(get_country_value(c.alpha3, category),c.alpha3)})) }}
-        selectCountry={setSelected}
+        selectCountry={setSelected} svgRef={svgRef}
       />
     </svg>
   );
