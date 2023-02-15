@@ -5,3 +5,5 @@ This project aims to visualize differences in morals and culture across the worl
 ## Setup to use raw data
 
 Download and extract the data from [OSF](https://osf.io/3hvt2/) and put the extracted `.csv` files in the `raw` folder. They should be named `ss16pusa.csv`, `ss16pusb.csv`, `ss16pusc.csv`, and `ss16pusd.csv`.
+
+test permissions
