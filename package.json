@@ -1,8 +1,9 @@
 {
-  "name": "ivis-project-2",
+  "name": "ivis-project",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "pages/Willenbrink/Ivis-project/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
