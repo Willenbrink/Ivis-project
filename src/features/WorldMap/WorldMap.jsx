@@ -24,6 +24,7 @@ const categories = ['Omission --> Commission', 'Passengers --> Pedestrians', 'La
 export default function WorldMap() {
   //currently selected country (alpha3)
   const [selected, setSelected] = useState(null);
+  const [hovered, setHovered] = useState(null);
   //TODO interactive cathegory selection. (cathegory index)
   const [category, setCategory] = useState(0);
   const svgRef = useRef()
@@ -43,10 +44,10 @@ export default function WorldMap() {
     return <pre>Loading...</pre>;
   }
   let svg = (
-    <svg width={canvasWidth} height={canvasHeight} ref={svgRef}>
-      <LineDraw
-        data={{ ...mapData, iso_countries: mapData.iso_countries.map(c => ({...c, color: valToColor(get_country_value(c.alpha3, category),c.alpha3)})) }}
-        selectCountry={setSelected} svgRef={svgRef}
+      <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
+          <LineDraw
+              data={{ ...mapData, iso_countries: mapData.iso_countries.map(c => ({ ...c, color: valToColor(get_country_value(c.alpha3, category), c.alpha3) })) }}
+              selectCountry={setSelected} selected={selected} hovered={hovered} setHovered={setHovered} svgRef={svgRef}
       />
     </svg>
   );
