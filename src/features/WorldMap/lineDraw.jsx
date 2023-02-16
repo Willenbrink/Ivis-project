@@ -26,8 +26,14 @@ export function LineDraw({
   return (
     <>
     <g className="mark" ref={gRef}>
-      <path className="earthSphere" d={path({ type: "Sphere" })} />
-      <path className="graticule" d={path(graticule())} />
+              <path className="earthSphere" d={path({ type: "Sphere" })}
+                  onClick={(e) => {
+                  selectCountry(null);
+              }} />
+              <path className="graticule" d={path(graticule())}
+                  onClick={(e) => {
+                  selectCountry(null);
+              }} />
       {
         //example country: {"color": "#040", "alpha3": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
         iso_countries.map(c => (
