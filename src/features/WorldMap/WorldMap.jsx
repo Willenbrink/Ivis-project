@@ -17,8 +17,12 @@ export const setSelected = (id) => {
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
 
-const canvasWidth = 960;
-const canvasHeight = 500;
+var body = document.body,
+    html = document.documentElement;
+
+const canvasWidth = "100%";
+const canvasHeight = "100%";  //Math.max( body.scrollHeight, body.offsetHeight, 
+                       //html.clientHeight, html.scrollHeight, html.offsetHeight );
 const categories = ['Omission --> Commission', 'Passengers --> Pedestrians', 'Law: Illegal --> Legal', 'Gender: Male --> Female', 'Fitness: Large --> Fit', 'Social Status: Low --> High', 'Age: Elderly --> Young', 'Number of Characters: Less --> More', 'Species: Pets --> Humans' ]
 
 export default function WorldMap() {
@@ -51,7 +55,7 @@ export default function WorldMap() {
     </svg>
   );
   return (
-    <div>
+    <div id="WorldCanvasDiv">
       <InputGroup>
           <InputGroup.Text id='basic-addon2' className='bg-white'>Categories:</InputGroup.Text>
           <Form.Select 
