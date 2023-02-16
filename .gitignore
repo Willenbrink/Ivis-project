@@ -23,4 +23,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+*.vsidx
+.vs/Ivis-project/v17/.wsuo
 .vs/
