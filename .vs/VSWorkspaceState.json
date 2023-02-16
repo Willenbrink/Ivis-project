@@ -1,0 +1,13 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\src",
+    "\\src\\features",
+    "\\src\\features\\TabSwitch",
+    "\\src\\features\\WorldMap",
+    "\\src\\model",
+    "\\src\\scss"
+  ],
+  "SelectedNode": "\\src\\worldMap.css",
+  "PreviewInSolutionExplorer": false
+}

@@ -17,12 +17,8 @@ export const setSelected = (id) => {
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
 
-var body = document.body,
-    html = document.documentElement;
-
 const canvasWidth = "100%";
-const canvasHeight = "100%";  //Math.max( body.scrollHeight, body.offsetHeight, 
-                       //html.clientHeight, html.scrollHeight, html.offsetHeight );
+const canvasHeight = "100%";
 const categories = ['Omission --> Commission', 'Passengers --> Pedestrians', 'Law: Illegal --> Legal', 'Gender: Male --> Female', 'Fitness: Large --> Fit', 'Social Status: Low --> High', 'Age: Elderly --> Young', 'Number of Characters: Less --> More', 'Species: Pets --> Humans' ]
 
 export default function WorldMap() {
