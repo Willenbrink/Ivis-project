@@ -3,6 +3,10 @@
 	stroke-width: 1.1px;
 }
 
+#WorldCanvasDiv {
+	height: 100%;
+}
+
 .mark .hoveredCountry { 
   stroke: #36c94d;
   stroke-width: 1.6px;
