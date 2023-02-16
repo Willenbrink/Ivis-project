@@ -42,7 +42,6 @@ export function LineDraw({
                           onClick={(e) => {
                               selectCountry(e.target.id);
                               selectedCountry = c;
-                              console.log(c)
                           }}
                       />
                   ))
