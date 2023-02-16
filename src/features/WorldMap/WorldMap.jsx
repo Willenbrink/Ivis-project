@@ -46,7 +46,7 @@ export default function WorldMap() {
     <svg width={canvasWidth} height={canvasHeight} ref={svgRef}>
       <LineDraw
         data={{ ...mapData, iso_countries: mapData.iso_countries.map(c => ({...c, color: valToColor(get_country_value(c.alpha3, category),c.alpha3)})) }}
-        selectCountry={setSelected} svgRef={svgRef}
+              selectCountry={setSelected} selected={selected} svgRef={svgRef}
       />
     </svg>
   );
