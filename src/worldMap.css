@@ -1,5 +1,6 @@
-.mark .country { 
-	
+.mark .selectedCountry {
+	stroke: #cc0000;
+	stroke-width: 2px;
 }
 
 .mark .country:hover { 
