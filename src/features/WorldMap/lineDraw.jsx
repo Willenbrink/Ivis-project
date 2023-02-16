@@ -76,7 +76,7 @@ export function LineDraw({
                                     setHovered(null);
                                     selectCountry(e.target.id);
                                     selectedCountry = hovered;
-                                    console.log(hovered);
+                                    
                                 }}
                         />
                         ) : ""
