@@ -25,3 +25,4 @@ dist-ssr
 *.sw?
 *.vsidx
 .vs/Ivis-project/v17/.wsuo
+.vs/
