@@ -28,11 +28,15 @@ export function LineDraw({
                 <path className="earthSphere" d={path({ type: "Sphere" })}
                     onMouseOver={() => {
                         setHovered(null);
-                }} />
+                }} onClick={() => {
+                  selectCountry(null);
+              } />
                 <path className="graticule" d={path(graticule())}
                     onMouseOver={() => {
                         setHovered(null);
-                    }} />
+                }} onClick={() => {
+                  selectCountry(null);
+              }/>
           {
             //example country: {"color": "#040", "alpha3": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
                       //example country: {"color": "#040", "alpha3": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
