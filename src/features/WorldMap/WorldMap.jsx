@@ -29,16 +29,19 @@ export default function WorldMap() {
   const [category, setCategory] = useState(0);
   const svgRef = useRef()
 
+    if (selected != null) console.log(get_country_value(selected, category));
+
   function valToColor(raw_value, alpha3_for_reference) {
     //value is as in the original data set.
     // c.color = c.alpha3 == selected ? "red" : "green"; 
-    const selectedValue = get_country_value(selected, category);
-    const relative_value = (raw_value - selectedValue) / country_values_range(category);
+    if (raw_value == null) return null;
+    const selectedValue = (selected != null ? get_country_value(selected, category) : 0);
+    const relative_value = (raw_value - selectedValue) / country_values_range(category, selected == null);
     const extreme_color = relative_value > 0 ? "red" : "green";
     //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
     const absolute_value = Math.abs(relative_value);
     return interpolateRgb("white", extreme_color)(absolute_value).toString();
-  }
+    }
   const mapData = parseJSON();
   if (!mapData) {
     return <pre>Loading...</pre>;
