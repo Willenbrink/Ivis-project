@@ -36,7 +36,7 @@ export default function WorldMap() {
     // c.color = c.alpha3 == selected ? "red" : "green"; 
     if (raw_value == null) return null;
     const selectedValue = (selected != null ? get_country_value(selected, category) : 0);
-    const relative_value = (raw_value - selectedValue) / country_values_range(category, selected == null);
+    const relative_value = (raw_value - selectedValue) / (selected != null ? country_values_range(category, false) : 1);
     const extreme_color = relative_value > 0 ? "red" : "green";
     //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
     const absolute_value = Math.abs(relative_value);
