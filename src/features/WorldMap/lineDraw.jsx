@@ -7,8 +7,6 @@ const projection = geoNaturalEarth1();
 const path = geoPath(projection);
 const graticule = geoGraticule();
 
-let selectedCountry = null;
-
 export function LineDraw({
   data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry,selected,hovered, setHovered,svgRef
 }) {
@@ -29,10 +27,14 @@ export function LineDraw({
                 <path className="earthSphere" d={path({ type: "Sphere" })}
                     onMouseOver={() => {
                         setHovered(null);
-                }} />
+                    }} onClick={() => {
+                        selectCountry(null);
+                    }} />
                 <path className="graticule" d={path(graticule())}
                     onMouseOver={() => {
                         setHovered(null);
+                    }} onClick={() => {
+                        selectCountry(null);
                     }} />
           {
             //example country: {"color": "#040", "alpha3": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
@@ -45,7 +47,7 @@ export function LineDraw({
                               className="country"
                               d={path(c.geometry)}
                               onMouseOver={() => {
-                                  if (selected == null || selected != c.id) setHovered(c);
+                                  setHovered(c.alpha3);
                               }}
                           />
                       ))
@@ -61,22 +63,21 @@ export function LineDraw({
             ))
             }
             <path className="interiorBorders" d={path(interiorBorders)} />
-            {
-                ((hovered != null && (selected == null || selected != hovered))) ?
-                    (
-                        <path
+                {
+                    (hovered != null) ?
+                        (
+                        <path hoveredCountry
                                 key="hovered"
-                                id={hovered.alpha3}
-                                fill={hovered.color}
+                                id={iso_countries.find(c => c.alpha3 === hovered).alpha3}
+                                fill={iso_countries.find(c => c.alpha3 === hovered).color}
                                 className="hoveredCountry"
-                                d={path(hovered.geometry)}
+                                d={path(iso_countries.find(c => c.alpha3 === hovered).geometry)}
                                 onMouseLeave={() => {
                                     setHovered(null);
                                 }}
                                 onClick={(e) => {
                                     setHovered(null);
                                     selectCountry(e.target.id);
-                                    selectedCountry = hovered;
                                     
                                 }}
                         />
@@ -86,10 +87,10 @@ export function LineDraw({
             (
                 <path
                     key={"selected"}
-                    id={"selectedCountryBorder"}
+                    id="selectedCountryBorder"
                     fill="none"
                     className="selectedCountry"
-                    d={path(selectedCountry.geometry)}
+                    d={path(iso_countries.find(c => c.alpha3 === selected).geometry)}
                 />
             ) : ""
                 }
