@@ -3,9 +3,10 @@ import ReactDom from "react-dom";
 import { parseJSON } from "./parseMapJSON";
 import { LineDraw } from "./lineDraw";
 import { zoom, select, interpolateRgb } from "d3";
-import { get_country_value, country_values_range } from "../../model/dumbDataHandler";
+import { get_country_value, country_values_range, country_values_minmax } from "../../model/dumbDataHandler";
 import { Form, InputGroup } from "react-bootstrap";
 import { useRef } from "react";
+import { categoriesObjects } from "../../utils/categories";
 /*export let selected = "";
 export const setSelected = (id) => {
   selected = id;
@@ -20,6 +21,7 @@ export const setSelected = (id) => {
 const canvasWidth = "100%";
 const canvasHeight = "100%";
 const categories = ['Omission --> Commission', 'Passengers --> Pedestrians', 'Law: Illegal --> Legal', 'Gender: Male --> Female', 'Fitness: Large --> Fit', 'Social Status: Low --> High', 'Age: Elderly --> Young', 'Number of Characters: Less --> More', 'Species: Pets --> Humans' ]
+
 
 export default function WorldMap() {
   //currently selected country (alpha3)
@@ -47,12 +49,18 @@ export default function WorldMap() {
       <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
           <LineDraw
               data={{ ...mapData, iso_countries: mapData.iso_countries.map(c => ({ ...c, color: valToColor(get_country_value(c.alpha3, category), c.alpha3) })) }}
-              selectCountry={setSelected} selected={selected} hovered={hovered} setHovered={setHovered} svgRef={svgRef}
+              selectCountry={setSelected} 
+              selected={selected} 
+              hovered={hovered} 
+              setHovered={setHovered} 
+              svgRef={svgRef} 
+              category={categoriesObjects[category]}
+              categoryStatistics={{ ...country_values_minmax(category), range: country_values_range(category)}}
       />
     </svg>
   );
   return (
-    <div id="WorldCanvasDiv">
+    <div id="WorldCanvasDiv" className="d-flex flex-column flex-grow-1">
       <InputGroup>
           <InputGroup.Text id='basic-addon2' className='bg-white'>Categories:</InputGroup.Text>
           <Form.Select 
