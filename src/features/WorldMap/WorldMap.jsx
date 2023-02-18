@@ -31,20 +31,30 @@ export default function WorldMap() {
   const [category, setCategory] = useState(0);
   const svgRef = useRef()
 
+  const colorScheme = {
+    left: 'red',
+    middle: 'white',
+    right: 'green'
+  }
+
+
   function valToColor(raw_value, alpha3_for_reference) {
     //value is as in the original data set.
     // c.color = c.alpha3 == selected ? "red" : "green"; 
-    const selectedValue = get_country_value(selected, category);
-    const relative_value = (raw_value - selectedValue) / country_values_range(category);
-    const extreme_color = relative_value > 0 ? "red" : "green";
+    if (raw_value == null) return null;
+    const selectedValue = (selected != null ? get_country_value(selected, category) : 0);
+    const relative_value = (raw_value - selectedValue) / (selected != null ? country_values_range(category, false) : 1);
+    const extreme_color = relative_value > 0 ? colorScheme.left : colorScheme.right;
     //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
     const absolute_value = Math.abs(relative_value);
-    return interpolateRgb("white", extreme_color)(absolute_value).toString();
-  }
+    return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value).toString();
+    }
   const mapData = parseJSON();
   if (!mapData) {
     return <pre>Loading...</pre>;
   }
+
+  const categoryStatistics = { ...country_values_minmax(category), range: country_values_range(category)}
   let svg = (
       <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
           <LineDraw
@@ -53,9 +63,11 @@ export default function WorldMap() {
               selected={selected} 
               hovered={hovered} 
               setHovered={setHovered} 
-              svgRef={svgRef} 
+              svgRef={svgRef}
+              selectedValue={(selected != null ? get_country_value(selected, category) : null)}
               category={categoriesObjects[category]}
-              categoryStatistics={{ ...country_values_minmax(category), range: country_values_range(category)}}
+              categoryStatistics={categoryStatistics}
+              minMaxColors={selected != null ? {min: valToColor(categoryStatistics.min),mid: colorScheme.middle, max:valToColor(categoryStatistics.max)} : {min: colorScheme.right, mid: colorScheme.middle, max: colorScheme.left}}
       />
     </svg>
   );

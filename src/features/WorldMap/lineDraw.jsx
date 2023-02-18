@@ -9,7 +9,7 @@ const path = geoPath(projection);
 const graticule = geoGraticule();
 
 export function LineDraw({
-  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry,selected,hovered, setHovered,svgRef, category, categoryStatistics
+  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry,selected,hovered, setHovered,svgRef, category, categoryStatistics, minMaxColors, selectedValue
 }) {
   const gRef = useRef()
   const zoomInScaleLimit = 8
@@ -30,6 +30,8 @@ export function LineDraw({
     const [left, right] = GetWidths()
     setLabelWidths({ left, right })
   },[])
+
+  const noDataColor = "#555"
 
     return (
         <>
@@ -53,11 +55,12 @@ export function LineDraw({
                           <path
                               key={c.alpha3}
                               id={c.alpha3}
-                              fill={c.color}
+                              fill={c.color != null ? c.color : noDataColor}
                               className="country"
                               d={path(c.geometry)}
                               onMouseOver={() => {
-                                  setHovered(c.alpha3);
+                                  if (c.color != null) setHovered(c.alpha3);
+                                  else setHovered(null);
                               }}
                           />
                       ))
@@ -66,7 +69,7 @@ export function LineDraw({
             non_iso_countries.map((c, idx) => (
               <path
                 key={`no_iso_country_${idx}`}
-                fill="#555"
+                fill={noDataColor}
                 className="no_iso_country"
                 d={path(c.geometry)}
               />
@@ -76,7 +79,7 @@ export function LineDraw({
                 {
                     (hovered != null) ?
                         (
-                        <path hoveredCountry
+                        <path
                                 key="hovered"
                                 id={iso_countries.find(c => c.alpha3 === hovered).alpha3}
                                 fill={iso_countries.find(c => c.alpha3 === hovered).color}
@@ -88,7 +91,6 @@ export function LineDraw({
                                 onClick={(e) => {
                                     setHovered(null);
                                     selectCountry(e.target.id);
-                                    
                                 }}
                         />
                         ) : ""
@@ -105,12 +107,12 @@ export function LineDraw({
             ) : ""
                 }
         </g>
-        {svgRef.current && <Legend svgRef={svgRef} category={category} labelWidths={labelWidths} categoryStatistics={categoryStatistics}/>}
+        {svgRef.current && <Legend svgRef={svgRef} category={category} labelWidths={labelWidths} categoryStatistics={categoryStatistics} noDataColor={noDataColor} minMaxColors={minMaxColors} selectedValue={selectedValue}/>}
     </>
   );
 }
 
-function Legend({svgRef, category, labelWidths, categoryStatistics}){
+function Legend({svgRef, category, labelWidths, categoryStatistics, noDataColor, minMaxColors, selectedValue}){
   if (!svgRef.current) return
   const legendRef = useRef()
 
@@ -141,7 +143,7 @@ function Legend({svgRef, category, labelWidths, categoryStatistics}){
     y: svgHeight - padding.y,
     height: boxHeight,
     width: boxHeight,
-    color: lineColor
+    color: noDataColor
   }
 
   const labelLeft = {
@@ -151,9 +153,10 @@ function Legend({svgRef, category, labelWidths, categoryStatistics}){
     color: lineColor,
     fontSize
   }
-
+  
+  const paddingLabelRight = 200
   const labelRight = {
-    x: svgWidth - labelWidths.right,
+    x: svgWidth - labelWidths.right - paddingLabelRight,
     y: svgHeight - padding.y + boxHeight/2 + fontSize/4,
     width: labelWidths.right, // the longest word that appears here is passengers, so this is this word's width
     color: lineColor,
@@ -170,10 +173,10 @@ function Legend({svgRef, category, labelWidths, categoryStatistics}){
   const boxWidth = Math.round(categoryStatistics.range/2 * availableWidthLine)
   // Lenght of the line to the right of the box
   const lineWidthRight = availableWidthLine - lineWidthLeft - boxWidth
-  console.log('available: ', availableWidthLine)
-  console.log('left: ', lineWidthLeft)
-  console.log('box: ', boxWidth)
-  console.log('box: ', lineWidthRight)
+  //console.log('available: ', availableWidthLine)
+  //console.log('left: ', lineWidthLeft)
+  //console.log('box: ', boxWidth)
+  //console.log('box: ', lineWidthRight)
   const vertLineLeft = {
     x1: labelLeft.x + labelLeft.width + 5,
     y1: svgHeight - padding.y + boxHeight,
@@ -186,39 +189,85 @@ function Legend({svgRef, category, labelWidths, categoryStatistics}){
   const hLineLeft = {
     x1: vertLineLeft.x1,
     y1: svgHeight - padding.y + boxHeight/2,
-    x2: labelLeft.x + labelLeft.width + lineWidthLeft,
+    x2: labelLeft.x + labelLeft.width + availableWidthLine,
     y2: svgHeight - padding.y + boxHeight/2,
     strokeWidth: "2", // the longest word that appears here is passengers, so this is this word's width
     color: lineColor
   }
 
-  const colorBox = {
-    x: hLineLeft.x2,
+  const rangeBox = {
+    x: labelLeft.x + labelLeft.width + lineWidthLeft,
     y: svgHeight - padding.y,
     height: boxHeight,
     width: boxWidth,
     color: '#ffffff'
   }
-
+  /*
   const hLineRight = {
-    x1: colorBox.x + colorBox.width,
+    x1: rangeBox.x + rangeBox.width,
     y1: svgHeight - padding.y + boxHeight/2,
-    x2: colorBox.x + colorBox.width + lineWidthRight,
+    x2: rangeBox.x + rangeBox.width + lineWidthRight,
     y2: svgHeight - padding.y + boxHeight/2,
     strokeWidth: "2", // the longest word that appears here is passengers, so this is this word's width
     color: lineColor
   }
+  */
 
   const vertLineRight = {
-    x1: hLineRight.x2,
+    x1: hLineLeft.x2,
     y1: svgHeight - padding.y + boxHeight,
-    x2: hLineRight.x2,
+    x2: hLineLeft.x2,
     y2: svgHeight - padding.y,
     strokeWidth: "2", // the longest word that appears here is passengers, so this is this word's width
     color: lineColor
   }
 
+  const colorBox = selectedValue
+  ? {
+    x: labelLeft.x + labelLeft.width + lineWidthLeft,
+    y: svgHeight - padding.y,
+    height: boxHeight,
+    width: boxWidth,
+    color: '#ffffff'
+  }
+  :
+  {
+    x: vertLineLeft.x1,
+    y: svgHeight - padding.y,
+    height: boxHeight,
+    width: vertLineRight.x2 - vertLineLeft.x2,
+    color: '#ffffff'
+  }
+
   const styleTransition = {transition: "0.3s"}
+
+  /*
+(selected - minValue) / (maxValue - Minvalue) * 100
+  background: rgb(0,255,14);
+background: linear-gradient(90deg, minMaxColors.min 0%, rgba(255,255,255,1) 52%, minMaxColors.min 100%);
+  */
+  const selectedToPercentage = selectedValue !== null
+  ? Math.round((selectedValue - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min) * 100)
+  : 50
+
+  console.log('PERCENTAGE: ', selectedToPercentage)
+  console.log('MINCOLOR: ', minMaxColors.min)
+  const linearGradient = {background: `linear-gradient(90deg, ${minMaxColors.min} 0%, rgba(255,255,255,1) 52%, ${minMaxColors.min} 100%)`}
+  // const linearGradient = {background: "linear-gradient(90deg, minMaxColors.min 0%, rgba(255,255,255,1) 52%, minMaxColors.min 100%)"}
+
+  /* GAMMAL SVG
+  <g className='' ref={legendRef}>
+        <text fontSize={noDataText.fontSize} x={noDataText.x} y={noDataText.y} width={noDataText.width} height={noDataText.height} fill={noDataText.color}>{noDataStr}</text>
+        <rect x={noDataBox.x} y={noDataBox.y} width={noDataBox.width} height={noDataBox.height} fill={noDataBox.color} stroke="#333" stroke-width="0.3"></rect>
+        <text x={labelLeft.x} y={labelLeft.y} width={labelLeft.width} height={labelLeft.height} fill={labelLeft.color}>{category.from}</text>
+        <line x1={vertLineLeft.x1} y1={vertLineLeft.y1} x2={vertLineLeft.x2} y2={vertLineLeft.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: vertLineLeft.strokeWidth}} />
+        <line x1={hLineLeft.x1} y1={hLineLeft.y1} x2={hLineLeft.x2} y2={hLineLeft.y2} style={{transition:"transform 300ms ease-in", stroke:"rgb(0,0,0)", strokeWidth: hLineLeft.strokeWidth}} />
+        <rect x={colorBox.x} y={colorBox.y} width={colorBox.width} height={colorBox.height} fill='none' stroke="#333" stroke-width="0.3" style={{...styleTransition, ...linearGradient}}></rect>
+        <line x1={vertLineRight.x1} y1={vertLineRight.y1} x2={vertLineRight.x2} y2={vertLineLeft.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: vertLineRight.strokeWidth}} />
+        <line x1={hLineRight.x1} y1={hLineRight.y1} x2={hLineRight.x2} y2={hLineRight.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: hLineRight.strokeWidth}} />
+        <text x={labelRight.x} y={labelRight.y} width={labelRight.width} height={labelRight.height} fill={labelRight.color}>{category.to}</text>
+    </g>
+  */
 
   return (
     <g className='' ref={legendRef}>
@@ -228,10 +277,19 @@ function Legend({svgRef, category, labelWidths, categoryStatistics}){
         <text x={labelLeft.x} y={labelLeft.y} width={labelLeft.width} height={labelLeft.height} fill={labelLeft.color}>{category.from}</text>
         <line x1={vertLineLeft.x1} y1={vertLineLeft.y1} x2={vertLineLeft.x2} y2={vertLineLeft.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: vertLineLeft.strokeWidth}} />
         <line x1={hLineLeft.x1} y1={hLineLeft.y1} x2={hLineLeft.x2} y2={hLineLeft.y2} style={{transition:"transform 300ms ease-in", stroke:"rgb(0,0,0)", strokeWidth: hLineLeft.strokeWidth}} />
-        {/* Box with colors */}
-        <rect x={colorBox.x} y={colorBox.y} width={colorBox.width} height={colorBox.height} fill={colorBox.color} stroke="#333" stroke-width="0.3" style={styleTransition}></rect>
+        {/* <line x1={hLineRight.x1} y1={hLineRight.y1} x2={hLineRight.x2} y2={hLineRight.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: hLineRight.strokeWidth}} /> */}
         <line x1={vertLineRight.x1} y1={vertLineRight.y1} x2={vertLineRight.x2} y2={vertLineLeft.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: vertLineRight.strokeWidth}} />
-        <line x1={hLineRight.x1} y1={hLineRight.y1} x2={hLineRight.x2} y2={hLineRight.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: hLineRight.strokeWidth}} />
+        {/* Box with colors */}
+        <defs>
+          <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style={{ stopColor: minMaxColors.min, stopOpacity:"1"}} />
+            <stop offset={`${selectedToPercentage}%`} style={{stopColor: minMaxColors.mid,stopOpacity:"1"}} />
+            <stop offset="100%" style={{stopColor: minMaxColors.max, stopOpacity:"1"}} />
+          </linearGradient>
+        </defs>
+        <rect x={colorBox.x} y={colorBox.y} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" stroke-width="0.3" style={{...styleTransition}}></rect>
+        {/* Box with range */}
+        <rect x={rangeBox.x} y={rangeBox.y} width={rangeBox.width} height={rangeBox.height} fill='none' stroke="#333" stroke-width="2" style={{...styleTransition}}></rect>
         <text x={labelRight.x} y={labelRight.y} width={labelRight.width} height={labelRight.height} fill={labelRight.color}>{category.to}</text>
     </g>
   )
