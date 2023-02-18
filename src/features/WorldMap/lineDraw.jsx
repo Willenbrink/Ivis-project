@@ -7,8 +7,13 @@ const projection = geoNaturalEarth1();
 const path = geoPath(projection);
 const graticule = geoGraticule();
 
+const selectedLineWidth = 1;
+const hoveredLineWidth = 1.3;
+const borderLineWidth = 0.5;
+const zoomLineStrength = 0.5;
+
 export function LineDraw({
-  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry,selected,hovered, setHovered,svgRef
+    data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry, selected, hovered, setHovered, zoomLevel, zoomLevelSetter, svgRef
 }) {
         const gRef = useRef()
         const legendRef = useRef()
@@ -18,6 +23,7 @@ export function LineDraw({
                 const g = select(gRef.current)
                 svg.call(zoom().on('zoom', (event) => {
                 g.attr('transform', event.transform);
+                zoomLevelSetter(Math.max(event.transform.k, 1));
             }))
         }
     }, [])
@@ -62,16 +68,17 @@ export function LineDraw({
                 d={path(c.geometry)}
               />
             ))
-            }
-            <path className="interiorBorders" d={path(interiorBorders)} />
+                }
+                <path className="interiorBorders" d={path(interiorBorders)} strokeWidth={` ${borderLineWidth * (1 / (zoomLevel * zoomLineStrength))}px`} />
                 {
                     (hovered != null) ?
                         (
-                        <path
+                            <path
                                 key="hovered"
                                 id={iso_countries.find(c => c.alpha3 === hovered).alpha3}
                                 fill={iso_countries.find(c => c.alpha3 === hovered).color}
                                 className="hoveredCountry"
+                                strokeWidth={` ${hoveredLineWidth * (1 / (zoomLevel * zoomLineStrength))}px`}
                                 d={path(iso_countries.find(c => c.alpha3 === hovered).geometry)}
                                 onMouseLeave={() => {
                                     setHovered(null);
@@ -88,7 +95,8 @@ export function LineDraw({
                 <path
                     key={"selected"}
                     id="selectedCountryBorder"
-                    fill="none"
+                                fill="none"
+                                strokeWidth={` ${selectedLineWidth * (1 / (zoomLevel * zoomLineStrength))}px`}
                     className="selectedCountry"
                     d={path(iso_countries.find(c => c.alpha3 === selected).geometry)}
                 />

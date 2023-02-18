@@ -25,6 +25,7 @@ export default function WorldMap() {
   //currently selected country (alpha3)
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
+   const [zoomLevel, zoomLevelSetter] = useState(null);
   //TODO interactive cathegory selection. (cathegory index)
   const [category, setCategory] = useState(0);
   const svgRef = useRef()
@@ -48,7 +49,7 @@ export default function WorldMap() {
       <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
           <LineDraw
               data={{ ...mapData, iso_countries: mapData.iso_countries.map(c => ({ ...c, color: valToColor(get_country_value(c.alpha3, category), c.alpha3) })) }}
-              selectCountry={setSelected} selected={selected} hovered={hovered} setHovered={setHovered} svgRef={svgRef}
+              selectCountry={setSelected} selected={selected} hovered={hovered} setHovered={setHovered} zoomLevel={zoomLevel} zoomLevelSetter={zoomLevelSetter} svgRef={svgRef}
       />
     </svg>
   );
