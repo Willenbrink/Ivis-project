@@ -10,17 +10,17 @@ const graticule = geoGraticule();
 export function LineDraw({
   data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry,selected,hovered, setHovered,svgRef
 }) {
-  const gRef = useRef()
-  const legendRef = useRef()
-  useEffect(()=>{
-    if (svgRef && gRef) {
-      const svg = select(svgRef.current)
-      const g = select(gRef.current)
-      svg.call(zoom().on('zoom', (event) => {
-        g.attr('transform', event.transform);
-      }))
-  }
-  }, [])
+        const gRef = useRef()
+        const legendRef = useRef()
+        useEffect(()=>{
+            if (svgRef && gRef) {
+                const svg = select(svgRef.current)
+                const g = select(gRef.current)
+                svg.call(zoom().on('zoom', (event) => {
+                g.attr('transform', event.transform);
+            }))
+        }
+    }, [])
     return (
         <>
         <g className="mark" ref={gRef}>
@@ -43,11 +43,12 @@ export function LineDraw({
                           <path
                               key={c.alpha3}
                               id={c.alpha3}
-                              fill={c.color}
+                              fill={c.color != null ? c.color : "#555"}
                               className="country"
                               d={path(c.geometry)}
                               onMouseOver={() => {
-                                  setHovered(c.alpha3);
+                                  if (c.color != null) setHovered(c.alpha3);
+                                  else setHovered(null);
                               }}
                           />
                       ))
@@ -66,7 +67,7 @@ export function LineDraw({
                 {
                     (hovered != null) ?
                         (
-                        <path hoveredCountry
+                        <path
                                 key="hovered"
                                 id={iso_countries.find(c => c.alpha3 === hovered).alpha3}
                                 fill={iso_countries.find(c => c.alpha3 === hovered).color}
@@ -78,7 +79,6 @@ export function LineDraw({
                                 onClick={(e) => {
                                     setHovered(null);
                                     selectCountry(e.target.id);
-                                    
                                 }}
                         />
                         ) : ""
