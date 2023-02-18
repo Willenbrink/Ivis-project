@@ -67,7 +67,7 @@ export function LineDraw({
                 {
                     (hovered != null) ?
                         (
-                        <path hoveredCountry
+                        <path
                                 key="hovered"
                                 id={iso_countries.find(c => c.alpha3 === hovered).alpha3}
                                 fill={iso_countries.find(c => c.alpha3 === hovered).color}
