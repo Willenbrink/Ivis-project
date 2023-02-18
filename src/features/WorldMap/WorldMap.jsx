@@ -29,8 +29,6 @@ export default function WorldMap() {
   const [category, setCategory] = useState(0);
   const svgRef = useRef()
 
-    if (selected != null) console.log(get_country_value(selected, category));
-
   function valToColor(raw_value, alpha3_for_reference) {
     //value is as in the original data set.
     // c.color = c.alpha3 == selected ? "red" : "green"; 
