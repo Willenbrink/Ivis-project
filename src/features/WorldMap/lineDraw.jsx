@@ -13,25 +13,29 @@ export function LineDraw({
 }) {
   const gRef = useRef()
   const zoomInScaleLimit = 8
+  const zoomOutScaleLimit = 0.5
   const [labelWidths, setLabelWidths] = useState({ left: 0, right: 0 })
 
+  // Zooming and panning
   useEffect(()=>{
     if (svgRef && gRef) {
       const svg = select(svgRef.current)
       const g = select(gRef.current)
-      svg.call(zoom().scaleExtent([0.5, zoomInScaleLimit])
+      svg.call(zoom().scaleExtent([zoomOutScaleLimit, zoomInScaleLimit])
       .translateExtent([[0, 0], [svgRef.current.clientWidth,svgRef.current.clientHeight]]).on('zoom', (event) => {
         g.attr('transform', event.transform);
       }))
   }
   }, [])
 
+  // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
   useEffect(()=>{
     const [left, right] = GetWidths()
     setLabelWidths({ left, right })
   },[])
 
-  const noDataColor = "#555"
+  const noDataColor = 'gray'
+  //"#D0D0D0"
 
     return (
         <>
@@ -107,12 +111,22 @@ export function LineDraw({
             ) : ""
                 }
         </g>
-        {svgRef.current && <Legend svgRef={svgRef} category={category} labelWidths={labelWidths} categoryStatistics={categoryStatistics} noDataColor={noDataColor} minMaxColors={minMaxColors} selectedValue={selectedValue}/>}
+        {svgRef.current && 
+        <Legend 
+          svgRef={svgRef} 
+          category={category} 
+          labelWidths={labelWidths} 
+          categoryStatistics={categoryStatistics} 
+          noDataColor={noDataColor} 
+          minMaxColors={minMaxColors} 
+          selectedValue={selectedValue} 
+          selectedCountry={selected != null ? iso_countries.find(c => c.alpha3 === selected).name : null}
+        />}
     </>
   );
 }
 
-function Legend({svgRef, category, labelWidths, categoryStatistics, noDataColor, minMaxColors, selectedValue}){
+function Legend({svgRef, category, labelWidths, categoryStatistics, noDataColor, minMaxColors, selectedValue, selectedCountry}){
   if (!svgRef.current) return
   const legendRef = useRef()
 
@@ -222,6 +236,7 @@ function Legend({svgRef, category, labelWidths, categoryStatistics, noDataColor,
     color: lineColor
   }
 
+  // no selected country --> colorBox has full width
   const colorBox = selectedValue
   ? {
     x: labelLeft.x + labelLeft.width + lineWidthLeft,
@@ -241,19 +256,45 @@ function Legend({svgRef, category, labelWidths, categoryStatistics, noDataColor,
 
   const styleTransition = {transition: "0.3s"}
 
-  /*
-(selected - minValue) / (maxValue - Minvalue) * 100
-  background: rgb(0,255,14);
-background: linear-gradient(90deg, minMaxColors.min 0%, rgba(255,255,255,1) 52%, minMaxColors.min 100%);
-  */
   const selectedToPercentage = selectedValue !== null
   ? Math.round((selectedValue - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min) * 100)
   : 50
 
-  console.log('PERCENTAGE: ', selectedToPercentage)
-  console.log('MINCOLOR: ', minMaxColors.min)
-  const linearGradient = {background: `linear-gradient(90deg, ${minMaxColors.min} 0%, rgba(255,255,255,1) 52%, ${minMaxColors.min} 100%)`}
-  // const linearGradient = {background: "linear-gradient(90deg, minMaxColors.min 0%, rgba(255,255,255,1) 52%, minMaxColors.min 100%)"}
+  const countryMarker = {
+    x: rangeBox.x + ((selectedToPercentage/100) * rangeBox.width),
+    y: svgHeight - padding.y,
+    height: boxHeight,
+    width: selectedValue !== null ? 3 : 0,
+    color: 'blue'
+  }
+
+  function bottomTooltipPath(width, height, offset, radius) {
+    const left = -width / 2
+    const right = width / 2
+    const bottom = offset + height
+    const top = offset
+    return `M 0,0 
+      L ${-offset},${top} 
+      H ${left + radius}
+      Q ${left},${top} ${left},${top + radius}  
+      V ${bottom - radius}   
+      Q ${left},${bottom} ${left + radius},${bottom}
+      H ${right - radius}
+      Q ${right},${bottom} ${right},${bottom - radius}
+      V ${top + radius}
+      Q ${right},${top} ${right - radius},${top}
+      H ${offset} 
+      L 0,0 z`
+  }
+
+
+  const middleMarker = {
+    x: hLineLeft.x1 + Math.round((hLineLeft.x2 - hLineLeft.x1)/2) ,
+    y: svgHeight - padding.y - 10,
+    height: boxHeight + 20,
+    width: 3,
+    color: 'gray'
+  }
 
   /* GAMMAL SVG
   <g className='' ref={legendRef}>
@@ -268,6 +309,14 @@ background: linear-gradient(90deg, minMaxColors.min 0%, rgba(255,255,255,1) 52%,
         <text x={labelRight.x} y={labelRight.y} width={labelRight.width} height={labelRight.height} fill={labelRight.color}>{category.to}</text>
     </g>
   */
+
+ const toolTipLabelWidth = selectedCountry !== null ? GetWidth(selectedCountry) : 0
+ const toolTip = (
+  <>
+    <path d={bottomTooltipPath(toolTipLabelWidth + 20, parseInt(fontSize) * 2, 5, 10)} fill='#EEEEEE' stroke='gray' transform={`translate(${countryMarker.x + countryMarker.width/2},${countryMarker.y + boxHeight + 2})`} style={{...styleTransition}}></path>
+    <text transform={`translate(${countryMarker.x + countryMarker.width/2 - toolTipLabelWidth/2},${countryMarker.y + boxHeight + parseInt(fontSize) + 12})`} style={{...styleTransition}}>{selectedCountry}</text>
+  </>
+ )
 
   return (
     <g className='' ref={legendRef}>
@@ -290,6 +339,10 @@ background: linear-gradient(90deg, minMaxColors.min 0%, rgba(255,255,255,1) 52%,
         <rect x={colorBox.x} y={colorBox.y} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" stroke-width="0.3" style={{...styleTransition}}></rect>
         {/* Box with range */}
         <rect x={rangeBox.x} y={rangeBox.y} width={rangeBox.width} height={rangeBox.height} fill='none' stroke="#333" stroke-width="2" style={{...styleTransition}}></rect>
+        {/* <rect x={middleMarker.x} y={middleMarker.y} width={middleMarker.width} height={middleMarker.height} stroke={middleMarker.color} style={{...styleTransition, borderStyle: 'dotted'}}></rect>*/}
+        <path stroke-dasharray={`${Math.round((boxHeight + 20)/8)}`} stroke-opacity="70%" d={`M0 0 V${boxHeight + 20} 0`} stroke='gray' stroke-width="2" transform={`translate(${middleMarker.x},${middleMarker.y})`}/>
+        <rect x={countryMarker.x} y={countryMarker.y} width={countryMarker.width} height={countryMarker.height} fill={countryMarker.color} style={{...styleTransition}}></rect>
+        {selectedValue && toolTip}
         <text x={labelRight.x} y={labelRight.y} width={labelRight.width} height={labelRight.height} fill={labelRight.color}>{category.to}</text>
     </g>
   )

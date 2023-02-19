@@ -1,5 +1,5 @@
 .mark .selectedCountry {
-	stroke: #cc0000;
+	stroke: blue;
 	stroke-width: 1.1px;
 }
 
@@ -7,12 +7,12 @@
 	height: 100%;
 }
 .mark .selectedCountry {
-	stroke: #cc0000;
+	stroke: blue;
 	stroke-width: 1px;
 }
 
 .mark .hoveredCountry { 
-  stroke: #36c94d;
+  stroke: rgb(59, 114, 255);
   stroke-width: 1.6px;
 }
 

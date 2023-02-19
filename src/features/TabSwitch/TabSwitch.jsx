@@ -31,7 +31,7 @@ export default function TabSwitch({children}) {
   // style={{height: `${height}px`}}
   return (
     <Tab.Container id="left-tabs-example" defaultActiveKey={activeTab}>
-      <Nav ref={tabsRef} className="border-bottom border-2" variant="pills" >
+      <Nav ref={tabsRef} className="border-bottom border-2 px-5" variant="pills" >
       {Children.map(children, (child, idx) => {
         return(
         <Nav.Item className=''>

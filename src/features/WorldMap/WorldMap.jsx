@@ -7,6 +7,7 @@ import { get_country_value, country_values_range, country_values_minmax } from "
 import { Form, InputGroup } from "react-bootstrap";
 import { useRef } from "react";
 import { categoriesObjects } from "../../utils/categories";
+import InfoPopover from "./InfoPopover";
 /*export let selected = "";
 export const setSelected = (id) => {
   selected = id;
@@ -20,8 +21,8 @@ export const setSelected = (id) => {
 
 const canvasWidth = "100%";
 const canvasHeight = "100%";
-const categories = ['Omission --> Commission', 'Passengers --> Pedestrians', 'Law: Illegal --> Legal', 'Gender: Male --> Female', 'Fitness: Large --> Fit', 'Social Status: Low --> High', 'Age: Elderly --> Young', 'Number of Characters: Less --> More', 'Species: Pets --> Humans' ]
-
+// const categories = ['Omission --> Commission', 'Passengers --> Pedestrians', 'Law: Illegal --> Legal', 'Gender: Male --> Female', 'Fitness: Large --> Fit', 'Social Status: Low --> High', 'Age: Elderly --> Young', 'Number of Characters: Less --> More', 'Species: Pets --> Humans' ]
+const categories = categoriesObjects.map(category => category.name)
 
 export default function WorldMap() {
   //currently selected country (alpha3)
@@ -34,7 +35,10 @@ export default function WorldMap() {
   const colorScheme = {
     left: 'red',
     middle: 'white',
-    right: 'green'
+    right: 'green',
+    selectedLeft: 'blue',
+    selectedMiddle: 'white',
+    selectedRight: 'yellow'
   }
 
 
@@ -72,19 +76,28 @@ export default function WorldMap() {
     </svg>
   );
   return (
-    <div id="WorldCanvasDiv" className="d-flex flex-column flex-grow-1">
-      <InputGroup>
-          <InputGroup.Text id='basic-addon2' className='bg-white'>Categories:</InputGroup.Text>
-          <Form.Select 
-          aria-label="Default select example"
-          onChange={((e) => setCategory(e.target.value))}
-          value={category}
-          >
-            {categories.map((cat, idx) => 
-            <option key={`option_${idx}`} value={idx}>{cat}</option> )}
-          </Form.Select>
-        </InputGroup>
-      {svg}
+    <div id="WorldCanvasDiv" className="d-flex flex-grow-1">
+      <div className="d-flex flex-column flex-grow-1">
+        <InputGroup className="px-5">
+            <InputGroup.Text id='basic-addon2' className='bg-light'>Categories:</InputGroup.Text>
+            <Form.Select 
+            aria-label="Default select example"
+            onChange={((e) => setCategory(e.target.value))}
+            value={category}
+            >
+              {categories.map((cat, idx) => 
+              <option key={`option_${idx}`} value={idx}>{cat}</option> )}
+            </Form.Select>
+            <InfoPopover title={categoriesObjects[category].title} info={categoriesObjects[category].info}/>
+          </InputGroup>
+        {svg}
+      </div>
+      {/* 
+      <div className="w-25 mx-3">
+        <p className="fs-4 mb-2 border-bottom">{categoriesObjects[category].title}</p>
+        <p>{categoriesObjects[category].info}</p>
+      </div>
+      */}
     </div>);
 }
 

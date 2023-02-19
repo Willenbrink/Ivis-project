@@ -1,47 +1,65 @@
 export const categoriesObjects = [
   { 
-    name: 'Omission --> Commission',
+    name: 'Avoiding intervention: Omission vs. Commission',
+    title: 'Avoiding intervention',
     from: 'Omission',
-    to: 'Commission'
+    to: 'Commission',
+    info:'Should we favor continuing on the same path(omission) or intervention(commission)?'
   }, 
   { 
-    name: 'Passengers --> Pedestrians',
+    name: 'Passengers vs. Pedestrians',
+    title: 'Passengers vs. Pedestrians',
     from: 'Passengers',
-    to: 'Pedestrians'
+    to: 'Pedestrians',
+    info:'What is more important: saving the passengers or the pedestrians?'
   }, 
   {
-    name: 'Law: Illegal --> Legal',
+    name: 'Law: Illegal vs. Legal',
+    title: 'Legal bias',
     from: 'Illegal',
-    to: 'Legal'
+    to: 'Legal',
+    info:'How important is it to follow the law?'
   }, 
   { 
-    name: 'Gender: Male --> Female',
+    name: 'Gender: Male vs. Female',
+    title: 'Gender bias',
     from: 'Male',
-    to: 'Female'
+    to: 'Female',
+    info:'Is it more important to save men or women?'
   }, 
   {
-    name: 'Fitness: Large --> Fit',
-    from: 'Male',
-    to: 'Female'
+    name: 'Fitness: Large vs. Fit',
+    title: 'Fitness bias',
+    from: 'Large',
+    to: 'Fit',
+    info: 'Is it more important to save fit or unfit(large) people?'
 }, 
   {
-    name: 'Social Status: Low --> High',
+    name: 'Social Status: Low vs. High',
+    title: 'Social status',
     from: 'Low',
-    to: 'High'
+    to: 'High',
+    info: 'Is it more important to save people with high social status than low social status?'
   }, 
   { 
-    name: 'Age: Elderly --> Young',
+    name: 'Age: Elderly vs. Young',
+    title: 'Age bias',
     from: 'Elderly',
-    to: 'Young'
+    to: 'Young',
+    info: 'Is it more important to save elderly or young people?'
   }, 
   {
-    name: 'Number of Characters: Less --> More',
+    name: 'Number of Characters: Less vs. More',
+    title: 'Number of casualities',
     from: 'Less',
-    to: 'More'
+    to: 'More',
+    info: 'Is it important to save more lives?'
   }, 
   { 
-    name: 'Species: Pets --> Humans',
+    name: 'Species: Pets vs. Humans',
+    title: 'Species bias',
     from: 'Pets',
-    to: 'Humans'
+    to: 'Humans',
+    info: 'Is it more important to save humans or other animals?'
   }
 ]
