@@ -8,12 +8,17 @@ const projection = geoNaturalEarth1();
 const path = geoPath(projection);
 const graticule = geoGraticule();
 
+const selectedLineWidth = 1;
+const hoveredLineWidth = 1.3;
+const borderLineWidth = 0.5;
+const zoomLineStrength = 0.5;
+
 export function LineDraw({
-  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry,selected,hovered, setHovered,svgRef, category, categoryStatistics, minMaxColors, selectedValue
+  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry,selected,hovered, setHovered,svgRef, category, categoryStatistics, minMaxColors, selectedValue, zoomLevel, zoomLevelSetter
 }) {
   const gRef = useRef()
   const zoomInScaleLimit = 8
-  const zoomOutScaleLimit = 0.5
+  const zoomOutScaleLimit = 1
   const [labelWidths, setLabelWidths] = useState({ left: 0, right: 0 })
 
   // Zooming and panning
@@ -22,24 +27,21 @@ export function LineDraw({
       const svg = select(svgRef.current)
       const g = select(gRef.current)
       svg.call(zoom().scaleExtent([zoomOutScaleLimit, zoomInScaleLimit])
-      .translateExtent([[0, 0], [svgRef.current.clientWidth,svgRef.current.clientHeight]]).on('zoom', (event) => {
-        g.attr('transform', event.transform);
+      .translateExtent([[-200, 0], [svgRef.current.clientWidth -200,svgRef.current.clientHeight]]).on('zoom', (event) => {
+        g.attr('transform', event.transform)
+        zoomLevelSetter(Math.max(event.transform.k, 1))
       }))
   }
   }, [])
 
   // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
-  useEffect(()=>{
-    const [left, right] = GetWidths()
-    setLabelWidths({ left, right })
-  },[])
 
   const noDataColor = 'gray'
   //"#D0D0D0"
 
     return (
         <>
-        <g className="mark" ref={gRef}>
+        <g className="mark">
                 <path className="earthSphere" d={path({ type: "Sphere" })}
                     onMouseOver={() => {
                         setHovered(null);
@@ -78,16 +80,17 @@ export function LineDraw({
                 d={path(c.geometry)}
               />
             ))
-            }
-            <path className="interiorBorders" d={path(interiorBorders)} />
+                }
+                <path className="interiorBorders" d={path(interiorBorders)} strokeWidth={` ${borderLineWidth * (1 / (zoomLevel * zoomLineStrength))}px`} />
                 {
                     (hovered != null) ?
                         (
-                        <path
+                            <path
                                 key="hovered"
                                 id={iso_countries.find(c => c.alpha3 === hovered).alpha3}
                                 fill={iso_countries.find(c => c.alpha3 === hovered).color}
                                 className="hoveredCountry"
+                                strokeWidth={` ${hoveredLineWidth * (1 / (zoomLevel * zoomLineStrength))}px`}
                                 d={path(iso_countries.find(c => c.alpha3 === hovered).geometry)}
                                 onMouseLeave={() => {
                                     setHovered(null);
@@ -104,7 +107,8 @@ export function LineDraw({
                 <path
                     key={"selected"}
                     id="selectedCountryBorder"
-                    fill="none"
+                                fill="none"
+                                strokeWidth={` ${selectedLineWidth * (1 / (zoomLevel * zoomLineStrength))}px`}
                     className="selectedCountry"
                     d={path(iso_countries.find(c => c.alpha3 === selected).geometry)}
                 />

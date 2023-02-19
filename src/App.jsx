@@ -7,7 +7,7 @@ function App() {
   return (
     <div className="h-100 vh-100 w-100 d-flex flex-column" style={{minHeight: '100%'}}>
       <TabSwitch>
-        <WorldMap icon="" title="PerCathegoryViz"/>
+        <WorldMap icon="" title="PerCategoryViz"/>
         <div icon="" title="RelativeToCountryViz">Hello</div>
         <AboutTab icon="" title="About"/>
       </TabSwitch>
