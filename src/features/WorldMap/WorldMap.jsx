@@ -31,7 +31,12 @@ export default function WorldMap() {
    const [zoomLevel, zoomLevelSetter] = useState(null);
   //TODO interactive cathegory selection. (cathegory index)
   const [category, setCategory] = useState(0);
+  const [svgHasMounted, setSvgHasMounted] = useState(false)
   const svgRef = useRef()
+
+  useEffect(()=>{
+    if (!svgHasMounted && svgRef.current?.clientWidth > 0) setSvgHasMounted(true)
+  },[svgRef.current])
 
   const colorScheme = {
     left: 'red',
@@ -62,6 +67,7 @@ export default function WorldMap() {
   const categoryStatistics = { ...country_values_minmax(category), range: country_values_range(category)}
   let svg = (
       <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
+          {svgHasMounted && 
           <LineDraw
               data={{ ...mapData, iso_countries: mapData.iso_countries.map(c => ({ ...c, color: valToColor(get_country_value(c.alpha3, category), c.alpha3) })) }}
               selectCountry={setSelected} 
@@ -76,25 +82,27 @@ export default function WorldMap() {
               zoomLevel={zoomLevel} 
               zoomLevelSetter={zoomLevelSetter}
       />
+          }
     </svg>
   );
   return (
-    <div id="WorldCanvasDiv" className="d-flex flex-grow-1">
-      <div className="d-flex flex-column flex-grow-1">
-        <InputGroup className="px-5">
+    <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
+      <div className="d-flex flex-column flex-grow-1 position-relative">
+        {svg}
+      </div>
+          <InputGroup className="px-5 pt-2 position-absolute">
             <InputGroup.Text id='basic-addon2' className='bg-light'>Categories:</InputGroup.Text>
             <Form.Select 
             aria-label="Default select example"
             onChange={((e) => setCategory(e.target.value))}
             value={category}
+            className='fw-bold'
             >
               {categories.map((cat, idx) => 
               <option key={`option_${idx}`} value={idx}>{cat}</option> )}
             </Form.Select>
             <InfoPopover title={categoriesObjects[category].title} info={categoriesObjects[category].info}/>
           </InputGroup>
-        {svg}
-      </div>
       {/* 
       <div className="w-25 mx-3">
         <p className="fs-4 mb-2 border-bottom">{categoriesObjects[category].title}</p>

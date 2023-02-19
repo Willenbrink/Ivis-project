@@ -29,13 +29,16 @@ export default function TabSwitch({children}) {
   },[])
   */
   // style={{height: `${height}px`}}
+  const chosenTab = "bg-white text-primary fw-light border-primary border-bottom border-3 rounded-0"
+  const tab = "bg-white fw-light rounded-0 text-secondary"
+
   return (
     <Tab.Container id="left-tabs-example" defaultActiveKey={activeTab}>
-      <Nav ref={tabsRef} className="border-bottom border-2 px-5" variant="pills" >
+      <Nav ref={tabsRef} className="shadow px-5" variant="pills" >
       {Children.map(children, (child, idx) => {
         return(
         <Nav.Item className=''>
-        <Nav.Link as="button" eventKey={idx} className='d-flex justify-content-center'><div className='d-flex align-items-center justify-content-center gap-2 fs-5 px-4'>{child.props.icon}<p className='m-0'>{child.props.title}</p></div></Nav.Link>
+        <Nav.Link as="button" eventKey={idx} onClick={()=>setActiveTab(idx)} className={`d-flex justify-content-center ${activeTab === idx ? chosenTab : tab}`}><div className='d-flex align-items-center justify-content-center gap-2 fs-5 px-4'>{child.props.icon}<p className='m-0'>{child.props.title}</p></div></Nav.Link>
       </Nav.Item>
         )
       })}
