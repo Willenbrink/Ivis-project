@@ -1,11 +1,37 @@
-import { Children, useState } from "react"
+import { useEffect } from "react";
+import { Children, useRef, useState } from "react"
 import { Nav, Tab } from "react-bootstrap";
 
 export default function TabSwitch({children}) {
   const [activeTab, setActiveTab] = useState(0)
+  const tabsRef = useRef()
+  // This code was an attempt to solve a window size issue
+  //
+  /*
+  const [height, setHeight] = useState(window.innerHeight)
+  // Set height when component has mounted
+  useEffect(()=>{
+    if (tabsRef.current){
+      setHeight(window.innerHeight - tabsRef.current.getBoundingClientRect().height)
+    }
+  }, [tabsRef.current])
+
+  // Set height when window 
+  useEffect(()=>{
+    function HandleResize(){
+      const newHeight = window.innerHeight - tabsRef.current.getBoundingClientRect().height
+      if (height !== newHeight) setHeight(newHeight)
+    }
+    window.addEventListener('resize', HandleResize)
+    return (() => {
+      window.removeEventListener('resize', HandleResize)
+    })
+  },[])
+  */
+  // style={{height: `${height}px`}}
   return (
-    <Tab.Container id="left-tabs-example" defaultActiveKey={activeTab} className='h-100 w-100'>
-      <Nav className="border-bottom border-2" variant="pills" >
+    <Tab.Container id="left-tabs-example" defaultActiveKey={activeTab}>
+      <Nav ref={tabsRef} className="border-bottom border-2 px-5" variant="pills" >
       {Children.map(children, (child, idx) => {
         return(
         <Nav.Item className=''>
@@ -14,10 +40,10 @@ export default function TabSwitch({children}) {
         )
       })}
         </Nav>
-          <Tab.Content className='w-100 h-100'>
+          <Tab.Content className='w-100 d-flex flex-column flex-grow-1' >
           {Children.map(children, (child, idx) => {
             return(
-            <Tab.Pane eventKey={idx} key={idx} className='w-100 h-100'>
+            <Tab.Pane eventKey={idx} key={idx} className={activeTab === idx ? 'd-flex flex-column flex-grow-1' : ''}>
             {child}
           </Tab.Pane>
          ) })}

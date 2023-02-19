@@ -5,7 +5,7 @@ import AboutTab from './features/AboutTab/AboutTab'
 
 function App() {
   return (
-    <div className="vh-100 w-100" style={{minHeight: '100vh', maxHeight: '100vh'}}>
+    <div className="h-100 vh-100 w-100 d-flex flex-column" style={{minHeight: '100%'}}>
       <TabSwitch>
         <WorldMap icon="" title="PerCategoryViz"/>
         <div icon="" title="RelativeToCountryViz">Hello</div>

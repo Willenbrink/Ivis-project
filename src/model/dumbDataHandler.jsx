@@ -1080,3 +1080,16 @@ export function country_values_range(cathegory_index, zeroBased) {
     console.log(values_range)
     return values_range[cathegory_index][baseIndex];
 }
+
+export function country_values_minmax(cathegory_index) {
+  let min = 1;
+  let max = -1;
+  for (let country in values_per_country) {
+      let value = values_per_country[country][cathegory_index];
+      if (value < min) min = value;
+      if (value > max) max = value;
+  }
+  return {min, max}
+
+
+}
