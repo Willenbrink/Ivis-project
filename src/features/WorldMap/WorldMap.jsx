@@ -27,6 +27,7 @@ export default function WorldMap() {
   //currently selected country (alpha3)
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
+   const [zoomLevel, zoomLevelSetter] = useState(null);
   //TODO interactive cathegory selection. (cathegory index)
   const [category, setCategory] = useState(0);
   const svgRef = useRef()
@@ -57,6 +58,8 @@ export default function WorldMap() {
               svgRef={svgRef} 
               category={categoriesObjects[category]}
               categoryStatistics={{ ...country_values_minmax(category), range: country_values_range(category)}}
+              zoomLevel={zoomLevel} 
+              zoomLevelSetter={zoomLevelSetter}
       />
     </svg>
   );
