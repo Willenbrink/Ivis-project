@@ -35,13 +35,17 @@ export function LineDraw({
   }, [])
 
   // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
+  useEffect(()=>{
+    const [left, right] = GetWidths()
+    setLabelWidths({ left, right })
+  },[])
 
   const noDataColor = 'gray'
   //"#D0D0D0"
 
     return (
         <>
-        <g className="mark">
+        <g className="mark" ref={gRef} transform={`translate(${200}, 0)`}>
                 <path className="earthSphere" d={path({ type: "Sphere" })}
                     onMouseOver={() => {
                         setHovered(null);
