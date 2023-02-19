@@ -33,10 +33,18 @@ export default function WorldMap() {
   const [category, setCategory] = useState(0);
   const [svgHasMounted, setSvgHasMounted] = useState(false)
   const svgRef = useRef()
-
+  
+  // Temporary fix for map not rendering on start
   useEffect(()=>{
-    if (!svgHasMounted && svgRef.current?.clientWidth > 0) setSvgHasMounted(true)
+    async function mount() {
+      await setTimeout(()=>{
+        setSvgHasMounted(true)
+      }, 100)
+      // if (!svgHasMounted && svgRef.current?.clientWidth > 0) setSvgHasMounted(true)
+    }
+    mount()
   },[svgRef.current])
+  
 
   const colorScheme = {
     left: 'red',
