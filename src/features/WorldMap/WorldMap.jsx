@@ -35,7 +35,7 @@ export default function WorldMap() {
   //for reseting the map
   const [doReset, setDoReset] = useState(false);
   const svgRef = useRef()
-  
+  // ddd
   // Temporary fix for map not rendering on start
   useEffect(()=>{
     async function mount() {
