@@ -7,12 +7,13 @@ set -e
 #git checkout master
 
 # build the static app
-#npm run build
+npm install
+npm run build
 
-#cd dist
+cd dist
 
 # bypass Jekyll processing
-#echo > .nojekyll
+echo > .nojekyll
 
 
 # Provide a helpful timestamp to commits 
