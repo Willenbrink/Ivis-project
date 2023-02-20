@@ -27,11 +27,11 @@ git init
 git checkout -B main
 # do the commit (only contains dist)
 git add -A
-git commit -m "GitHub Pages deploy script
+git commit -m "[Automated] GitHub Pages deploy script
 [$(date '+%F@%T (%Z)')]"
 
 # if you are deploying to https://<USERNAME>.github.io/<REPO>
 # push the contents of the main (branch in sub-git-repo) to gh-pages branch. We need to specify the git@github address because in the sub-repo we don't have this as origin
-git push -f ${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com:Willenbrink/Ivis-project.git main:gh-pages
+git push -f https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/Willenbrink/Ivis-project.git main:gh-pages
 
 cd -
