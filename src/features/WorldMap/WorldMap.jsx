@@ -45,7 +45,7 @@ export default function WorldMap() {
       // if (!svgHasMounted && svgRef.current?.clientWidth > 0) setSvgHasMounted(true)
     }
     mount()
-  },[svgRef.current])
+  },[])
   
 
   const colorScheme = {
