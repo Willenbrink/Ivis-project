@@ -17,7 +17,7 @@ echo > .nojekyll
 
 
 # Setup git on the build VM
-git config --global user.name "GitHub Actions Bot"
+git config --global user.name ${GITHUB_ACTOR}
 git config --global user.email "<>"
 
 # Provide a helpful timestamp to commits 
@@ -32,6 +32,6 @@ git commit -m "GitHub Pages deploy script
 
 # if you are deploying to https://<USERNAME>.github.io/<REPO>
 # push the contents of the main (branch in sub-git-repo) to gh-pages branch. We need to specify the git@github address because in the sub-repo we don't have this as origin
-git push -f git@github.com:Willenbrink/Ivis-project.git main:gh-pages
+git push -f ${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com:Willenbrink/Ivis-project.git main:gh-pages
 
 cd -
