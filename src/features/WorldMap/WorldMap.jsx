@@ -104,7 +104,7 @@ export default function WorldMap() {
           <InputGroup className="px-5 pt-2 position-absolute" style={{width: "90%"}}>
             <InputGroup.Text id='basic-addon2' className='bg-light'>Categories:</InputGroup.Text>
             <Form.Select 
-            aria-label="Default select example"
+            aria-label="Default select example!"
             onChange={((e) => setCategory(e.target.value))}
             value={category}
             className='fw-bold'
