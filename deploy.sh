@@ -4,15 +4,15 @@
 set -e
 
 # checkout on master???
-git checkout master
+#git checkout master
 
 # build the static app
-npm run build
+#npm run build
 
-cd dist
+#cd dist
 
 # bypass Jekyll processing
-echo > .nojekyll
+#echo > .nojekyll
 
 
 # Provide a helpful timestamp to commits 

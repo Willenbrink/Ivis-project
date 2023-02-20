@@ -28,6 +28,14 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout master
+        run: git checkout master
+      - name: Build
+        run: npm run build
+      - name: Change dir
+        run: cd dist
+      - name: Disable jekyll
+        run: echo > .nojekyll
       - name: Run deploy.sh
         run: ./deploy.sh
       #- name: Checkout
