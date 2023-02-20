@@ -28,8 +28,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout master
-        run: git checkout master
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Build
         run: npm run build
       - name: Change dir
@@ -38,8 +38,6 @@ jobs:
         run: echo > .nojekyll
       - name: Run deploy.sh
         run: ./deploy.sh
-      #- name: Checkout
-      #  uses: actions/checkout@v3
       #- name: Setup Pages
       #  uses: actions/configure-pages@v3
       #- name: Upload artifact
