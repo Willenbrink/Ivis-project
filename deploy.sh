@@ -17,8 +17,8 @@ echo > .nojekyll
 
 
 # Setup git on the build VM
-git config user.name "GitHub Actions Bot"
-git config user.email "<>"
+git config --global user.name "GitHub Actions Bot"
+git config --global user.email "<>"
 
 # Provide a helpful timestamp to commits 
 # this initiates a sub-git-repo (uggly work-around) to make sure we only get the dist files in the commit to github-pages
