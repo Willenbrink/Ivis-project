@@ -1,39 +1,64 @@
+import { zoomIdentity } from "d3";
 import { geoNaturalEarth1, geoPath, geoGraticule, select, zoom, svg } from "d3";
 import React, { useState, useCallback, useEffect } from "react";
 import { useRef } from "react";
 import { categoriesObjects } from "../../utils/categories";
 //import { selected, setSelected } from "./WorldMap";
-
-const projection = geoNaturalEarth1();
-const path = geoPath(projection);
-const graticule = geoGraticule();
+/*
+const projection = geoNaturalEarth1().translate([width / 2, height / 1.4])    // translate to center of screen. You might have to fiddle with this
+//depending on the size of your screen
+.scale([150]);
+const path = geoPath(projection)
+const graticule = geoGraticule()
 
 const selectedLineWidth = 1;
 const hoveredLineWidth = 1.3;
 const borderLineWidth = 0.5;
 const zoomLineStrength = 0.5;
+*/
 
 export function LineDraw({
-  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry,selected,hovered, setHovered,svgRef, category, categoryStatistics, minMaxColors, selectedValue, zoomLevel, zoomLevelSetter
+  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry,selected,hovered, setHovered,svgRef, category, categoryStatistics, minMaxColors, selectedValue, zoomLevel, zoomLevelSetter, doReset, setDoReset
 }) {
   const gRef = useRef()
   const zoomInScaleLimit = 8
-  const zoomOutScaleLimit = 1
+  const zoomOutScaleLimit = 0.12
   const [labelWidths, setLabelWidths] = useState({ left: 0, right: 0 })
+  // console.log(svgRef.current.clientWidth)
+  // console.log('PAAAAATH: ', graticule())
+  const projection = geoNaturalEarth1().scale(249.5 * svgRef.current.clientHeight/950).translate([svgRef.current.clientWidth/2,svgRef.current.clientHeight/2])
+  // console.log('PROJECTION: ', projection)
+  //.translate([svgRef.current.clientWidth / 2, svgRef.current.clientHeight / 1.4])
+  const path = geoPath(projection)
+  const graticule = geoGraticule()
 
+  const selectedLineWidth = 1;
+  const hoveredLineWidth = 1.3;
+  const borderLineWidth = 0.5;
+  const zoomLineStrength = 0.5;
+
+  const zoomFactor = (1 / (Math.max(1, zoomLevel) * zoomLineStrength))
   // Zooming and panning
   useEffect(()=>{
     if (svgRef && gRef) {
       const svg = select(svgRef.current)
       const g = select(gRef.current)
       svg.call(zoom().scaleExtent([zoomOutScaleLimit, zoomInScaleLimit])
-      .translateExtent([[-200, 0], [svgRef.current.clientWidth -200,svgRef.current.clientHeight]]).on('zoom', (event) => {
+      .translateExtent([[0, 0], [svgRef.current.clientWidth,svgRef.current.clientHeight]]).on('zoom', (event) => {
         g.attr('transform', event.transform)
-        zoomLevelSetter(Math.max(event.transform.k, 1))
+        zoomLevelSetter(event.transform.k)
       }))
   }
   }, [])
-
+  //resetting the zoom
+  if (doReset) {
+    setDoReset(false)
+    if (svgRef && gRef) {
+      const g = select(gRef.current)
+      g.attr('transform', zoomIdentity);
+      zoomLevelSetter(null)
+    } 
+  }
   // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
   useEffect(()=>{
     const [left, right] = GetWidths()
@@ -42,10 +67,10 @@ export function LineDraw({
 
   const noDataColor = 'gray'
   //"#D0D0D0"
-
+// transform={`translate(${200}, 0)`}
     return (
         <>
-        <g className="mark" ref={gRef} transform={`translate(${200}, 0)`}>
+        <g className="mark" ref={gRef} >
                 <path className="earthSphere" d={path({ type: "Sphere" })}
                     onMouseOver={() => {
                         setHovered(null);
@@ -85,7 +110,7 @@ export function LineDraw({
               />
             ))
                 }
-                <path className="interiorBorders" d={path(interiorBorders)} strokeWidth={` ${borderLineWidth * (1 / (zoomLevel * zoomLineStrength))}px`} />
+                <path className="interiorBorders" d={path(interiorBorders)} strokeWidth={` ${borderLineWidth * zoomFactor}px`} />
                 {
                     (hovered != null) ?
                         (
@@ -94,7 +119,7 @@ export function LineDraw({
                                 id={iso_countries.find(c => c.alpha3 === hovered).alpha3}
                                 fill={iso_countries.find(c => c.alpha3 === hovered).color}
                                 className="hoveredCountry"
-                                strokeWidth={` ${hoveredLineWidth * (1 / (zoomLevel * zoomLineStrength))}px`}
+                                strokeWidth={` ${hoveredLineWidth * zoomFactor}px`}
                                 d={path(iso_countries.find(c => c.alpha3 === hovered).geometry)}
                                 onMouseLeave={() => {
                                     setHovered(null);
@@ -112,7 +137,7 @@ export function LineDraw({
                     key={"selected"}
                     id="selectedCountryBorder"
                                 fill="none"
-                                strokeWidth={` ${selectedLineWidth * (1 / (zoomLevel * zoomLineStrength))}px`}
+                                strokeWidth={` ${selectedLineWidth * zoomFactor}px`}
                     className="selectedCountry"
                     d={path(iso_countries.find(c => c.alpha3 === selected).geometry)}
                 />
@@ -148,7 +173,7 @@ function Legend({svgRef, category, labelWidths, categoryStatistics, noDataColor,
 
 
   const padding = {
-    x: 50,
+    x: 100,
     y: 100
   }
 
@@ -176,9 +201,9 @@ function Legend({svgRef, category, labelWidths, categoryStatistics, noDataColor,
     fontSize
   }
   
-  const paddingLabelRight = 200
+  const paddingLabelRight = 100
   const labelRight = {
-    x: svgWidth - labelWidths.right - paddingLabelRight,
+    x: svgWidth - labelWidths.right - (padding.x * 2),
     y: svgHeight - padding.y + boxHeight/2 + fontSize/4,
     width: labelWidths.right, // the longest word that appears here is passengers, so this is this word's width
     color: lineColor,
@@ -329,7 +354,7 @@ function Legend({svgRef, category, labelWidths, categoryStatistics, noDataColor,
   return (
     <g className='' ref={legendRef}>
         <text fontSize={noDataText.fontSize} x={noDataText.x} y={noDataText.y} width={noDataText.width} height={noDataText.height} fill={noDataText.color}>{noDataStr}</text>
-        <rect x={noDataBox.x} y={noDataBox.y} width={noDataBox.width} height={noDataBox.height} fill={noDataBox.color} stroke="#333" stroke-width="0.3"></rect>
+        <rect x={noDataBox.x} y={noDataBox.y} width={noDataBox.width} height={noDataBox.height} fill={noDataBox.color} stroke="#333" strokeWidth="0.3"></rect>
         {/* Line starts here */}
         <text x={labelLeft.x} y={labelLeft.y} width={labelLeft.width} height={labelLeft.height} fill={labelLeft.color}>{category.from}</text>
         <line x1={vertLineLeft.x1} y1={vertLineLeft.y1} x2={vertLineLeft.x2} y2={vertLineLeft.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: vertLineLeft.strokeWidth}} />
@@ -344,11 +369,11 @@ function Legend({svgRef, category, labelWidths, categoryStatistics, noDataColor,
             <stop offset="100%" style={{stopColor: minMaxColors.max, stopOpacity:"1"}} />
           </linearGradient>
         </defs>
-        <rect x={colorBox.x} y={colorBox.y} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" stroke-width="0.3" style={{...styleTransition}}></rect>
+        <rect x={colorBox.x} y={colorBox.y} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" strokeWidth="0.3" style={{...styleTransition}}></rect>
         {/* Box with range */}
-        <rect x={rangeBox.x} y={rangeBox.y} width={rangeBox.width} height={rangeBox.height} fill='none' stroke="#333" stroke-width="2" style={{...styleTransition}}></rect>
+        <rect x={rangeBox.x} y={rangeBox.y} width={rangeBox.width} height={rangeBox.height} fill='none' stroke="#333" strokeWidth="2" style={{...styleTransition}}></rect>
         {/* <rect x={middleMarker.x} y={middleMarker.y} width={middleMarker.width} height={middleMarker.height} stroke={middleMarker.color} style={{...styleTransition, borderStyle: 'dotted'}}></rect>*/}
-        <path stroke-dasharray={`${Math.round((boxHeight + 20)/8)}`} stroke-opacity="70%" d={`M0 0 V${boxHeight + 20} 0`} stroke='gray' stroke-width="2" transform={`translate(${middleMarker.x},${middleMarker.y})`}/>
+        <path strokeDasharray={`${Math.round((boxHeight + 20)/8)}`} strokeOpacity="70%" d={`M0 0 V${boxHeight + 20} 0`} stroke='gray' strokeWidth="2" transform={`translate(${middleMarker.x},${middleMarker.y})`}/>
         <rect x={countryMarker.x} y={countryMarker.y} width={countryMarker.width} height={countryMarker.height} fill={countryMarker.color} style={{...styleTransition}}></rect>
         {selectedValue && toolTip}
         <text x={labelRight.x} y={labelRight.y} width={labelRight.width} height={labelRight.height} fill={labelRight.color}>{category.to}</text>

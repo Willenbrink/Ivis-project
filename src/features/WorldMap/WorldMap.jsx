@@ -4,7 +4,7 @@ import { parseJSON } from "./parseMapJSON";
 import { LineDraw } from "./lineDraw";
 import { zoom, select, interpolateRgb } from "d3";
 import { get_country_value, country_values_range, country_values_minmax } from "../../model/dumbDataHandler";
-import { Form, InputGroup } from "react-bootstrap";
+import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
 import { categoriesObjects } from "../../utils/categories";
 import InfoPopover from "./InfoPopover";
@@ -29,9 +29,24 @@ export default function WorldMap() {
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
    const [zoomLevel, zoomLevelSetter] = useState(null);
-  //TODO interactive cathegory selection. (cathegory index)
+  //interactive cathegory selection. (cathegory index)
   const [category, setCategory] = useState(0);
+  const [svgHasMounted, setSvgHasMounted] = useState(false)
+  //for reseting the map
+  const [doReset, setDoReset] = useState(false);
   const svgRef = useRef()
+  
+  // Temporary fix for map not rendering on start
+  useEffect(()=>{
+    async function mount() {
+      await setTimeout(()=>{
+        setSvgHasMounted(true)
+      }, 100)
+      // if (!svgHasMounted && svgRef.current?.clientWidth > 0) setSvgHasMounted(true)
+    }
+    mount()
+  },[svgRef.current])
+  
 
   const colorScheme = {
     left: 'red',
@@ -41,7 +56,6 @@ export default function WorldMap() {
     selectedMiddle: 'white',
     selectedRight: 'yellow'
   }
-
 
   function valToColor(raw_value, alpha3_for_reference) {
     //value is as in the original data set.
@@ -60,8 +74,9 @@ export default function WorldMap() {
   }
 
   const categoryStatistics = { ...country_values_minmax(category), range: country_values_range(category)}
-  let svg = (
+  const svg = (
       <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
+          {svgHasMounted && 
           <LineDraw
               data={{ ...mapData, iso_countries: mapData.iso_countries.map(c => ({ ...c, color: valToColor(get_country_value(c.alpha3, category), c.alpha3) })) }}
               selectCountry={setSelected} 
@@ -75,25 +90,34 @@ export default function WorldMap() {
               minMaxColors={selected != null ? {min: valToColor(categoryStatistics.min),mid: colorScheme.middle, max:valToColor(categoryStatistics.max)} : {min: colorScheme.right, mid: colorScheme.middle, max: colorScheme.left}}
               zoomLevel={zoomLevel} 
               zoomLevelSetter={zoomLevelSetter}
+              doReset={doReset}
+              setDoReset={setDoReset}
       />
+          }
     </svg>
   );
   return (
-    <div id="WorldCanvasDiv" className="d-flex flex-grow-1">
-      <div className="d-flex flex-column flex-grow-1">
-        <InputGroup className="px-5">
+    <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
+      <div className="d-flex flex-column flex-grow-1 position-relative">
+        {svg}
+      </div>
+          <InputGroup className="px-5 pt-2 position-absolute" style={{width: "90%"}}>
             <InputGroup.Text id='basic-addon2' className='bg-light'>Categories:</InputGroup.Text>
             <Form.Select 
             aria-label="Default select example"
             onChange={((e) => setCategory(e.target.value))}
             value={category}
+            className='fw-bold'
             >
               {categories.map((cat, idx) => 
               <option key={`option_${idx}`} value={idx}>{cat}</option> )}
             </Form.Select>
             <InfoPopover title={categoriesObjects[category].title} info={categoriesObjects[category].info}/>
           </InputGroup>
-        {svg}
+
+      <div id="zoomDiv" style={{position:"absolute", margin:"10px", right: 0}}>
+        <p hidden={true} style={{textAlign: "right"}}>Zoom: {zoomLevel?zoomLevel.toFixed(2):"1.00"}</p>
+        <Button onClick={(e) => {setDoReset(true);}} hidden={!zoomLevel || !(zoomLevel < 0.5 || zoomLevel > 2)}>Reset Map</Button>
       </div>
       {/* 
       <div className="w-25 mx-3">
