@@ -33,7 +33,7 @@ export const categoriesObjects = [
     from: 'Large',
     to: 'Fit',
     info: 'Is it more important to save fit or unfit(large) people?'
-}, 
+  },
   {
     name: 'Social Status: Low vs. High',
     title: 'Social status',

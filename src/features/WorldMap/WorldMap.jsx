@@ -107,7 +107,7 @@ export default function WorldMap() {
             className='fw-bold'
             >
               {categories.map((cat, idx) => 
-              <option key={`option_${idx}`} value={idx}>{cat}</option> )}
+                <option key={`option_${idx}`} value={idx}>{cat}</option> )}
             </Form.Select>
             <InfoPopover title={categoriesObjects[category].title} info={categoriesObjects[category].info}/>
           </InputGroup>
