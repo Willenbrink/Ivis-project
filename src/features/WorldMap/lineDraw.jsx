@@ -1,5 +1,5 @@
 import { zoomIdentity } from "d3";
-import { geoNaturalEarth1, geoPath, geoGraticule, select, zoom, svg } from "d3";
+import { geoNaturalEarth1, geoPath, geoGraticule, select, zoom, svg, interpolateRgb } from "d3";
 import React, { useState, useCallback, useEffect } from "react";
 import { useRef } from "react";
 import { categoriesObjects } from "../../utils/categories";
@@ -27,9 +27,28 @@ export const colorScheme = {
   noData: 'gray',
 };
 
+function valToColor(value, range) {
+  if (value == null)
+    return colorScheme.noData;
+  var relative_value;
+  if(range.selected !== null) {
+    relative_value = (value - range.selected) / (range.max - range.min);
+  } else {
+    // If range.selected is null, we have our reference at 0.
+    // But, this means that the extreme ends are only "half the bar" away from the reference.
+    // Therefore, we multiply by 2
+    relative_value = 2 * value / (range.max - range.min);
+  }
+  const extreme_color = relative_value > 0 ? colorScheme.left : colorScheme.right;
+  //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
+  const absolute_value = Math.abs(relative_value);
+  return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
+};
+
 export function LineDraw({
-  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry,selected,hovered, setHovered,svgRef, zoomLevel, zoomLevelSetter, doReset, setDoReset
+  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry, selected, range, hovered, setHovered, svgRef, zoomLevel, zoomLevelSetter, doReset, setDoReset
 }) {
+
   const gRef = useRef()
   const zoomInScaleLimit = 8
   const zoomOutScaleLimit = 0.12
@@ -90,11 +109,11 @@ export function LineDraw({
               <path
                 key={c.alpha3}
                 id={c.alpha3}
-                fill={c.color != null ? c.color : colorScheme.noData}
+                fill={valToColor(c.value, range)}
                 className="country"
                 d={path(c.geometry)}
                 onMouseOver={() => {
-                  if (c.color != null) setHovered(c.alpha3);
+                  if (c.value != null) setHovered(c.alpha3);
                   else setHovered(null);
                 }}
               />
@@ -118,7 +137,7 @@ export function LineDraw({
                 <path
                   key="hovered"
                   id={iso_countries.find(c => c.alpha3 === hovered).alpha3}
-                  fill={iso_countries.find(c => c.alpha3 === hovered).color}
+                  fill={valToColor(iso_countries.find(c => c.alpha3 === hovered).value, range)}
                   stroke={colorScheme.hoveredCountry}
                   strokeWidth={` ${hoveredLineWidth * zoomFactor}px`}
                   d={path(iso_countries.find(c => c.alpha3 === hovered).geometry)}
@@ -149,7 +168,7 @@ export function LineDraw({
   );
 }
 
-export function Legend({svgRef, category, categoryStatistics, minMaxColors, selectedValue, selectedCountry}){
+export function Legend({svgRef, category, categoryStatistics, range, selectedCountry}){
   const [labelWidths, setLabelWidths] = useState({ left: 0, right: 0 })
   // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
   useEffect(()=>{
@@ -266,7 +285,7 @@ export function Legend({svgRef, category, categoryStatistics, minMaxColors, sele
   }
 
   // no selected country --> colorBox has full width
-  const colorBox = selectedValue
+  const colorBox = range.selected
   ? {
     x: labelLeft.x + labelLeft.width + lineWidthLeft,
     y: svgHeight - padding.y,
@@ -285,15 +304,15 @@ export function Legend({svgRef, category, categoryStatistics, minMaxColors, sele
 
   const styleTransition = {transition: "0.3s"}
 
-  const selectedToPercentage = selectedValue !== null
-  ? Math.round((selectedValue - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min) * 100)
+  const selectedToPercentage = range.selected !== null
+        ? Math.round((range.selected - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min) * 100)
   : 50
 
   const countryMarker = {
     x: rangeBox.x + ((selectedToPercentage/100) * rangeBox.width),
     y: svgHeight - padding.y,
     height: boxHeight,
-    width: selectedValue !== null ? 3 : 0,
+    width: range.selected !== null ? 3 : 0,
     color: colorScheme.selectedCountry,
   }
 
@@ -360,9 +379,9 @@ export function Legend({svgRef, category, categoryStatistics, minMaxColors, sele
         {/* Box with colors */}
         <defs>
           <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style={{ stopColor: minMaxColors.min, stopOpacity:"1"}} />
-            <stop offset={`${selectedToPercentage}%`} style={{stopColor: minMaxColors.mid,stopOpacity:"1"}} />
-            <stop offset="100%" style={{stopColor: minMaxColors.max, stopOpacity:"1"}} />
+            <stop offset="0%" style={{ stopColor: valToColor(range.min, range), stopOpacity:"1"}} />
+            <stop offset={`${selectedToPercentage}%`} style={{stopColor: colorScheme.middle, stopOpacity:"1"}} />
+            <stop offset="100%" style={{stopColor: valToColor(range.max, range), stopOpacity:"1"}} />
           </linearGradient>
         </defs>
         <rect x={colorBox.x} y={colorBox.y} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" strokeWidth="0.3" style={{...styleTransition}}></rect>
@@ -371,7 +390,7 @@ export function Legend({svgRef, category, categoryStatistics, minMaxColors, sele
         {/* <rect x={middleMarker.x} y={middleMarker.y} width={middleMarker.width} height={middleMarker.height} stroke={middleMarker.color} style={{...styleTransition, borderStyle: 'dotted'}}></rect>*/}
         <path strokeDasharray={`${Math.round((boxHeight + 20)/8)}`} strokeOpacity="70%" d={`M0 0 V${boxHeight + 20} 0`} stroke='gray' strokeWidth="2" transform={`translate(${middleMarker.x},${middleMarker.y})`}/>
         <rect x={countryMarker.x} y={countryMarker.y} width={countryMarker.width} height={countryMarker.height} fill={countryMarker.color} style={{...styleTransition}}></rect>
-        {selectedValue && toolTip}
+        {range.selected && toolTip}
         <text x={labelRight.x} y={labelRight.y} width={labelRight.width} height={labelRight.height} fill={labelRight.color}>{category.to}</text>
     </g>
   )

@@ -47,32 +47,24 @@ export default function WorldMap() {
     mount()
   },[])
 
-  function valToColor(value, ref_value) {
-    //value is as in the original data set.
-    if (value == null)
-      return null;
-      // return colorScheme.noData;
-    const selectedValue = (selected != null ? get_country_value_abs(selected, category) : 0);
-    const relative_value = (value - selectedValue) / (selected != null ? country_values_range(category, false) : 1);
-    const extreme_color = relative_value > 0 ? colorScheme.left : colorScheme.right;
-    //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
-    const absolute_value = Math.abs(relative_value);
-    return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value).toString();
-    }
   const mapData = parseJSON();
   if (!mapData) {
     return <pre>Loading...</pre>;
   }
 
   const categoryStatistics = { ...country_values_minmax(category), range: country_values_range(category)}
+  const range = selected != null
+        ? {min: categoryStatistics.min, selected: get_country_value_abs(selected, category), max: categoryStatistics.max}
+        : {min: -1, selected: null, max: 1};
   const svg = (
       <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
           <>
               {svgHasMounted &&
               <LineDraw
-                data={{ ...mapData, iso_countries: mapData.iso_countries.map(c => ({ ...c, color: valToColor(get_country_value_abs(c.alpha3, category), c.alpha3) })) }}
+                data={{ ...mapData, iso_countries: mapData.iso_countries.map(c => ({ ...c, value: get_country_value_abs(c.alpha3, category) })) }}
                 selectCountry={setSelected}
                 selected={selected}
+                range={range}
                 hovered={hovered}
                 setHovered={setHovered}
                 svgRef={svgRef}
@@ -85,16 +77,9 @@ export default function WorldMap() {
               {svgHasMounted && svgRef.current &&
               <Legend
                 svgRef={svgRef}
-                minMaxColors={selected != null
-                              ? {min: valToColor(categoryStatistics.min),
-                                  mid: colorScheme.middle,
-                                  max:valToColor(categoryStatistics.max)}
-                              : {min: colorScheme.right,
-                                  mid: colorScheme.middle,
-                                  max: colorScheme.left}}
+                range={range}
                 category={categoriesObjects[category]}
                 categoryStatistics={categoryStatistics}
-                selectedValue={(selected != null ? get_country_value_abs(selected, category) : null)}
                 selectedCountry={selected != null ? mapData.iso_countries.find(c => c.alpha3 === selected).name : null}
               />}
           </>
