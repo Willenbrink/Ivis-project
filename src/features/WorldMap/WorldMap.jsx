@@ -3,7 +3,7 @@ import ReactDom from "react-dom";
 import { parseJSON } from "./parseMapJSON";
 import { LineDraw, colorScheme } from "./lineDraw";
 import { zoom, select, interpolateRgb } from "d3";
-import { get_country_value, country_values_range, country_values_minmax } from "../../model/dumbDataHandler";
+import { get_country_value_abs, get_country_value_rel, country_values_range, country_values_minmax } from "../../model/dumbDataHandler";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
 import { categoriesObjects } from "../../utils/categories";
@@ -47,12 +47,13 @@ export default function WorldMap() {
     mount()
   },[])
 
-  function valToColor(raw_value, alpha3_for_reference) {
+  function valToColor(value, ref_value) {
     //value is as in the original data set.
-    // c.color = c.alpha3 == selected ? "red" : "green"; 
-    if (raw_value == null) return null;
-    const selectedValue = (selected != null ? get_country_value(selected, category) : 0);
-    const relative_value = (raw_value - selectedValue) / (selected != null ? country_values_range(category, false) : 1);
+    if (value == null)
+      return null;
+      // return colorScheme.noData;
+    const selectedValue = (selected != null ? get_country_value_abs(selected, category) : 0);
+    const relative_value = (value - selectedValue) / (selected != null ? country_values_range(category, false) : 1);
     const extreme_color = relative_value > 0 ? colorScheme.left : colorScheme.right;
     //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
     const absolute_value = Math.abs(relative_value);
@@ -68,13 +69,13 @@ export default function WorldMap() {
       <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
           {svgHasMounted && 
           <LineDraw
-              data={{ ...mapData, iso_countries: mapData.iso_countries.map(c => ({ ...c, color: valToColor(get_country_value(c.alpha3, category), c.alpha3) })) }}
+              data={{ ...mapData, iso_countries: mapData.iso_countries.map(c => ({ ...c, color: valToColor(get_country_value_abs(c.alpha3, category), c.alpha3) })) }}
               selectCountry={setSelected} 
               selected={selected} 
               hovered={hovered} 
               setHovered={setHovered} 
               svgRef={svgRef}
-              selectedValue={(selected != null ? get_country_value(selected, category) : null)}
+              selectedValue={(selected != null ? get_country_value_abs(selected, category) : null)}
               category={categoriesObjects[category]}
               categoryStatistics={categoryStatistics}
               minMaxColors={selected != null

@@ -1056,11 +1056,16 @@ const values_per_country = {
   ],
 };
 
-export function get_country_value(alpha3, cathegory_index) {
-  if (alpha3 === null) return 0;
-  //if alpha3 is not in the list, return null
-  if (values_per_country[alpha3] === undefined) return null;
-  return values_per_country[alpha3][cathegory_index];
+export function get_country_value_abs(country, category) {
+  if (country === null) return 0;
+  if (values_per_country[country] === undefined) return null;
+  return values_per_country[country][category];
+}
+
+export function get_country_value_rel(country, category, reference) {
+  if (country === null) return 0;
+  if (values_per_country[country] === undefined) return null;
+  return values_per_country[country][category];
 }
 
 //difference between the highest and lowest value for each cathegory
