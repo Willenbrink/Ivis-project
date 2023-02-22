@@ -306,7 +306,7 @@ function Legend({svgRef, category, labelWidths, categoryStatistics, noDataColor,
     y: svgHeight - padding.y,
     height: boxHeight,
     width: selectedValue !== null ? 3 : 0,
-    color: 'blue'
+    color: colorScheme.selectedCountry,
   }
 
   function bottomTooltipPath(width, height, offset, radius) {
