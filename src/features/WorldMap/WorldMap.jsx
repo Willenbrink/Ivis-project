@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import ReactDom from "react-dom";
 import { parseJSON } from "./parseMapJSON";
-import { LineDraw, colorScheme } from "./lineDraw";
+import { LineDraw, Legend, colorScheme } from "./lineDraw";
 import { zoom, select, interpolateRgb } from "d3";
 import { get_country_value_abs, get_country_value_rel, country_values_range, country_values_minmax } from "../../model/dumbDataHandler";
 import { Form, InputGroup, Button } from "react-bootstrap";
@@ -67,31 +67,38 @@ export default function WorldMap() {
   const categoryStatistics = { ...country_values_minmax(category), range: country_values_range(category)}
   const svg = (
       <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
-          {svgHasMounted && 
-          <LineDraw
-              data={{ ...mapData, iso_countries: mapData.iso_countries.map(c => ({ ...c, color: valToColor(get_country_value_abs(c.alpha3, category), c.alpha3) })) }}
-              selectCountry={setSelected} 
-              selected={selected} 
-              hovered={hovered} 
-              setHovered={setHovered} 
-              svgRef={svgRef}
-              selectedValue={(selected != null ? get_country_value_abs(selected, category) : null)}
-              category={categoriesObjects[category]}
-              categoryStatistics={categoryStatistics}
-              minMaxColors={selected != null
-                            ? {min: valToColor(categoryStatistics.min),
-                               mid: colorScheme.middle,
-                               max:valToColor(categoryStatistics.max)}
-                            : {min: colorScheme.right,
-                               mid: colorScheme.middle,
-                               max: colorScheme.left}}
-              zoomLevel={zoomLevel} 
-              zoomLevelSetter={zoomLevelSetter}
-              doReset={doReset}
-              setDoReset={setDoReset}
-      />
-          }
-    </svg>
+          <>
+              {svgHasMounted &&
+              <LineDraw
+                data={{ ...mapData, iso_countries: mapData.iso_countries.map(c => ({ ...c, color: valToColor(get_country_value_abs(c.alpha3, category), c.alpha3) })) }}
+                selectCountry={setSelected}
+                selected={selected}
+                hovered={hovered}
+                setHovered={setHovered}
+                svgRef={svgRef}
+                zoomLevel={zoomLevel}
+                zoomLevelSetter={zoomLevelSetter}
+                doReset={doReset}
+                setDoReset={setDoReset}
+              />
+              }
+              {svgHasMounted && svgRef.current &&
+              <Legend
+                svgRef={svgRef}
+                minMaxColors={selected != null
+                              ? {min: valToColor(categoryStatistics.min),
+                                  mid: colorScheme.middle,
+                                  max:valToColor(categoryStatistics.max)}
+                              : {min: colorScheme.right,
+                                  mid: colorScheme.middle,
+                                  max: colorScheme.left}}
+                category={categoriesObjects[category]}
+                categoryStatistics={categoryStatistics}
+                selectedValue={(selected != null ? get_country_value_abs(selected, category) : null)}
+                selectedCountry={selected != null ? mapData.iso_countries.find(c => c.alpha3 === selected).name : null}
+              />}
+          </>
+      </svg>
   );
   return (
     <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">

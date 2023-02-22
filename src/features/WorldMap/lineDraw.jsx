@@ -28,12 +28,11 @@ export const colorScheme = {
 };
 
 export function LineDraw({
-  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry,selected,hovered, setHovered,svgRef, category, categoryStatistics, minMaxColors, selectedValue, zoomLevel, zoomLevelSetter, doReset, setDoReset
+  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry,selected,hovered, setHovered,svgRef, zoomLevel, zoomLevelSetter, doReset, setDoReset
 }) {
   const gRef = useRef()
   const zoomInScaleLimit = 8
   const zoomOutScaleLimit = 0.12
-  const [labelWidths, setLabelWidths] = useState({ left: 0, right: 0 })
   // console.log(svgRef.current.clientWidth)
   // console.log('PAAAAATH: ', graticule())
   const projection = geoNaturalEarth1().scale(249.5 * svgRef.current.clientHeight/950).translate([svgRef.current.clientWidth/2,svgRef.current.clientHeight/2])
@@ -54,11 +53,11 @@ export function LineDraw({
       const svg = select(svgRef.current)
       const g = select(gRef.current)
       svg.call(zoom().scaleExtent([zoomOutScaleLimit, zoomInScaleLimit])
-      .translateExtent([[0, 0], [svgRef.current.clientWidth,svgRef.current.clientHeight]]).on('zoom', (event) => {
-        g.attr('transform', event.transform)
-        zoomLevelSetter(event.transform.k)
-      }))
-  }
+                     .translateExtent([[0, 0], [svgRef.current.clientWidth,svgRef.current.clientHeight]]).on('zoom', (event) => {
+                       g.attr('transform', event.transform)
+                       zoomLevelSetter(event.transform.k)
+                     }))
+    }
   }, [])
   //resetting the zoom
   if (doReset) {
@@ -69,44 +68,39 @@ export function LineDraw({
       zoomLevelSetter(null)
     } 
   }
-  // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
-  useEffect(()=>{
-    const [left, right] = GetWidths()
-    setLabelWidths({ left, right })
-  },[])
 
-    return (
-        <>
-        <g className="mark" ref={gRef} >
-                <path className="earthSphere" d={path({ type: "Sphere" })}
-                    onMouseOver={() => {
-                        setHovered(null);
-                    }} onClick={() => {
-                        selectCountry(null);
-                    }} />
-                <path className="graticule" d={path(graticule())}
-                    onMouseOver={() => {
-                        setHovered(null);
-                    }} onClick={() => {
-                        selectCountry(null);
-                    }} />
+  return (
+      <g className="mark" ref={gRef} >
+          <path className="earthSphere" d={path({ type: "Sphere" })}
+                onMouseOver={() => {
+                  setHovered(null);
+                }} onClick={() => {
+                  selectCountry(null);
+                }} />
+          <path className="graticule" d={path(graticule())}
+                onMouseOver={() => {
+                  setHovered(null);
+                }} onClick={() => {
+                  selectCountry(null);
+                }} />
           {
             //example country: {"color": "#040", "alpha3": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
-                      //example country: {"color": "#040", "alpha3": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
-                      iso_countries.map(c => (
-                          <path
-                              key={c.alpha3}
-                              id={c.alpha3}
-                              fill={c.color != null ? c.color : colorScheme.noData}
-                              className="country"
-                              d={path(c.geometry)}
-                              onMouseOver={() => {
-                                  if (c.color != null) setHovered(c.alpha3);
-                                  else setHovered(null);
-                              }}
-                          />
-                      ))
-            }{
+            //example country: {"color": "#040", "alpha3": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
+            iso_countries.map(c => (
+              <path
+                key={c.alpha3}
+                id={c.alpha3}
+                fill={c.color != null ? c.color : colorScheme.noData}
+                className="country"
+                d={path(c.geometry)}
+                onMouseOver={() => {
+                  if (c.color != null) setHovered(c.alpha3);
+                  else setHovered(null);
+                }}
+              />
+            ))
+          }
+          {
             //example country: {"geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
             non_iso_countries.map((c, idx) => (
               <path
@@ -116,30 +110,31 @@ export function LineDraw({
                 d={path(c.geometry)}
               />
             ))
-                }
-                <path className="interiorBorders" d={path(interiorBorders)} strokeWidth={` ${borderLineWidth * zoomFactor}px`} />
-                {
-                    (hovered != null) ?
-                        (
-                            <path
-                                key="hovered"
-                                id={iso_countries.find(c => c.alpha3 === hovered).alpha3}
-                                fill={iso_countries.find(c => c.alpha3 === hovered).color}
-                                stroke={colorScheme.hoveredCountry}
-                                strokeWidth={` ${hoveredLineWidth * zoomFactor}px`}
-                                d={path(iso_countries.find(c => c.alpha3 === hovered).geometry)}
-                                onMouseLeave={() => {
-                                    setHovered(null);
-                                }}
-                                onClick={(e) => {
-                                    setHovered(null);
-                                    selectCountry(e.target.id);
-                                }}
-                        />
-                        ) : ""
-                } {
+          }
+          <path className="interiorBorders" d={path(interiorBorders)} strokeWidth={` ${borderLineWidth * zoomFactor}px`} />
+          {
+            (hovered != null) ?
+              (
+                <path
+                  key="hovered"
+                  id={iso_countries.find(c => c.alpha3 === hovered).alpha3}
+                  fill={iso_countries.find(c => c.alpha3 === hovered).color}
+                  stroke={colorScheme.hoveredCountry}
+                  strokeWidth={` ${hoveredLineWidth * zoomFactor}px`}
+                  d={path(iso_countries.find(c => c.alpha3 === hovered).geometry)}
+                  onMouseLeave={() => {
+                    setHovered(null);
+                  }}
+                  onClick={(e) => {
+                    setHovered(null);
+                    selectCountry(e.target.id);
+                  }}
+                />
+              ) : ""
+          }
+          {
             (selected != null) ?
-            (
+              (
                 <path
                   key={"selected"}
                   id="selectedCountryBorder"
@@ -148,24 +143,20 @@ export function LineDraw({
                   stroke={colorScheme.selectedCountry}
                   d={path(iso_countries.find(c => c.alpha3 === selected).geometry)}
                 />
-            ) : ""
-                }
-        </g>
-        {svgRef.current && 
-        <Legend 
-          svgRef={svgRef} 
-          category={category} 
-          labelWidths={labelWidths} 
-          categoryStatistics={categoryStatistics} 
-          minMaxColors={minMaxColors}
-          selectedValue={selectedValue} 
-          selectedCountry={selected != null ? iso_countries.find(c => c.alpha3 === selected).name : null}
-        />}
-    </>
+              ) : ""
+          }
+      </g>
   );
 }
 
-function Legend({svgRef, category, labelWidths, categoryStatistics, minMaxColors, selectedValue, selectedCountry}){
+export function Legend({svgRef, category, categoryStatistics, minMaxColors, selectedValue, selectedCountry}){
+  const [labelWidths, setLabelWidths] = useState({ left: 0, right: 0 })
+  // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
+  useEffect(()=>{
+    console.log("Computing widths!");
+    const [left, right] = GetWidths()
+    setLabelWidths({ left, right })
+  },[])
   if (!svgRef.current) return
   const legendRef = useRef()
 
