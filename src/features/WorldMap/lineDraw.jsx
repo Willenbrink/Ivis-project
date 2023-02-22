@@ -17,6 +17,14 @@ const borderLineWidth = 0.5;
 const zoomLineStrength = 0.5;
 */
 
+export const colorScheme = {
+  left: '#ef4400',
+  middle: '#f7f7f7',
+  right: '#0083cf',
+  selectedCountry: '#00A600',
+  hoveredCountry: '#00CC00',
+};
+
 export function LineDraw({
   data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry,selected,hovered, setHovered,svgRef, category, categoryStatistics, minMaxColors, selectedValue, zoomLevel, zoomLevelSetter, doReset, setDoReset
 }) {
@@ -118,7 +126,7 @@ export function LineDraw({
                                 key="hovered"
                                 id={iso_countries.find(c => c.alpha3 === hovered).alpha3}
                                 fill={iso_countries.find(c => c.alpha3 === hovered).color}
-                                className="hoveredCountry"
+                                stroke={colorScheme.hoveredCountry}
                                 strokeWidth={` ${hoveredLineWidth * zoomFactor}px`}
                                 d={path(iso_countries.find(c => c.alpha3 === hovered).geometry)}
                                 onMouseLeave={() => {
@@ -134,12 +142,12 @@ export function LineDraw({
             (selected != null) ?
             (
                 <path
-                    key={"selected"}
-                    id="selectedCountryBorder"
-                                fill="none"
-                                strokeWidth={` ${selectedLineWidth * zoomFactor}px`}
-                    className="selectedCountry"
-                    d={path(iso_countries.find(c => c.alpha3 === selected).geometry)}
+                  key={"selected"}
+                  id="selectedCountryBorder"
+                  fill="none"
+                  strokeWidth={` ${selectedLineWidth * zoomFactor}px`}
+                  stroke={colorScheme.selectedCountry}
+                  d={path(iso_countries.find(c => c.alpha3 === selected).geometry)}
                 />
             ) : ""
                 }

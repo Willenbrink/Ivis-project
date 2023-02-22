@@ -1,13 +1,5 @@
-.mark .selectedCountry {
-	stroke: blue;
-}
-
 #WorldCanvasDiv {
 	height: 100%;
-}
-
-.mark .hoveredCountry { 
-  stroke: rgb(80, 170, 255);
 }
 
 .mark .interiorBorders {
