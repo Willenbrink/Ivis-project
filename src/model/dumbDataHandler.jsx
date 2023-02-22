@@ -1070,9 +1070,8 @@ export function get_country_value_rel(country, category, reference) {
 
 //difference between the highest and lowest value for each cathegory
 var values_range = [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null];
-export function country_values_range(cathegory_index, zeroBased) {
-    const baseIndex = zeroBased ? 1 : 0
-    if (values_range[cathegory_index] !== null) return values_range[cathegory_index][baseIndex];
+export function country_values_range(cathegory_index) {
+    if (values_range[cathegory_index] !== null) return values_range[cathegory_index];
 
     let min = 1;
     let max = -1;
@@ -1081,9 +1080,9 @@ export function country_values_range(cathegory_index, zeroBased) {
         if (value < min) min = value;
         if (value > max) max = value;
     }
-    values_range[cathegory_index] = [max - min, Math.max(Math.abs(min), Math.abs(max))];
+    values_range[cathegory_index] = max - min;
     console.log(values_range)
-    return values_range[cathegory_index][baseIndex];
+    return values_range[cathegory_index];
 }
 
 export function country_values_minmax(cathegory_index) {
