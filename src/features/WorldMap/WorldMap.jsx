@@ -77,7 +77,13 @@ export default function WorldMap() {
               selectedValue={(selected != null ? get_country_value(selected, category) : null)}
               category={categoriesObjects[category]}
               categoryStatistics={categoryStatistics}
-              minMaxColors={selected != null ? {min: valToColor(categoryStatistics.min),mid: colorScheme.middle, max:valToColor(categoryStatistics.max)} : {min: colorScheme.right, mid: colorScheme.middle, max: colorScheme.left}}
+              minMaxColors={selected != null
+                            ? {min: valToColor(categoryStatistics.min),
+                               mid: colorScheme.middle,
+                               max:valToColor(categoryStatistics.max)}
+                            : {min: colorScheme.right,
+                               mid: colorScheme.middle,
+                               max: colorScheme.left}}
               zoomLevel={zoomLevel} 
               zoomLevelSetter={zoomLevelSetter}
               doReset={doReset}
