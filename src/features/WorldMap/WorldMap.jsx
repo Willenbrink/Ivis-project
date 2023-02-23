@@ -2,8 +2,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import ReactDom from "react-dom";
 import { parseJSON } from "./parseMapJSON";
 import { LineDraw, Legend } from "./lineDraw";
-import { zoom, select, interpolateRgb } from "d3";
-import { get_country_value_abs, country_values_stats } from "../../model/dumbDataHandler";
+import { get_country_value, country_values_stats } from "../../model/dataHandler";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
 import { categories } from "../../utils/categories";
@@ -21,15 +20,14 @@ export const setSelected = (id) => {
 
 const canvasWidth = "100%";
 const canvasHeight = "100%";
-// const categories = ['Omission --> Commission', 'Passengers --> Pedestrians', 'Law: Illegal --> Legal', 'Gender: Male --> Female', 'Fitness: Large --> Fit', 'Social Status: Low --> High', 'Age: Elderly --> Young', 'Number of Characters: Less --> More', 'Species: Pets --> Humans' ]
 
 export default function WorldMap() {
   //currently selected country (alpha3)
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
    const [zoomLevel, zoomLevelSetter] = useState(null);
-  //interactive cathegory selection. (cathegory index)
-  const [category, setCategory] = useState(categories.species);
+  //interactive category selection. (category index)
+  const [category, setCategory] = useState(categories.species.id);
   const [svgHasMounted, setSvgHasMounted] = useState(false)
   //for reseting the map
   const [doReset, setDoReset] = useState(false);
@@ -52,12 +50,12 @@ export default function WorldMap() {
   }
   mapData = {
     ...mapData,
-    iso_countries: mapData.iso_countries.map(c => ({ ...c, value: get_country_value_abs(c.alpha3, category) }))
+    iso_countries: mapData.iso_countries.map(c => ({ ...c, value: get_country_value(c.alpha3, category) }))
   };
 
   const categoryStatistics = country_values_stats(category);
   const range = selected != null
-        ? {min: categoryStatistics.min, selected: get_country_value_abs(selected, category), max: categoryStatistics.max}
+        ? {min: categoryStatistics.min, selected: get_country_value(selected, category), max: categoryStatistics.max}
         : {min: -1, selected: null, max: 1};
   const svg = (
       <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
@@ -97,15 +95,15 @@ export default function WorldMap() {
             <InputGroup.Text id='basic-addon2' className='bg-light'>Categories:</InputGroup.Text>
             <Form.Select 
             aria-label="Default select example!"
-            onChange={((e) => setCategory(categories[e.target.value]))}
-            value={category.id}
+            onChange={((e) => setCategory(categories[e.target.value].id))}
+            value={category}
             className='fw-bold'
             >
               {Object.entries(categories).map(([id, cat]) => {
                 return <option key={id} value={id}>{cat.name}</option> ;
               })}
             </Form.Select>
-            <InfoPopover title={categories[category.id].name_short || categories[category.id].name} info={categories[category.id].info}/>
+            <InfoPopover title={categories[category].name_short || categories[category].name} info={categories[category].info}/>
           </InputGroup>
 
       <div id="zoomDiv" style={{position:"absolute", margin:"10px", right: 0}}>
