@@ -18,7 +18,11 @@ type country = {
   age_se: float;
   number_se: float;
   species_se: float;
-} [@@deriving yojson]
+} [@@deriving yojson { meta = true }]
+
+type country_assoc = (string * country) list
+
+let country_assoc_to_yojson xs = `Assoc (List.map (fun (id,c) -> id, country_to_yojson c) xs)
 
 let () =
   let path_data =
@@ -82,7 +86,12 @@ Instead, use the Google Drive link.
         | _ -> failwith "Invalid format")
     |> List.map row_to_country
   in
-  let yojson = [%to_yojson: country list] countries in
-  (* print_endline (Yojson.Safe.to_string yojson) *)
+  let yojson : Yojson.Safe.t =
+    `Assoc [
+      ("keys", [%to_yojson: string list] @@ List.tl Yojson_meta_country.keys); (* We do not want to export id *)
+      ("countries", [%to_yojson: country_assoc] @@ List.map (fun c -> (c.id, c)) countries);
+    ]
+  in
   Yojson.Safe.to_file ~std:true country_json yojson;
+  print_endline (Yojson.Safe.to_string yojson);
   Printf.printf "Successfully wrote file to %s.\n" country_json
