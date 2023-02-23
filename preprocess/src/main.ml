@@ -9,15 +9,17 @@ type country = {
   age: float;
   number: float;
   species: float;
-  intervention_se: float;
-  passengers_se: float;
-  law_se: float;
-  gender_se: float;
-  fitness_se: float;
-  status_se: float;
-  age_se: float;
-  number_se: float;
-  species_se: float;
+  (* Not sure what these values exactly represent but they are relatively consistent. *)
+  (* Presumably they encode the spread of (i.e. confidence in) the answers *)
+  (* intervention_se: float; *)
+  (* passengers_se: float; *)
+  (* law_se: float; *)
+  (* gender_se: float; *)
+  (* fitness_se: float; *)
+  (* status_se: float; *)
+  (* age_se: float; *)
+  (* number_se: float; *)
+  (* species_se: float; *)
 } [@@deriving yojson { meta = true }]
 
 type country_assoc = (string * country) list
@@ -73,7 +75,7 @@ Instead, use the Google Drive link.
       ->
       { id;
         intervention; passengers; law; gender; fitness; status; age; number; species;
-        intervention_se; passengers_se; law_se; gender_se; fitness_se; status_se; age_se; number_se; species_se;
+        (* intervention_se; passengers_se; law_se; gender_se; fitness_se; status_se; age_se; number_se; species_se; *)
       }
     | _ -> failwith "Invalid format"
   in
