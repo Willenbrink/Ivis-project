@@ -357,11 +357,11 @@ export function Legend({svgRef, category, categoryStatistics, range, selected}){
     </g>
   */
 
-  const toolTipLabelWidth = GetWidth(selected?.name || "")
+  const toolTipLabelWidth = GetWidth(selected?.name)
   const toolTip = (
   <>
     <path d={bottomTooltipPath(toolTipLabelWidth + 20, parseInt(fontSize) * 2, 5, 10)} fill='#EEEEEE' stroke='gray' transform={`translate(${countryMarker.x + countryMarker.width/2},${countryMarker.y + boxHeight + 2})`} style={{...styleTransition}}></path>
-    <text transform={`translate(${countryMarker.x + countryMarker.width/2 - toolTipLabelWidth/2},${countryMarker.y + boxHeight + parseInt(fontSize) + 12})`} style={{...styleTransition}}>{selected?.name || ""}</text>
+    <text transform={`translate(${countryMarker.x + countryMarker.width/2 - toolTipLabelWidth/2},${countryMarker.y + boxHeight + parseInt(fontSize) + 12})`} style={{...styleTransition}}>{selected?.name}</text>
   </>
  )
 

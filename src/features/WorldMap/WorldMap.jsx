@@ -42,9 +42,9 @@ export default function WorldMap() {
     return <pre>Loading...</pre>;
   }
 
-  const categoryStatistics = country_values_stats(category);
+  const categoryStatistics = country_values_stats(category.id);
   const range = selected
-        ? {min: categoryStatistics.min, selected: selected[category], max: categoryStatistics.max}
+        ? {min: categoryStatistics.min, selected: selected[category.id], max: categoryStatistics.max}
         : {min: -1, selected: null, max: 1};
   const svg = (
       <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
@@ -85,7 +85,7 @@ export default function WorldMap() {
             <InputGroup.Text id='basic-addon2' className='bg-light'>Categories:</InputGroup.Text>
             <Form.Select 
             aria-label="Default select example!"
-            onChange={((e) => setCategory(categories[e.target.value].id))}
+            onChange={((e) => setCategory(categories[e.target.value]))}
             value={category}
             className='fw-bold'
             >
@@ -93,7 +93,7 @@ export default function WorldMap() {
                 return <option key={id} value={id}>{cat.name}</option> ;
               })}
             </Form.Select>
-            <InfoPopover title={categories[category].name_short || categories[category].name} info={categories[category].info}/>
+            <InfoPopover title={categories[category.id].name_short || categories[category.id].name} info={categories[category.id].info}/>
           </InputGroup>
 
       <div id="zoomDiv" style={{position:"absolute", margin:"10px", right: 0}}>
