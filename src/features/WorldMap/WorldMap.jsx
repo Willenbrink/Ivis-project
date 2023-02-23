@@ -44,14 +44,10 @@ export default function WorldMap() {
     mount()
   },[])
 
-  var mapData = parseJSON();
+  const mapData = parseJSON();
   if (!mapData) {
     return <pre>Loading...</pre>;
   }
-  mapData = {
-    ...mapData,
-    iso_countries: mapData.iso_countries.map(c => ({ ...c, value: get_country_value(c.alpha3, category) }))
-  };
 
   const categoryStatistics = country_values_stats(category);
   const range = selected != null
@@ -73,6 +69,7 @@ export default function WorldMap() {
                 zoomLevelSetter={zoomLevelSetter}
                 doReset={doReset}
                 setDoReset={setDoReset}
+                category={category}
               />
               }
               {svgHasMounted && svgRef.current &&
@@ -81,7 +78,7 @@ export default function WorldMap() {
                 range={range}
                 category={category}
                 categoryStatistics={categoryStatistics}
-                selectedCountry={selected != null ? mapData.iso_countries.find(c => c.alpha3 === selected).name : null}
+                selectedCountry={selected != null ? mapData.iso_countries[selected].name : null}
               />}
           </>
       </svg>

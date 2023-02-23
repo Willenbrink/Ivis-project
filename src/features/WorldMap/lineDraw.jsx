@@ -46,7 +46,7 @@ function valToColor(value, range) {
 };
 
 export function LineDraw({
-  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry, selected, range, hovered, setHovered, svgRef, zoomLevel, zoomLevelSetter, doReset, setDoReset
+  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry, selected, range, hovered, setHovered, svgRef, zoomLevel, zoomLevelSetter, doReset, setDoReset, category
 }) {
 
   const gRef = useRef()
@@ -105,19 +105,19 @@ export function LineDraw({
           {
             //example country: {"color": "#040", "alpha3": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
             //example country: {"color": "#040", "alpha3": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
-            iso_countries.map(c => (
-              <path
-                key={c.alpha3}
-                id={c.alpha3}
-                fill={valToColor(c.value, range)}
+            Object.values(iso_countries).map(c => {
+              return <path
+                key={c.id}
+                id={c.id}
+                fill={valToColor(c[category], range)}
                 className="country"
                 d={path(c.geometry)}
                 onMouseOver={() => {
-                  if (c.value != null) setHovered(c.alpha3);
+                  if (c[category] != null) setHovered(c.id);
                   else setHovered(null);
                 }}
-              />
-            ))
+              />}
+            )
           }
           {
             //example country: {"geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
@@ -135,12 +135,12 @@ export function LineDraw({
             (hovered != null) ?
               (
                 <path
-                  key="hovered"
-                  id={iso_countries.find(c => c.alpha3 === hovered).alpha3}
-                  fill={valToColor(iso_countries.find(c => c.alpha3 === hovered).value, range)}
+                  key={"hovered"}
+                  id={iso_countries[hovered].id}
+                  fill={valToColor(iso_countries[hovered][category], range)}
                   stroke={colorScheme.hoveredCountry}
                   strokeWidth={` ${hoveredLineWidth * zoomFactor}px`}
-                  d={path(iso_countries.find(c => c.alpha3 === hovered).geometry)}
+                  d={path(iso_countries[hovered].geometry)}
                   onMouseLeave={() => {
                     setHovered(null);
                   }}
@@ -160,7 +160,7 @@ export function LineDraw({
                   fill="none"
                   strokeWidth={` ${selectedLineWidth * zoomFactor}px`}
                   stroke={colorScheme.selectedCountry}
-                  d={path(iso_countries.find(c => c.alpha3 === selected).geometry)}
+                  d={path(iso_countries[selected].geometry)}
                 />
               ) : ""
           }

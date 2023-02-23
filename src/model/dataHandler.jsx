@@ -5,9 +5,15 @@ var data = null;
 
 fetch("CountriesChangePr.json").then((x) => x.json()).then((x) => data = x);
 
+export function get_country_data(country) {
+  if (data === null || country === null || data.countries[country] === undefined)
+    return null;
+  return data.countries[country];
+}
+
 export function get_country_value(country, category) {
-  if (data === null || country === null) return null;
-  if (data.countries[country] === undefined) return null;
+  if (data === null || country === null || data.countries[country] === undefined)
+    return null;
   return data.countries[country][category];
 }
 
