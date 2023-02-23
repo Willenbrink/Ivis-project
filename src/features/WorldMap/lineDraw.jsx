@@ -1,9 +1,8 @@
-import { zoomIdentity } from "d3";
-import { geoNaturalEarth1, geoPath, geoGraticule, select, zoom, svg, interpolateRgb } from "d3";
+import { zoomIdentity, geoNaturalEarth1, geoPath, geoGraticule, select, zoom, svg, interpolateRgb } from "d3";
 import React, { useState, useCallback, useEffect } from "react";
 import { useRef } from "react";
 import { categories } from "../../utils/categories";
-//import { selected, setSelected } from "./WorldMap";
+import { get_keys } from "../../model/dataHandler";
 /*
 const projection = geoNaturalEarth1().translate([width / 2, height / 1.4])    // translate to center of screen. You might have to fiddle with this
 //depending on the size of your screen
@@ -28,10 +27,10 @@ export const colorScheme = {
 };
 
 function valToColor(value, range) {
-  if (value == null)
+  if (value === undefined)
     return colorScheme.noData;
   var relative_value;
-  if(range.selected !== null) {
+  if(range.selected) {
     relative_value = (value - range.selected) / (range.max - range.min);
   } else {
     // If range.selected is null, we have our reference at 0.
@@ -39,7 +38,7 @@ function valToColor(value, range) {
     // Therefore, we multiply by 2
     relative_value = 2 * value / (range.max - range.min);
   }
-  const extreme_color = relative_value > 0 ? colorScheme.left : colorScheme.right;
+  const extreme_color = relative_value < 0 ? colorScheme.left : colorScheme.right;
   //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
   const absolute_value = Math.abs(relative_value);
   return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
@@ -113,7 +112,7 @@ export function LineDraw({
                 className="country"
                 d={path(c.geometry)}
                 onMouseOver={() => {
-                  if (c[category] != null) setHovered(c.id);
+                  if (c.hasData) setHovered(c.id);
                   else setHovered(null);
                 }}
               />}
@@ -135,9 +134,9 @@ export function LineDraw({
             (hovered != null) ?
               (
                 <path
-                  key={"hovered"}
-                  id={iso_countries[hovered].id}
-                  fill={valToColor(iso_countries[hovered][category], range)}
+                  key="hovered"
+                  id={hovered}
+                  fill="transparent"
                   stroke={colorScheme.hoveredCountry}
                   strokeWidth={` ${hoveredLineWidth * zoomFactor}px`}
                   d={path(iso_countries[hovered].geometry)}
@@ -146,21 +145,21 @@ export function LineDraw({
                   }}
                   onClick={(e) => {
                     setHovered(null);
-                    selectCountry(e.target.id);
+                    selectCountry(iso_countries[e.target.id]);
                   }}
                 />
               ) : ""
           }
           {
-            (selected != null) ?
+            selected ?
               (
                 <path
-                  key={"selected"}
+                  key="selected"
                   id="selectedCountryBorder"
-                  fill="none"
+                  fill="transparent"
                   strokeWidth={` ${selectedLineWidth * zoomFactor}px`}
                   stroke={colorScheme.selectedCountry}
-                  d={path(iso_countries[selected].geometry)}
+                  d={path(selected.geometry)}
                 />
               ) : ""
           }
@@ -168,7 +167,7 @@ export function LineDraw({
   );
 }
 
-export function Legend({svgRef, category, categoryStatistics, range, selectedCountry}){
+export function Legend({svgRef, category, categoryStatistics, range, selected}){
   const [labelWidths, setLabelWidths] = useState({ left: 0, right: 0 })
   // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
   useEffect(()=>{
@@ -304,7 +303,7 @@ export function Legend({svgRef, category, categoryStatistics, range, selectedCou
 
   const styleTransition = {transition: "0.3s"}
 
-  const selectedToPercentage = range.selected !== null
+  const selectedToPercentage = range.selected
         ? Math.round((range.selected - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min) * 100)
   : 50
 
@@ -358,11 +357,11 @@ export function Legend({svgRef, category, categoryStatistics, range, selectedCou
     </g>
   */
 
- const toolTipLabelWidth = selectedCountry !== null ? GetWidth(selectedCountry) : 0
- const toolTip = (
+  const toolTipLabelWidth = GetWidth(selected?.name || "")
+  const toolTip = (
   <>
     <path d={bottomTooltipPath(toolTipLabelWidth + 20, parseInt(fontSize) * 2, 5, 10)} fill='#EEEEEE' stroke='gray' transform={`translate(${countryMarker.x + countryMarker.width/2},${countryMarker.y + boxHeight + 2})`} style={{...styleTransition}}></path>
-    <text transform={`translate(${countryMarker.x + countryMarker.width/2 - toolTipLabelWidth/2},${countryMarker.y + boxHeight + parseInt(fontSize) + 12})`} style={{...styleTransition}}>{selectedCountry}</text>
+    <text transform={`translate(${countryMarker.x + countryMarker.width/2 - toolTipLabelWidth/2},${countryMarker.y + boxHeight + parseInt(fontSize) + 12})`} style={{...styleTransition}}>{selected?.name || ""}</text>
   </>
  )
 
@@ -379,9 +378,9 @@ export function Legend({svgRef, category, categoryStatistics, range, selectedCou
         {/* Box with colors */}
         <defs>
           <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style={{ stopColor: valToColor(range.min, range), stopOpacity:"1"}} />
+            <stop offset="0%" style={{ stopColor: colorScheme.left, stopOpacity:"1"}} />
             <stop offset={`${selectedToPercentage}%`} style={{stopColor: colorScheme.middle, stopOpacity:"1"}} />
-            <stop offset="100%" style={{stopColor: valToColor(range.max, range), stopOpacity:"1"}} />
+            <stop offset="100%" style={{stopColor: colorScheme.right, stopOpacity:"1"}} />
           </linearGradient>
         </defs>
         <rect x={colorBox.x} y={colorBox.y} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" strokeWidth="0.3" style={{...styleTransition}}></rect>

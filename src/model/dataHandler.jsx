@@ -5,26 +5,31 @@ var data = null;
 
 fetch("CountriesChangePr.json").then((x) => x.json()).then((x) => data = x);
 
+export function get_keys() {
+  if (!data)
+    return null;
+  return data.keys;
+}
+
 export function get_country_data(country) {
-  if (data === null || country === null || data.countries[country] === undefined)
+  if (!data || !country || !data.countries[country])
     return null;
   return data.countries[country];
 }
 
-export function get_country_value(country, category) {
-  if (data === null || country === null || data.countries[country] === undefined)
-    return null;
-  return data.countries[country][category];
-}
-
 export function country_values_stats(category) {
-  if (data === null) return null;
+  if (!data)
+    return null;
   let min = Number.POSITIVE_INFINITY;
   let max = Number.NEGATIVE_INFINITY;
   for (let country in data.countries) {
-      const value = get_country_value(country, category);
-      if (value < min) min = value;
-      if (value > max) max = value;
+      const value = get_country_data(country)[category];
+      if (value < min) {
+          min = value;
+      }
+      if (value > max) {
+          max = value;
+      }
   }
   return {min, max, range: max - min}
 }

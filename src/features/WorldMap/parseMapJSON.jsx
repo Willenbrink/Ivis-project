@@ -26,6 +26,7 @@ export const parseJSON = () => {
             ...data,
             // If the country has no data, data is null. Therefore we have to write the id again.
             id: alpha3,
+            hasData: !!data,
             name: d.properties.name,
             geometry: d.geometry,
           };

@@ -2,18 +2,11 @@ import React, { useState, useCallback, useEffect } from "react";
 import ReactDom from "react-dom";
 import { parseJSON } from "./parseMapJSON";
 import { LineDraw, Legend } from "./lineDraw";
-import { get_country_value, country_values_stats } from "../../model/dataHandler";
+import { country_values_stats } from "../../model/dataHandler";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
 import { categories } from "../../utils/categories";
 import InfoPopover from "./InfoPopover";
-/*export let selected = "";
-export const setSelected = (id) => {
-  selected = id;
-  //this.setState({selected: id});
-  
-  useEffect
-};*/
 
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
@@ -22,11 +15,11 @@ const canvasWidth = "100%";
 const canvasHeight = "100%";
 
 export default function WorldMap() {
-  //currently selected country (alpha3)
+  //currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
    const [zoomLevel, zoomLevelSetter] = useState(null);
-  //interactive category selection. (category index)
+  //interactive category selection
   const [category, setCategory] = useState(categories.species.id);
   const [svgHasMounted, setSvgHasMounted] = useState(false)
   //for reseting the map
@@ -38,7 +31,7 @@ export default function WorldMap() {
     async function mount() {
       await setTimeout(()=>{
         setSvgHasMounted(true)
-      }, 100)
+      }, 300)
       // if (!svgHasMounted && svgRef.current?.clientWidth > 0) setSvgHasMounted(true)
     }
     mount()
@@ -50,8 +43,8 @@ export default function WorldMap() {
   }
 
   const categoryStatistics = country_values_stats(category);
-  const range = selected != null
-        ? {min: categoryStatistics.min, selected: get_country_value(selected, category), max: categoryStatistics.max}
+  const range = selected
+        ? {min: categoryStatistics.min, selected: selected[category], max: categoryStatistics.max}
         : {min: -1, selected: null, max: 1};
   const svg = (
       <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
@@ -78,7 +71,7 @@ export default function WorldMap() {
                 range={range}
                 category={category}
                 categoryStatistics={categoryStatistics}
-                selectedCountry={selected != null ? mapData.iso_countries[selected].name : null}
+                selected={selected}
               />}
           </>
       </svg>
