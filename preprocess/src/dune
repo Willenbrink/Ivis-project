@@ -1,0 +1,4 @@
+(executable
+ (public_name preprocess)
+ (name main)
+ (libraries csv yojson))

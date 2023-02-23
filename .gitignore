@@ -1,4 +1,6 @@
 raw/*
+preprocess/_build
+
 # Logs
 logs
 *.log
