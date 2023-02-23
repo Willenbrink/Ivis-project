@@ -2,7 +2,7 @@ import { zoomIdentity } from "d3";
 import { geoNaturalEarth1, geoPath, geoGraticule, select, zoom, svg, interpolateRgb } from "d3";
 import React, { useState, useCallback, useEffect } from "react";
 import { useRef } from "react";
-import { categoriesObjects } from "../../utils/categories";
+import { categories } from "../../utils/categories";
 //import { selected, setSelected } from "./WorldMap";
 /*
 const projection = geoNaturalEarth1().translate([width / 2, height / 1.4])    // translate to center of screen. You might have to fiddle with this
@@ -415,7 +415,7 @@ function GetWidths(){
   // the idea is that we assign enough space for the labels so the lines and boxes between will have a fixed width when changing categories
   let left = 0
   let right = 0
-  categoriesObjects.forEach((cat) => {
+  Object.values(categories).forEach((cat) => {
     const leftNew = GetWidth(cat.from)
     const rightNew = GetWidth(cat.to)
     if (leftNew > left) left = leftNew

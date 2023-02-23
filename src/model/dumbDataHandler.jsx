@@ -1,3 +1,5 @@
+import { categories } from "../utils/categories";
+
 const columns = [
   "[Omission -> Commission]: Estimates",
   "[Passengers -> Pedestrians]: Estimates",
@@ -1056,40 +1058,39 @@ const values_per_country = {
   ],
 };
 
+function cat_index(category) {
+  return Object.keys(categories).indexOf(category.id);
+}
+
 export function get_country_value_abs(country, category) {
   if (country === null) return 0;
   if (values_per_country[country] === undefined) return null;
-  return values_per_country[country][category];
-}
-
-export function get_country_value_rel(country, category, reference) {
-  if (country === null) return 0;
-  if (values_per_country[country] === undefined) return null;
-  return values_per_country[country][category];
+  return values_per_country[country][cat_index(category)];
 }
 
 //difference between the highest and lowest value for each cathegory
 var values_range = [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null];
-export function country_values_range(cathegory_index) {
-    if (values_range[cathegory_index] !== null) return values_range[cathegory_index];
+export function country_values_range(category) {
+    if (values_range[cat_index(category)] !== null)
+      return values_range[cat_index(category)];
 
     let min = 1;
     let max = -1;
     for (let country in values_per_country) {
-        let value = values_per_country[country][cathegory_index];
+        const value = values_per_country[country][cat_index(category)];
         if (value < min) min = value;
         if (value > max) max = value;
     }
-    values_range[cathegory_index] = max - min;
+    values_range[cat_index(category)] = max - min;
     console.log(values_range)
-    return values_range[cathegory_index];
+    return values_range[cat_index(category)];
 }
 
-export function country_values_minmax(cathegory_index) {
+export function country_values_minmax(category) {
   let min = 1;
   let max = -1;
   for (let country in values_per_country) {
-      let value = values_per_country[country][cathegory_index];
+      const value = values_per_country[country][cat_index(category)];
       if (value < min) min = value;
       if (value > max) max = value;
   }
