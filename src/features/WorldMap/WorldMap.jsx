@@ -3,7 +3,7 @@ import ReactDom from "react-dom";
 import { parseJSON } from "./parseMapJSON";
 import { LineDraw, Legend } from "./lineDraw";
 import { zoom, select, interpolateRgb } from "d3";
-import { get_country_value_abs, country_values_range, country_values_minmax } from "../../model/dumbDataHandler";
+import { get_country_value_abs, country_values_stats } from "../../model/dumbDataHandler";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
 import { categories } from "../../utils/categories";
@@ -55,7 +55,7 @@ export default function WorldMap() {
     iso_countries: mapData.iso_countries.map(c => ({ ...c, value: get_country_value_abs(c.alpha3, category) }))
   };
 
-  const categoryStatistics = { ...country_values_minmax(category), range: country_values_range(category)}
+  const categoryStatistics = country_values_stats(category);
   const range = selected != null
         ? {min: categoryStatistics.min, selected: get_country_value_abs(selected, category), max: categoryStatistics.max}
         : {min: -1, selected: null, max: 1};
