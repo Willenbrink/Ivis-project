@@ -2,6 +2,13 @@
 // TODO maybe we should also freeze stuff and wrap that in functions so keys and id are guaranteed identical?
 
 export const categories = {
+  distance: {
+    id: 'distance',
+    name: 'Total distance across all categories',
+    from: 'Not a value',
+    to: 'Maximal difference',
+    info: 'This is a WIP display of the total distance between the selected and all other countries.',
+  },
   intervention: {
     id: 'intervention',
     name: 'Avoiding intervention: Omission vs. Commission',

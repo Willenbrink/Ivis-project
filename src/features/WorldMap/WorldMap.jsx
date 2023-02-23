@@ -20,7 +20,7 @@ export default function WorldMap() {
   const [hovered, setHovered] = useState(null);
    const [zoomLevel, zoomLevelSetter] = useState(null);
   //interactive category selection
-  const [category, setCategory] = useState(categories.species.id);
+  const [category, setCategory] = useState(categories.distance);
   const [svgHasMounted, setSvgHasMounted] = useState(false)
   //for reseting the map
   const [doReset, setDoReset] = useState(false);

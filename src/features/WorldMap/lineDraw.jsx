@@ -26,17 +26,37 @@ export const colorScheme = {
   noData: 'gray',
 };
 
-function valToColor(value, range) {
-  if (value === undefined)
+function valToColor(country, category, selected, range) {
+  if (!country.hasData)
     return colorScheme.noData;
-  var relative_value;
-  if(range.selected) {
-    relative_value = (value - range.selected) / (range.max - range.min);
+
+  var value, relative_value;
+  if(category.id === "distance" && selected) {
+    var dist_sq = 0;
+    // Choose higher values to make the dimension with the largest distance play a larger role.
+    // Inspired by Shephard Interpolation: https://en.wikipedia.org/wiki/Inverse_distance_weighting#/media/File:Shepard_interpolation_2.png
+    // Image that three countries have the results A: (0,0), B: (0.5, 0.5), C: (0.9)
+    // With exponent = 1, C is closer to A than B as 0.9 < 0.5 + 0.5
+    // With exponent = 2, B is closeras (0.25 + 0.25)^0.5 < 0.9^2^0.5 = 0.9
+    const exponent = 2;
+    for(const k of get_keys()) {
+      dist_sq += Math.abs(country[k] - selected[k]) ** exponent;
+    }
+    relative_value = exponent * dist_sq ** (1/exponent);
+    // console.log(value, selected, country);
+  } else if(category.id === "distance" && !selected) {
+    // There can not be a global overview if we display
+    relative_value = 0;
   } else {
-    // If range.selected is null, we have our reference at 0.
-    // But, this means that the extreme ends are only "half the bar" away from the reference.
-    // Therefore, we multiply by 2
-    relative_value = 2 * value / (range.max - range.min);
+    value = country[category.id];
+    if(range.selected) {
+      relative_value = (value - range.selected) / (range.max - range.min);
+    } else {
+      // If range.selected is null, we have our reference at 0.
+      // But, this means that the extreme ends are only "half the bar" away from the reference.
+      // Therefore, we multiply by 2
+      relative_value = 2 * value / (range.max - range.min);
+    }
   }
   const extreme_color = relative_value < 0 ? colorScheme.left : colorScheme.right;
   //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
@@ -108,7 +128,7 @@ export function LineDraw({
               return <path
                 key={c.id}
                 id={c.id}
-                fill={valToColor(c[category], range)}
+                fill={valToColor(c, category, selected, range)}
                 className="country"
                 d={path(c.geometry)}
                 onMouseOver={() => {
