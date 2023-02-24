@@ -7,7 +7,7 @@ export const categories = {
     name: 'Total distance across all categories',
     from: 'Not a value',
     to: 'Maximal difference',
-    info: 'This is a WIP display of the total distance between the selected and all other countries.',
+    info: 'This is a WIP display of the total distance between the selected and all other countries. There is no absolute value so you have to select a country first. One result visualized here is: Uruguay and Paraguay differ a lot but neither a close to Europe.',
   },
   intervention: {
     id: 'intervention',

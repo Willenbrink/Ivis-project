@@ -26,6 +26,23 @@ export const colorScheme = {
   noData: 'gray',
 };
 
+function valToColorNormal(value, range) {
+  var relative_value;
+  if(range.selected) {
+    relative_value = (value - range.selected) / (range.max - range.min);
+  } else {
+    // If range.selected is null, we have our reference at 0.
+    // But, this means that the extreme ends are only "half the bar" away from the reference.
+    // Therefore, we multiply by 2
+    relative_value = 2 * value / (range.max - range.min);
+  }
+  const extreme_color = relative_value < 0 ? colorScheme.left : colorScheme.right;
+  //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
+  const absolute_value = Math.abs(relative_value);
+  return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
+}
+
+// TODO distance map should be moved to its own tab. Then this can be simplified
 function valToColor(country, category, selected, range) {
   if (!country.hasData)
     return colorScheme.noData;
@@ -45,18 +62,11 @@ function valToColor(country, category, selected, range) {
     relative_value = exponent * dist_sq ** (1/exponent);
     // console.log(value, selected, country);
   } else if(category.id === "distance" && !selected) {
-    // There can not be a global overview if we display
+    // There can not be a global overview if we display distance
     relative_value = 0;
   } else {
     value = country[category.id];
-    if(range.selected) {
-      relative_value = (value - range.selected) / (range.max - range.min);
-    } else {
-      // If range.selected is null, we have our reference at 0.
-      // But, this means that the extreme ends are only "half the bar" away from the reference.
-      // Therefore, we multiply by 2
-      relative_value = 2 * value / (range.max - range.min);
-    }
+    return valToColorNormal(value, range);
   }
   const extreme_color = relative_value < 0 ? colorScheme.left : colorScheme.right;
   //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
@@ -394,9 +404,9 @@ export function Legend({svgRef, category, categoryStatistics, range, selected}){
         {/* Box with colors */}
         <defs>
           <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style={{ stopColor: colorScheme.left, stopOpacity:"1"}} />
+            <stop offset="0%" style={{ stopColor: valToColorNormal(range.min, range), stopOpacity:"1"}} />
             <stop offset={`${selectedToPercentage}%`} style={{stopColor: colorScheme.middle, stopOpacity:"1"}} />
-            <stop offset="100%" style={{stopColor: colorScheme.right, stopOpacity:"1"}} />
+            <stop offset="100%" style={{stopColor: valToColorNormal(range.max, range), stopOpacity:"1"}} />
           </linearGradient>
         </defs>
         <rect x={colorBox.x} y={colorBox.y} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" strokeWidth="0.3" style={{...styleTransition}}></rect>
