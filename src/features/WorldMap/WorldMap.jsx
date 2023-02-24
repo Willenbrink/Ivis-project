@@ -86,7 +86,7 @@ export default function WorldMap() {
             <Form.Select 
             aria-label="Default select example!"
             onChange={((e) => setCategory(categories[e.target.value]))}
-            value={category}
+            value={category?.id}
             className='fw-bold'
             >
               {Object.entries(categories).map(([id, cat]) => {
