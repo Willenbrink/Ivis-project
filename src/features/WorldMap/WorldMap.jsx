@@ -73,6 +73,10 @@ export default function WorldMap({activeTab}) {
   };
 
   const colors = { left: colorScheme.left, mid:undefined, right: colorScheme.right };
+  const markers = {
+    selected: selected && { id: selected.id, value: (selected[category.id] - range.min) / (range.max - range.min), color: colorScheme.selectedCountry },
+    hovered: hovered && { id: hovered.id, value: (hovered[category.id] - range.min) / (range.max - range.min), color: colorScheme.hoveredCountry },
+  };
 
   const svg = (
       <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
@@ -99,6 +103,7 @@ export default function WorldMap({activeTab}) {
                 categoryStatistics={categoryStatistics}
                 selected={selected}
                 colors={colors}
+                markers={markers}
               />}
           </>
           }

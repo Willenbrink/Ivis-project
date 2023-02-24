@@ -22,7 +22,7 @@ function valToColor(value, range) {
   return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
 }
 
-export function Legend({svgRef, category, categoryStatistics, range, selected, colors}){
+export function Legend({svgRef, category, categoryStatistics, range, selected, colors, markers}){
   const [labelWidths, setLabelWidths] = useState({ left: 0, right: 0 })
   // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
   useEffect(()=>{
@@ -185,12 +185,15 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
         ? Math.round((range.selected - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min) * 100)
   : 50
 
-  const countryMarker = {
-    x: rangeBox.x + ((selectedToPercentage/100) * rangeBox.width),
-    y: svgHeight - padding.y,
-    height: boxHeight,
-    width: range.selected !== null ? 3 : 0,
-    color: colorScheme.selectedCountry,
+  function countryMarkers() {
+    return (<>{
+      Object.values(markers).map(m => {
+        console.log(m && m.value);
+        return (
+          m && <rect key={"marker" + m.id} x={rangeBox.x + m.value * rangeBox.width} y={svgHeight - padding.y} width={3} height={boxHeight} fill={m.color} style={{...styleTransition}}></rect>
+        );
+      })
+    }</>);
   }
 
   function bottomTooltipPath(width, height, offset, radius) {
@@ -219,6 +222,14 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
     height: boxHeight + 20,
     width: 3,
     color: 'gray'
+  }
+
+  const countryMarker = {
+    x: rangeBox.x + ((selectedToPercentage/100) * rangeBox.width),
+    y: svgHeight - padding.y,
+    height: boxHeight,
+    width: 3,
+    color: colorScheme.selectedCountry,
   }
 
   const toolTipLabelWidth = GetWidth(selected?.name)
@@ -264,10 +275,8 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
         <path strokeDasharray={`${Math.round((boxHeight + 20)/8)}`} strokeOpacity="70%" d={`M0 0 V${boxHeight + 20} 0`} stroke='gray' strokeWidth="2" transform={`translate(${middleMarker.x},${middleMarker.y})`}/>
         {/* <rect x={middleMarker.x} y={middleMarker.y} width={middleMarker.width} height={middleMarker.height} stroke={middleMarker.color} style={{...styleTransition, borderStyle: 'dotted'}}></rect> */}
 
-        <> {/* Country marker */}
-            <rect x={countryMarker.x} y={countryMarker.y} width={countryMarker.width} height={countryMarker.height} fill={countryMarker.color} style={{...styleTransition}}></rect>
-            {range.selected && toolTip}
-        </>
+        {countryMarkers()}
+        {range.selected && toolTip}
     </g>
   )
 }
