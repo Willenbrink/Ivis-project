@@ -215,8 +215,6 @@ export function Legend({svgRef, category, categoryStatistics, range, selected}){
   const fontSize = "16" // this has to be changed if we change the font or font size
   const lineColor = '#000000'
   const noDataStr = 'No data'
-  const rangeBoxStr_1 = "The range of all"
-  const rangeBoxStr_2 = "countries answers"
 
 
   const padding = {
@@ -235,29 +233,6 @@ export function Legend({svgRef, category, categoryStatistics, range, selected}){
   const noDataBox = {
     x: noDataText.x + noDataText.width + 5,
     y: svgHeight - padding.y,
-    height: boxHeight,
-    width: boxHeight,
-  }
-
-  const rangeBoxText_1 = {
-    x: padding.x,
-    y: svgHeight - padding.y + boxHeight/2 + fontSize/4 - noDataBox.height - fontSize/2,
-    width: GetWidth(rangeBoxStr_1), // this has to be measured if we change the text size or font
-    color: lineColor,
-    fontSize
-  }
-
-  const rangeBoxText_2 = {
-    x: padding.x,
-    y: svgHeight - padding.y + boxHeight/2 + fontSize/4 - noDataBox.height + fontSize/2,
-    width: GetWidth(rangeBoxStr_2), // this has to be measured if we change the text size or font
-    color: lineColor,
-    fontSize
-  }
-
-  const rangeBoxBox = {
-    x: noDataText.x + noDataText.width + 5,
-    y: svgHeight - noDataBox.height - padding.y,
     height: boxHeight,
     width: boxHeight,
   }
@@ -420,16 +395,11 @@ export function Legend({svgRef, category, categoryStatistics, range, selected}){
 
   return (
     <g className='' ref={legendRef}>
-        {/* No data text */}
         <text fontSize={noDataText.fontSize} x={noDataText.x} y={noDataText.y} width={noDataText.width} height={noDataText.height} fill={noDataText.color}>{noDataStr}</text>
         <rect x={noDataBox.x} y={noDataBox.y} width={noDataBox.width} height={noDataBox.height} fill={colorScheme.noData} stroke="#333" strokeWidth="0.3"></rect>
-        {/* Rangebox text */}
-        <text fontSize={rangeBoxText_1.fontSize} x={rangeBoxText_1.x} y={rangeBoxText_1.y} width={rangeBoxText_1.width} height={rangeBoxText_1.height} fill={rangeBoxText_1.color}>{rangeBoxStr_1}</text>
-        <text fontSize={rangeBoxText_2.fontSize} x={rangeBoxText_2.x} y={rangeBoxText_2.y} width={rangeBoxText_2.width} height={rangeBoxText_2.height} fill={rangeBoxText_2.color}>{rangeBoxStr_2}</text>
-        <rect x={rangeBoxBox.x} y={rangeBoxBox.y} width={rangeBoxBox.width} height={rangeBoxBox.height} fill='none' className='dashedRect' strokeWidth="2"></rect>
         {/* Line starts here */}
         <text x={labelLeft.x} y={labelLeft.y} width={labelLeft.width} height={labelLeft.height} fill={labelLeft.color}>{category.from}</text>
-        <rect x={hBox.x} y={hBox.y} width={hBox.width} height={hBox.height} fill='white' stroke="rgb(0,0,0)" strokeWidth="1"/>
+        <rect x={hBox.x} y={hBox.y} width={hBox.width} height={hBox.height} fill='white' stroke="rgb(0,0,0)" strokeWidth="2" />
         {/* <line x1={hLineRight.x1} y1={hLineRight.y1} x2={hLineRight.x2} y2={hLineRight.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: hLineRight.strokeWidth}} /> */}
         {/* Box with colors */}
         <defs>
@@ -441,7 +411,7 @@ export function Legend({svgRef, category, categoryStatistics, range, selected}){
         </defs>
         <rect x={colorBox.x} y={colorBox.y} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" strokeWidth="0.3" style={{...styleTransition}}></rect>
         {/* Box with range */}
-        <rect x={rangeBox.x} y={rangeBox.y} width={rangeBox.width} height={rangeBox.height} fill='none' strokeWidth="2" style={{...styleTransition}} className="dashedRect"></rect>
+        <rect x={rangeBox.x} y={rangeBox.y} width={rangeBox.width} height={rangeBox.height} fill='none' stroke="#333" strokeWidth="2" style={{...styleTransition}}></rect>
         {/* <rect x={middleMarker.x} y={middleMarker.y} width={middleMarker.width} height={middleMarker.height} stroke={middleMarker.color} style={{...styleTransition, borderStyle: 'dotted'}}></rect>*/}
         <path strokeDasharray={`${Math.round((boxHeight + 20)/8)}`} strokeOpacity="70%" d={`M0 0 V${boxHeight + 20} 0`} stroke='gray' strokeWidth="2" transform={`translate(${middleMarker.x},${middleMarker.y})`}/>
         <rect x={countryMarker.x} y={countryMarker.y} width={countryMarker.width} height={countryMarker.height} fill={countryMarker.color} style={{...styleTransition}}></rect>

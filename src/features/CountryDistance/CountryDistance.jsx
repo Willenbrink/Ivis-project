@@ -5,9 +5,8 @@ import { LineDraw, Legend } from "./lineDraw";
 import { country_values_stats } from "../../model/dataHandler";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
-import { categories } from "../../utils/categories";
+import { categories, distance } from "../../utils/categories";
 import InfoPopover from "./InfoPopover";
-import useWindowDimensions from "../../hooks/windowResizeHook";
 
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
@@ -15,18 +14,18 @@ import useWindowDimensions from "../../hooks/windowResizeHook";
 const canvasWidth = "100%";
 const canvasHeight = "100%";
 
-export default function WorldMap({activeTab}) {
+export default function CountryDistance({activeTab}) {
   //currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
    const [zoomLevel, zoomLevelSetter] = useState(null);
   //interactive category selection
-  const [category, setCategory] = useState(categories.intervention);
+
   const [svgHasMounted, setSvgHasMounted] = useState(false)
   //for reseting the map
   const [doReset, setDoReset] = useState(false);
   const svgRef = useRef()
-
+  
   // Temporary fix for map not rendering on start
   useEffect(()=>{
     async function mount() {
@@ -38,16 +37,17 @@ export default function WorldMap({activeTab}) {
     mount()
   },[activeTab])
 
-
   const mapData = parseJSON();
   if (!mapData) {
     return <pre>Loading...</pre>;
   }
 
+  const category = distance
   const categoryStatistics = country_values_stats(category.id);
   const range = selected
         ? {min: categoryStatistics.min, selected: selected[category.id], max: categoryStatistics.max}
         : {min: -1, selected: null, max: 1};
+  
   const svg = (
       <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
           <>
@@ -67,14 +67,14 @@ export default function WorldMap({activeTab}) {
                 category={category}
               />
               }
-              {svgHasMounted && svgRef.current &&
+              {/* svgHasMounted && svgRef.current &&
               <Legend
                 svgRef={svgRef}
                 range={range}
                 category={category}
                 categoryStatistics={categoryStatistics}
                 selected={selected}
-              />}
+            />*/}
           </>
       </svg>
   );
@@ -84,18 +84,8 @@ export default function WorldMap({activeTab}) {
         {svg}
       </div>
           <InputGroup className="px-5 pt-2 position-absolute" style={{width: "90%"}}>
-            <InputGroup.Text id='basic-addon2' className='bg-light'>Categories:</InputGroup.Text>
-            <Form.Select 
-            aria-label="Default select example!"
-            onChange={((e) => setCategory(categories[e.target.value]))}
-            value={category?.id}
-            className='fw-bold'
-            >
-              {Object.entries(categories).map(([id, cat]) => {
-                return <option key={id} value={id}>{cat.name}</option> ;
-              })}
-            </Form.Select>
-            <InfoPopover title={categories[category.id].name_short || categories[category.id].name} info={categories[category.id].info}/>
+            <InputGroup.Text id='basic-addon2' className='bg-light'>Country distance</InputGroup.Text>
+            {/* <InfoPopover title={categories[category.id].name_short || categories[category.id].name} info={categories[category.id].info}/>*/}
           </InputGroup>
 
       <div id="zoomDiv" style={{position:"absolute", margin:"10px", right: 0}}>

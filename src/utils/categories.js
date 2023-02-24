@@ -1,14 +1,15 @@
 // Loosely inspired by: https://stackoverflow.com/questions/44447847/enums-in-javascript-with-es6
 // TODO maybe we should also freeze stuff and wrap that in functions so keys and id are guaranteed identical?
 
+export const distance =  {
+  id: 'distance',
+  name: 'Total distance across all categories',
+  from: 'Not a value',
+  to: 'Maximal difference',
+  info: 'This is a WIP display of the total distance between the selected and all other countries. There is no absolute value so you have to select a country first. One result visualized here is: Uruguay and Paraguay differ a lot but neither a close to Europe.',
+}
+
 export const categories = {
-  distance: {
-    id: 'distance',
-    name: 'Total distance across all categories',
-    from: 'Not a value',
-    to: 'Maximal difference',
-    info: 'This is a WIP display of the total distance between the selected and all other countries. There is no absolute value so you have to select a country first. One result visualized here is: Uruguay and Paraguay differ a lot but neither a close to Europe.',
-  },
   intervention: {
     id: 'intervention',
     name: 'Avoiding intervention: Omission vs. Commission',

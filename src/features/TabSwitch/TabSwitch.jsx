@@ -2,8 +2,7 @@ import { useEffect } from "react";
 import { Children, useRef, useState } from "react"
 import { Nav, Tab } from "react-bootstrap";
 
-export default function TabSwitch({children}) {
-  const [activeTab, setActiveTab] = useState(0)
+export default function TabSwitch({children, activeTab, setActiveTab}) {
   const tabsRef = useRef()
   // This code was an attempt to solve a window size issue
   //
