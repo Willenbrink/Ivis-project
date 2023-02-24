@@ -259,19 +259,26 @@ export function Legend({svgRef, category, categoryStatistics, range, selected}){
   //console.log('box: ', boxWidth)
   //console.log('box: ', lineWidthRight)
   const vertLineLeft = {
-    x1: labelLeft.x + labelLeft.width + 5,
+    x: labelLeft.x + labelLeft.width + 5,
     y1: svgHeight - padding.y + boxHeight,
-    x2: labelLeft.x + labelLeft.width + 5,
     y2: svgHeight - padding.y,
     strokeWidth: "2", // the longest word that appears here is passengers, so this is this word's width
     color: lineColor
   }
 
-  const hLineLeft = {
-    x1: vertLineLeft.x1,
-    y1: svgHeight - padding.y + boxHeight/2,
-    x2: labelLeft.x + labelLeft.width + availableWidthLine,
-    y2: svgHeight - padding.y + boxHeight/2,
+  const vertLineRight = {
+    x: labelLeft.x + labelLeft.width + availableWidthLine,
+    y1: svgHeight - padding.y + boxHeight,
+    y2: svgHeight - padding.y,
+    strokeWidth: "2", // the longest word that appears here is passengers, so this is this word's width
+    color: lineColor
+  }
+
+  const hBox = {
+    x: vertLineLeft.x,
+    y: vertLineLeft.y2,
+    height: boxHeight,
+    width: vertLineRight.x - vertLineLeft.x,
     strokeWidth: "2", // the longest word that appears here is passengers, so this is this word's width
     color: lineColor
   }
@@ -294,15 +301,6 @@ export function Legend({svgRef, category, categoryStatistics, range, selected}){
   }
   */
 
-  const vertLineRight = {
-    x1: hLineLeft.x2,
-    y1: svgHeight - padding.y + boxHeight,
-    x2: hLineLeft.x2,
-    y2: svgHeight - padding.y,
-    strokeWidth: "2", // the longest word that appears here is passengers, so this is this word's width
-    color: lineColor
-  }
-
   // no selected country --> colorBox has full width
   const colorBox = range.selected
   ? {
@@ -314,10 +312,10 @@ export function Legend({svgRef, category, categoryStatistics, range, selected}){
   }
   :
   {
-    x: vertLineLeft.x1,
+    x: vertLineLeft.x,
     y: svgHeight - padding.y,
     height: boxHeight,
-    width: vertLineRight.x2 - vertLineLeft.x2,
+    width: vertLineRight.x - vertLineLeft.x,
     color: '#ffffff'
   }
 
@@ -356,7 +354,7 @@ export function Legend({svgRef, category, categoryStatistics, range, selected}){
 
 
   const middleMarker = {
-    x: hLineLeft.x1 + Math.round((hLineLeft.x2 - hLineLeft.x1)/2) ,
+    x: hBox.x + Math.round(hBox.width/2) ,
     y: svgHeight - padding.y - 10,
     height: boxHeight + 20,
     width: 3,
@@ -391,10 +389,8 @@ export function Legend({svgRef, category, categoryStatistics, range, selected}){
         <rect x={noDataBox.x} y={noDataBox.y} width={noDataBox.width} height={noDataBox.height} fill={colorScheme.noData} stroke="#333" strokeWidth="0.3"></rect>
         {/* Line starts here */}
         <text x={labelLeft.x} y={labelLeft.y} width={labelLeft.width} height={labelLeft.height} fill={labelLeft.color}>{category.from}</text>
-        <line x1={vertLineLeft.x1} y1={vertLineLeft.y1} x2={vertLineLeft.x2} y2={vertLineLeft.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: vertLineLeft.strokeWidth}} />
-        <line x1={hLineLeft.x1} y1={hLineLeft.y1} x2={hLineLeft.x2} y2={hLineLeft.y2} style={{transition:"transform 300ms ease-in", stroke:"rgb(0,0,0)", strokeWidth: hLineLeft.strokeWidth}} />
+        <rect x={hBox.x} y={hBox.y} width={hBox.width} height={hBox.height} fill='white' stroke="rgb(0,0,0)" strokeWidth="2" />
         {/* <line x1={hLineRight.x1} y1={hLineRight.y1} x2={hLineRight.x2} y2={hLineRight.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: hLineRight.strokeWidth}} /> */}
-        <line x1={vertLineRight.x1} y1={vertLineRight.y1} x2={vertLineRight.x2} y2={vertLineLeft.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: vertLineRight.strokeWidth}} />
         {/* Box with colors */}
         <defs>
           <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
