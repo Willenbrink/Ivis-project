@@ -1,16 +1,14 @@
 import React, { useState, useCallback, useEffect } from "react";
 import ReactDom from "react-dom";
 import { parseJSON } from "./parseMapJSON";
-import { Legend } from "../../utils/legend";
 import { LineDraw } from "../../utils/lineDraw";
 import colorScheme from "../../utils/colorScheme";
+import { get_keys } from "../../model/dataHandler";
+import { distance } from "../../utils/categories";
 import { interpolateRgb } from "d3";
-import { country_values_stats } from "../../model/dataHandler";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
-import { categories } from "../../utils/categories";
 import InfoPopover from "./InfoPopover";
-import useWindowDimensions from "../../hooks/windowResizeHook";
 
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
@@ -18,18 +16,44 @@ import useWindowDimensions from "../../hooks/windowResizeHook";
 const canvasWidth = "100%";
 const canvasHeight = "100%";
 
-export default function WorldMap({activeTab}) {
+function countryToColor(country, selected) {
+  if (!country.hasData)
+    return colorScheme.noData;
+  if(!selected) {
+    return colorScheme.middle;
+  }
+
+  var relative_value;
+  var dist_sq = 0;
+  // Choose higher values to make the dimension with the largest distance play a larger role.
+  // Inspired by Shephard Interpolation: https://en.wikipedia.org/wiki/Inverse_distance_weighting#/media/File:Shepard_interpolation_2.png
+  // Image that three countries have the results A: (0,0), B: (0.5, 0.5), C: (0.9)
+  // With exponent = 1, C is closer to A than B as 0.9 < 0.5 + 0.5
+  // With exponent = 2, B is closeras (0.25 + 0.25)^0.5 < 0.9^2^0.5 = 0.9
+  const exponent = 2;
+  for(const k of get_keys()) {
+    dist_sq += Math.abs(country[k] - selected[k]) ** exponent;
+  }
+  relative_value = exponent * dist_sq ** (1/exponent);
+  const extreme_color = relative_value < 0 ? colorScheme.left : colorScheme.right;
+  //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
+  const absolute_value = Math.abs(relative_value);
+  return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
+};
+
+
+export default function CountryDistance({activeTab}) {
   //currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
    const [zoomLevel, zoomLevelSetter] = useState(null);
   //interactive category selection
-  const [category, setCategory] = useState(categories.intervention);
+
   const [svgHasMounted, setSvgHasMounted] = useState(false)
   //for reseting the map
   const [doReset, setDoReset] = useState(false);
   const svgRef = useRef()
-
+  
   // Temporary fix for map not rendering on start
   useEffect(()=>{
     async function mount() {
@@ -41,46 +65,17 @@ export default function WorldMap({activeTab}) {
     mount()
   },[activeTab])
 
-
   const mapData = parseJSON();
   if (!mapData) {
     return <pre>Loading...</pre>;
   }
 
-  const categoryStatistics = country_values_stats(category.id);
-  const range = selected
-        ? {min: categoryStatistics.min, selected: selected[category.id], max: categoryStatistics.max}
-        : {min: -1, selected: null, max: 1};
-
-
-  function countryToColor(country, _) {
-    const value = country[category.id];
-    if (!value)
-      return colorScheme.noData;
-    var relative_value;
-    if(range.selected) {
-      relative_value = (value - range.selected) / (range.max - range.min);
-    } else {
-      // If range.selected is null, we have our reference at 0.
-      // But, this means that the extreme ends are only "half the bar" away from the reference.
-      // Therefore, we multiply by 2
-      relative_value = 2 * value / (range.max - range.min);
-    }
-    const extreme_color = relative_value < 0 ? colorScheme.left : colorScheme.right;
-    //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
-    const absolute_value = Math.abs(relative_value);
-    return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
-  };
-
-  const colors = { left: colorScheme.left, mid:undefined, right: colorScheme.right };
-
   const svg = (
       <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
           {svgHasMounted &&
-           <>
+          <>
               <LineDraw
                 data={mapData}
-                countryToColor={countryToColor}
                 selectCountry={setSelected}
                 selected={selected}
                 hovered={hovered}
@@ -90,16 +85,8 @@ export default function WorldMap({activeTab}) {
                 zoomLevelSetter={zoomLevelSetter}
                 doReset={doReset}
                 setDoReset={setDoReset}
+                countryToColor={countryToColor}
               />
-              {svgRef.current &&
-              <Legend
-                svgRef={svgRef}
-                range={range}
-                category={category}
-                categoryStatistics={categoryStatistics}
-                selected={selected}
-                colors={colors}
-              />}
           </>
           }
       </svg>
@@ -110,18 +97,8 @@ export default function WorldMap({activeTab}) {
         {svg}
       </div>
           <InputGroup className="px-5 pt-2 position-absolute" style={{width: "90%"}}>
-            <InputGroup.Text id='basic-addon2' className='bg-light'>Categories:</InputGroup.Text>
-            <Form.Select 
-            aria-label="Default select example!"
-            onChange={((e) => setCategory(categories[e.target.value]))}
-            value={category?.id}
-            className='fw-bold'
-            >
-              {Object.entries(categories).map(([id, cat]) => {
-                return <option key={id} value={id}>{cat.name}</option> ;
-              })}
-            </Form.Select>
-            <InfoPopover title={categories[category.id].name_short || categories[category.id].name} info={categories[category.id].info}/>
+            <InputGroup.Text id='basic-addon2' className='bg-light'>Country distance</InputGroup.Text>
+            <InfoPopover title={distance.name_short || distance.name} info={distance.info}/>
           </InputGroup>
 
       <div id="zoomDiv" style={{position:"absolute", margin:"10px", right: 0}}>

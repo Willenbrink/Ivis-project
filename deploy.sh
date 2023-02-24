@@ -13,7 +13,6 @@ set -e
 npm install
 npm run build
 
-# cd dist
 
 # bypass Jekyll processing
 echo > dist/.nojekyll

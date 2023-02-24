@@ -1,39 +1,35 @@
-import React, { useState, useCallback, useEffect } from "react";
+// data is an object of form: {keys: id list, countries: (id -> data) object}.
+// Where keys is a list of 3-letter country code
+// and data is an object containing a countrys id and a (key -> float) mapping with the keys defined before.
+var data = null;
 
-const CSV_PATH = "/public/CountriesChangePr.csv";
+fetch("CountriesChangePr.json").then((x) => x.json()).then((x) => data = x);
 
-//ASYNC STUFF I COULDNT GET TO WORK :/
-var parsedCSV = null;
-/**
- * @returns {str-Countrycode: [float-values]}
- * with cathegories: [Omission -> Commission]: Estimates,[Passengers -> Pedestrians]: Estimates,Law [Illegal -> Legal]: Estimates,Gender [Male -> Female]: Estimates,Fitness [Large -> Fit]: Estimates,Social Status [Low -> High]: Estimates,Age [Elderly -> Young]: Estimates,No. Characters [Less -> More]: Estimates,Species [Pets -> Humans]: Estimates,[Omission -> Commission]: se,[Passengers -> Pedestrians]: se,Law [Illegal -> Legal]: se,Gender [Male -> Female]: se,Fitness [Large -> Fit]: se,Social Status [Low -> High]: se,Age [Elderly -> Young]: se,No. Characters [Less -> More]: se,Species [Pets -> Humans]: se
+export function get_keys() {
+  if (!data)
+    return null;
+  return data.keys;
+}
 
- */
-async function parseCSV() {
-  if (parsedCSV !== null) return parsedCSV;
-  parsedCSV = fetch(CSV_PATH)
-      .then((response) => response.text())
-      .then((text) => {
-        const [columns, ...data] = text.split(/\r?\n/);
-        parsedCSV = Object.assign({}, ...data.map((row) => {
-          const [countrycodes, ...values] = row.split(",");
-          return { [countrycodes]: values };
-        }));
-        console.log(parsedCSV)
-        return parsedCSV;
-      })
-      .catch((e) => {
-        console.error("[ERR]" + e);
-      });
-  
-};
+export function get_country_data(country) {
+  if (!data || !country || !data.countries[country])
+    return null;
+  return data.countries[country];
+}
 
-export async function get_country_value (alpha3, cathegory_index) {
-  if (alpha3 === "DEU") await parseCSV();
-  if (alpha3 === null) return 0;
-  return -0.2;
-};
-
-export async function country_values_range (cathegory_index) {
-  return 0.7;
-};
+export function country_values_stats(category) {
+  if (!data)
+    return null;
+  let min = Number.POSITIVE_INFINITY;
+  let max = Number.NEGATIVE_INFINITY;
+  for (let country in data.countries) {
+      const value = get_country_data(country)[category];
+      if (value < min) {
+          min = value;
+      }
+      if (value > max) {
+          max = value;
+      }
+  }
+  return {min, max, range: max - min}
+}

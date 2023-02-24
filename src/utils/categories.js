@@ -1,6 +1,14 @@
 // Loosely inspired by: https://stackoverflow.com/questions/44447847/enums-in-javascript-with-es6
 // TODO maybe we should also freeze stuff and wrap that in functions so keys and id are guaranteed identical?
 
+export const distance =  {
+  id: 'distance',
+  name: 'Total distance across all categories',
+  from: 'Not a value',
+  to: 'Maximal difference',
+  info: 'This is a WIP display of the total distance between the selected and all other countries. There is no absolute value so you have to select a country first. One result visualized here that is otherwise hard to see is: Germany, Turkey and China differ a lot from each other. That is, they belong to different culture groups. This is different from e.g. Venezuela and Brazil. They differ from each other a bit but both differ significantly from the rest of the world. They share a culture group. Clustering (unimplemented as of now) will show this in more detail.',
+}
+
 export const categories = {
   intervention: {
     id: 'intervention',
