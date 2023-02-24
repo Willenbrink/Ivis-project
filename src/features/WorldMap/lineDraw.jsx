@@ -1,8 +1,8 @@
 import { zoomIdentity } from "d3";
-import { geoNaturalEarth1, geoPath, geoGraticule, select, zoom, svg } from "d3";
+import { geoNaturalEarth1, geoPath, geoGraticule, select, zoom, svg, interpolateRgb } from "d3";
 import React, { useState, useCallback, useEffect } from "react";
 import { useRef } from "react";
-import { categoriesObjects } from "../../utils/categories";
+import { categories } from "../../utils/categories";
 //import { selected, setSelected } from "./WorldMap";
 /*
 const projection = geoNaturalEarth1().translate([width / 2, height / 1.4])    // translate to center of screen. You might have to fiddle with this
@@ -27,13 +27,31 @@ export const colorScheme = {
   noData: 'gray',
 };
 
+function valToColor(value, range) {
+  if (value == null)
+    return colorScheme.noData;
+  var relative_value;
+  if(range.selected !== null) {
+    relative_value = (value - range.selected) / (range.max - range.min);
+  } else {
+    // If range.selected is null, we have our reference at 0.
+    // But, this means that the extreme ends are only "half the bar" away from the reference.
+    // Therefore, we multiply by 2
+    relative_value = 2 * value / (range.max - range.min);
+  }
+  const extreme_color = relative_value > 0 ? colorScheme.left : colorScheme.right;
+  //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
+  const absolute_value = Math.abs(relative_value);
+  return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
+};
+
 export function LineDraw({
-  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry,selected,hovered, setHovered,svgRef, category, categoryStatistics, minMaxColors, selectedValue, zoomLevel, zoomLevelSetter, doReset, setDoReset
+  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry, selected, range, hovered, setHovered, svgRef, zoomLevel, zoomLevelSetter, doReset, setDoReset
 }) {
+
   const gRef = useRef()
   const zoomInScaleLimit = 8
   const zoomOutScaleLimit = 0.12
-  const [labelWidths, setLabelWidths] = useState({ left: 0, right: 0 })
   // console.log(svgRef.current.clientWidth)
   // console.log('PAAAAATH: ', graticule())
   const projection = geoNaturalEarth1().scale(249.5 * svgRef.current.clientHeight/950).translate([svgRef.current.clientWidth/2,svgRef.current.clientHeight/2])
@@ -54,11 +72,11 @@ export function LineDraw({
       const svg = select(svgRef.current)
       const g = select(gRef.current)
       svg.call(zoom().scaleExtent([zoomOutScaleLimit, zoomInScaleLimit])
-      .translateExtent([[0, 0], [svgRef.current.clientWidth,svgRef.current.clientHeight]]).on('zoom', (event) => {
-        g.attr('transform', event.transform)
-        zoomLevelSetter(event.transform.k)
-      }))
-  }
+                     .translateExtent([[0, 0], [svgRef.current.clientWidth,svgRef.current.clientHeight]]).on('zoom', (event) => {
+                       g.attr('transform', event.transform)
+                       zoomLevelSetter(event.transform.k)
+                     }))
+    }
   }, [])
   //resetting the zoom
   if (doReset) {
@@ -69,44 +87,39 @@ export function LineDraw({
       zoomLevelSetter(null)
     } 
   }
-  // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
-  useEffect(()=>{
-    const [left, right] = GetWidths()
-    setLabelWidths({ left, right })
-  },[])
 
-    return (
-        <>
-        <g className="mark" ref={gRef} >
-                <path className="earthSphere" d={path({ type: "Sphere" })}
-                    onMouseOver={() => {
-                        setHovered(null);
-                    }} onClick={() => {
-                        selectCountry(null);
-                    }} />
-                <path className="graticule" d={path(graticule())}
-                    onMouseOver={() => {
-                        setHovered(null);
-                    }} onClick={() => {
-                        selectCountry(null);
-                    }} />
+  return (
+      <g className="mark" ref={gRef} >
+          <path className="earthSphere" d={path({ type: "Sphere" })}
+                onMouseOver={() => {
+                  setHovered(null);
+                }} onClick={() => {
+                  selectCountry(null);
+                }} />
+          <path className="graticule" d={path(graticule())}
+                onMouseOver={() => {
+                  setHovered(null);
+                }} onClick={() => {
+                  selectCountry(null);
+                }} />
           {
             //example country: {"color": "#040", "alpha3": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
-                      //example country: {"color": "#040", "alpha3": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
-                      iso_countries.map(c => (
-                          <path
-                              key={c.alpha3}
-                              id={c.alpha3}
-                              fill={c.color != null ? c.color : colorScheme.noData}
-                              className="country"
-                              d={path(c.geometry)}
-                              onMouseOver={() => {
-                                  if (c.color != null) setHovered(c.alpha3);
-                                  else setHovered(null);
-                              }}
-                          />
-                      ))
-            }{
+            //example country: {"color": "#040", "alpha3": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
+            iso_countries.map(c => (
+              <path
+                key={c.alpha3}
+                id={c.alpha3}
+                fill={valToColor(c.value, range)}
+                className="country"
+                d={path(c.geometry)}
+                onMouseOver={() => {
+                  if (c.value != null) setHovered(c.alpha3);
+                  else setHovered(null);
+                }}
+              />
+            ))
+          }
+          {
             //example country: {"geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
             non_iso_countries.map((c, idx) => (
               <path
@@ -116,30 +129,31 @@ export function LineDraw({
                 d={path(c.geometry)}
               />
             ))
-                }
-                <path className="interiorBorders" d={path(interiorBorders)} strokeWidth={` ${borderLineWidth * zoomFactor}px`} />
-                {
-                    (hovered != null) ?
-                        (
-                            <path
-                                key="hovered"
-                                id={iso_countries.find(c => c.alpha3 === hovered).alpha3}
-                                fill={iso_countries.find(c => c.alpha3 === hovered).color}
-                                stroke={colorScheme.hoveredCountry}
-                                strokeWidth={` ${hoveredLineWidth * zoomFactor}px`}
-                                d={path(iso_countries.find(c => c.alpha3 === hovered).geometry)}
-                                onMouseLeave={() => {
-                                    setHovered(null);
-                                }}
-                                onClick={(e) => {
-                                    setHovered(null);
-                                    selectCountry(e.target.id);
-                                }}
-                        />
-                        ) : ""
-                } {
+          }
+          <path className="interiorBorders" d={path(interiorBorders)} strokeWidth={` ${borderLineWidth * zoomFactor}px`} />
+          {
+            (hovered != null) ?
+              (
+                <path
+                  key="hovered"
+                  id={iso_countries.find(c => c.alpha3 === hovered).alpha3}
+                  fill={valToColor(iso_countries.find(c => c.alpha3 === hovered).value, range)}
+                  stroke={colorScheme.hoveredCountry}
+                  strokeWidth={` ${hoveredLineWidth * zoomFactor}px`}
+                  d={path(iso_countries.find(c => c.alpha3 === hovered).geometry)}
+                  onMouseLeave={() => {
+                    setHovered(null);
+                  }}
+                  onClick={(e) => {
+                    setHovered(null);
+                    selectCountry(e.target.id);
+                  }}
+                />
+              ) : ""
+          }
+          {
             (selected != null) ?
-            (
+              (
                 <path
                   key={"selected"}
                   id="selectedCountryBorder"
@@ -148,24 +162,20 @@ export function LineDraw({
                   stroke={colorScheme.selectedCountry}
                   d={path(iso_countries.find(c => c.alpha3 === selected).geometry)}
                 />
-            ) : ""
-                }
-        </g>
-        {svgRef.current && 
-        <Legend 
-          svgRef={svgRef} 
-          category={category} 
-          labelWidths={labelWidths} 
-          categoryStatistics={categoryStatistics} 
-          minMaxColors={minMaxColors}
-          selectedValue={selectedValue} 
-          selectedCountry={selected != null ? iso_countries.find(c => c.alpha3 === selected).name : null}
-        />}
-    </>
+              ) : ""
+          }
+      </g>
   );
 }
 
-function Legend({svgRef, category, labelWidths, categoryStatistics, minMaxColors, selectedValue, selectedCountry}){
+export function Legend({svgRef, category, categoryStatistics, range, selectedCountry}){
+  const [labelWidths, setLabelWidths] = useState({ left: 0, right: 0 })
+  // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
+  useEffect(()=>{
+    console.log("Computing widths!");
+    const [left, right] = GetWidths()
+    setLabelWidths({ left, right })
+  },[])
   if (!svgRef.current) return
   const legendRef = useRef()
 
@@ -275,7 +285,7 @@ function Legend({svgRef, category, labelWidths, categoryStatistics, minMaxColors
   }
 
   // no selected country --> colorBox has full width
-  const colorBox = selectedValue
+  const colorBox = range.selected
   ? {
     x: labelLeft.x + labelLeft.width + lineWidthLeft,
     y: svgHeight - padding.y,
@@ -294,15 +304,15 @@ function Legend({svgRef, category, labelWidths, categoryStatistics, minMaxColors
 
   const styleTransition = {transition: "0.3s"}
 
-  const selectedToPercentage = selectedValue !== null
-  ? Math.round((selectedValue - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min) * 100)
+  const selectedToPercentage = range.selected !== null
+        ? Math.round((range.selected - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min) * 100)
   : 50
 
   const countryMarker = {
     x: rangeBox.x + ((selectedToPercentage/100) * rangeBox.width),
     y: svgHeight - padding.y,
     height: boxHeight,
-    width: selectedValue !== null ? 3 : 0,
+    width: range.selected !== null ? 3 : 0,
     color: colorScheme.selectedCountry,
   }
 
@@ -369,9 +379,9 @@ function Legend({svgRef, category, labelWidths, categoryStatistics, minMaxColors
         {/* Box with colors */}
         <defs>
           <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style={{ stopColor: minMaxColors.min, stopOpacity:"1"}} />
-            <stop offset={`${selectedToPercentage}%`} style={{stopColor: minMaxColors.mid,stopOpacity:"1"}} />
-            <stop offset="100%" style={{stopColor: minMaxColors.max, stopOpacity:"1"}} />
+            <stop offset="0%" style={{ stopColor: valToColor(range.min, range), stopOpacity:"1"}} />
+            <stop offset={`${selectedToPercentage}%`} style={{stopColor: colorScheme.middle, stopOpacity:"1"}} />
+            <stop offset="100%" style={{stopColor: valToColor(range.max, range), stopOpacity:"1"}} />
           </linearGradient>
         </defs>
         <rect x={colorBox.x} y={colorBox.y} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" strokeWidth="0.3" style={{...styleTransition}}></rect>
@@ -380,7 +390,7 @@ function Legend({svgRef, category, labelWidths, categoryStatistics, minMaxColors
         {/* <rect x={middleMarker.x} y={middleMarker.y} width={middleMarker.width} height={middleMarker.height} stroke={middleMarker.color} style={{...styleTransition, borderStyle: 'dotted'}}></rect>*/}
         <path strokeDasharray={`${Math.round((boxHeight + 20)/8)}`} strokeOpacity="70%" d={`M0 0 V${boxHeight + 20} 0`} stroke='gray' strokeWidth="2" transform={`translate(${middleMarker.x},${middleMarker.y})`}/>
         <rect x={countryMarker.x} y={countryMarker.y} width={countryMarker.width} height={countryMarker.height} fill={countryMarker.color} style={{...styleTransition}}></rect>
-        {selectedValue && toolTip}
+        {range.selected && toolTip}
         <text x={labelRight.x} y={labelRight.y} width={labelRight.width} height={labelRight.height} fill={labelRight.color}>{category.to}</text>
     </g>
   )
@@ -405,7 +415,7 @@ function GetWidths(){
   // the idea is that we assign enough space for the labels so the lines and boxes between will have a fixed width when changing categories
   let left = 0
   let right = 0
-  categoriesObjects.forEach((cat) => {
+  Object.values(categories).forEach((cat) => {
     const leftNew = GetWidth(cat.from)
     const rightNew = GetWidth(cat.to)
     if (leftNew > left) left = leftNew

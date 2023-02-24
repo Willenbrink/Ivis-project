@@ -1,12 +1,12 @@
 import React, { useState, useCallback, useEffect } from "react";
 import ReactDom from "react-dom";
 import { parseJSON } from "./parseMapJSON";
-import { LineDraw, colorScheme } from "./lineDraw";
+import { LineDraw, Legend } from "./lineDraw";
 import { zoom, select, interpolateRgb } from "d3";
-import { get_country_value, country_values_range, country_values_minmax } from "../../model/dumbDataHandler";
+import { get_country_value_abs, country_values_stats } from "../../model/dumbDataHandler";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
-import { categoriesObjects } from "../../utils/categories";
+import { categories } from "../../utils/categories";
 import InfoPopover from "./InfoPopover";
 /*export let selected = "";
 export const setSelected = (id) => {
@@ -22,7 +22,6 @@ export const setSelected = (id) => {
 const canvasWidth = "100%";
 const canvasHeight = "100%";
 // const categories = ['Omission --> Commission', 'Passengers --> Pedestrians', 'Law: Illegal --> Legal', 'Gender: Male --> Female', 'Fitness: Large --> Fit', 'Social Status: Low --> High', 'Age: Elderly --> Young', 'Number of Characters: Less --> More', 'Species: Pets --> Humans' ]
-const categories = categoriesObjects.map(category => category.name)
 
 export default function WorldMap() {
   //currently selected country (alpha3)
@@ -30,7 +29,7 @@ export default function WorldMap() {
   const [hovered, setHovered] = useState(null);
    const [zoomLevel, zoomLevelSetter] = useState(null);
   //interactive cathegory selection. (cathegory index)
-  const [category, setCategory] = useState(0);
+  const [category, setCategory] = useState(categories.species);
   const [svgHasMounted, setSvgHasMounted] = useState(false)
   //for reseting the map
   const [doReset, setDoReset] = useState(false);
@@ -47,50 +46,47 @@ export default function WorldMap() {
     mount()
   },[])
 
-  function valToColor(raw_value, alpha3_for_reference) {
-    //value is as in the original data set.
-    // c.color = c.alpha3 == selected ? "red" : "green"; 
-    if (raw_value == null) return null;
-    const selectedValue = (selected != null ? get_country_value(selected, category) : 0);
-    const relative_value = (raw_value - selectedValue) / (selected != null ? country_values_range(category, false) : 1);
-    const extreme_color = relative_value > 0 ? colorScheme.left : colorScheme.right;
-    //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
-    const absolute_value = Math.abs(relative_value);
-    return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value).toString();
-    }
-  const mapData = parseJSON();
+  var mapData = parseJSON();
   if (!mapData) {
     return <pre>Loading...</pre>;
   }
+  mapData = {
+    ...mapData,
+    iso_countries: mapData.iso_countries.map(c => ({ ...c, value: get_country_value_abs(c.alpha3, category) }))
+  };
 
-  const categoryStatistics = { ...country_values_minmax(category), range: country_values_range(category)}
+  const categoryStatistics = country_values_stats(category);
+  const range = selected != null
+        ? {min: categoryStatistics.min, selected: get_country_value_abs(selected, category), max: categoryStatistics.max}
+        : {min: -1, selected: null, max: 1};
   const svg = (
       <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
-          {svgHasMounted && 
-          <LineDraw
-              data={{ ...mapData, iso_countries: mapData.iso_countries.map(c => ({ ...c, color: valToColor(get_country_value(c.alpha3, category), c.alpha3) })) }}
-              selectCountry={setSelected} 
-              selected={selected} 
-              hovered={hovered} 
-              setHovered={setHovered} 
-              svgRef={svgRef}
-              selectedValue={(selected != null ? get_country_value(selected, category) : null)}
-              category={categoriesObjects[category]}
-              categoryStatistics={categoryStatistics}
-              minMaxColors={selected != null
-                            ? {min: valToColor(categoryStatistics.min),
-                               mid: colorScheme.middle,
-                               max:valToColor(categoryStatistics.max)}
-                            : {min: colorScheme.right,
-                               mid: colorScheme.middle,
-                               max: colorScheme.left}}
-              zoomLevel={zoomLevel} 
-              zoomLevelSetter={zoomLevelSetter}
-              doReset={doReset}
-              setDoReset={setDoReset}
-      />
-          }
-    </svg>
+          <>
+              {svgHasMounted &&
+              <LineDraw
+                data={mapData}
+                selectCountry={setSelected}
+                selected={selected}
+                range={range}
+                hovered={hovered}
+                setHovered={setHovered}
+                svgRef={svgRef}
+                zoomLevel={zoomLevel}
+                zoomLevelSetter={zoomLevelSetter}
+                doReset={doReset}
+                setDoReset={setDoReset}
+              />
+              }
+              {svgHasMounted && svgRef.current &&
+              <Legend
+                svgRef={svgRef}
+                range={range}
+                category={category}
+                categoryStatistics={categoryStatistics}
+                selectedCountry={selected != null ? mapData.iso_countries.find(c => c.alpha3 === selected).name : null}
+              />}
+          </>
+      </svg>
   );
   return (
     <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
@@ -101,14 +97,15 @@ export default function WorldMap() {
             <InputGroup.Text id='basic-addon2' className='bg-light'>Categories:</InputGroup.Text>
             <Form.Select 
             aria-label="Default select example!"
-            onChange={((e) => setCategory(e.target.value))}
-            value={category}
+            onChange={((e) => setCategory(categories[e.target.value]))}
+            value={category.id}
             className='fw-bold'
             >
-              {categories.map((cat, idx) => 
-              <option key={`option_${idx}`} value={idx}>{cat}</option> )}
+              {Object.entries(categories).map(([id, cat]) => {
+                return <option key={id} value={id}>{cat.name}</option> ;
+              })}
             </Form.Select>
-            <InfoPopover title={categoriesObjects[category].title} info={categoriesObjects[category].info}/>
+            <InfoPopover title={categories[category.id].name_short || categories[category.id].name} info={categories[category.id].info}/>
           </InputGroup>
 
       <div id="zoomDiv" style={{position:"absolute", margin:"10px", right: 0}}>
