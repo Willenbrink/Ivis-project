@@ -1,14 +1,14 @@
 import React, { useState, useCallback, useEffect } from "react";
 import ReactDom from "react-dom";
-import { parseJSON } from "./parseMapJSON";
+import { parseJSON } from "../../utils/parseMapJSON";
 import { LineDraw } from "../../utils/lineDraw";
 import colorScheme from "../../utils/colorScheme";
 import { get_keys } from "../../model/dataHandler";
 import { distance } from "../../utils/categories";
+import InfoPopover from "../../utils/InfoPopover";
 import { interpolateRgb } from "d3";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
-import InfoPopover from "./InfoPopover";
 
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
