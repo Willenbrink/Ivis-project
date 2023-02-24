@@ -62,13 +62,13 @@ export default function CountryDistance({activeTab}) {
       </svg>
   );
   return (
-    <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
+    activeTab && <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
       <div className="d-flex flex-column flex-grow-1 position-relative">
         {svg}
       </div>
           <InputGroup className="px-5 pt-2 position-absolute" style={{width: "90%"}}>
             <InputGroup.Text id='basic-addon2' className='bg-light'>Country distance</InputGroup.Text>
-            {/* <InfoPopover title={categories[category.id].name_short || categories[category.id].name} info={categories[category.id].info}/>*/}
+            <InfoPopover title={distance.name_short || distance.name} info={distance.info}/>
           </InputGroup>
 
       <div id="zoomDiv" style={{position:"absolute", margin:"10px", right: 0}}>

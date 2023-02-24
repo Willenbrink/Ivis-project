@@ -79,7 +79,7 @@ export default function WorldMap({activeTab}) {
       </svg>
   );
   return (
-    <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
+    activeTab && <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
       <div className="d-flex flex-column flex-grow-1 position-relative">
         {svg}
       </div>
