@@ -1,7 +1,10 @@
 import React, { useState, useCallback, useEffect } from "react";
 import ReactDom from "react-dom";
 import { parseJSON } from "./parseMapJSON";
-import { LineDraw, Legend } from "./lineDraw";
+import { Legend } from "../../utils/legend";
+import { LineDraw } from "../../utils/lineDraw";
+import colorScheme from "../../utils/colorScheme";
+import { interpolateRgb } from "d3";
 import { country_values_stats } from "../../model/dataHandler";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
@@ -48,15 +51,38 @@ export default function WorldMap({activeTab}) {
   const range = selected
         ? {min: categoryStatistics.min, selected: selected[category.id], max: categoryStatistics.max}
         : {min: -1, selected: null, max: 1};
+
+
+  function countryToColor(country, _) {
+    const value = country[category.id];
+    if (!value)
+      return colorScheme.noData;
+    var relative_value;
+    if(range.selected) {
+      relative_value = (value - range.selected) / (range.max - range.min);
+    } else {
+      // If range.selected is null, we have our reference at 0.
+      // But, this means that the extreme ends are only "half the bar" away from the reference.
+      // Therefore, we multiply by 2
+      relative_value = 2 * value / (range.max - range.min);
+    }
+    const extreme_color = relative_value < 0 ? colorScheme.left : colorScheme.right;
+    //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
+    const absolute_value = Math.abs(relative_value);
+    return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
+  };
+
+  const colors = { left: colorScheme.left, mid:undefined, right: colorScheme.right };
+
   const svg = (
       <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
-          <>
-              {svgHasMounted &&
+          {svgHasMounted &&
+           <>
               <LineDraw
                 data={mapData}
+                countryToColor={countryToColor}
                 selectCountry={setSelected}
                 selected={selected}
-                range={range}
                 hovered={hovered}
                 setHovered={setHovered}
                 svgRef={svgRef}
@@ -64,18 +90,18 @@ export default function WorldMap({activeTab}) {
                 zoomLevelSetter={zoomLevelSetter}
                 doReset={doReset}
                 setDoReset={setDoReset}
-                category={category}
               />
-              }
-              {svgHasMounted && svgRef.current &&
+              {svgRef.current &&
               <Legend
                 svgRef={svgRef}
                 range={range}
                 category={category}
                 categoryStatistics={categoryStatistics}
                 selected={selected}
+                colors={colors}
               />}
           </>
+          }
       </svg>
   );
   return (

@@ -1,66 +1,16 @@
 import { zoomIdentity, geoNaturalEarth1, geoPath, geoGraticule, select, zoom, svg, interpolateRgb } from "d3";
 import React, { useState, useCallback, useEffect } from "react";
 import { useRef } from "react";
-import { get_keys } from "../../model/dataHandler";
-/*
-const projection = geoNaturalEarth1().translate([width / 2, height / 1.4])    // translate to center of screen. You might have to fiddle with this
-//depending on the size of your screen
-.scale([150]);
-const path = geoPath(projection)
-const graticule = geoGraticule()
-
-const selectedLineWidth = 1;
-const hoveredLineWidth = 1.3;
-const borderLineWidth = 0.5;
-const zoomLineStrength = 0.5;
-*/
-
-export const colorScheme = {
-  left: '#ef4400',
-  middle: '#f7f7f7',
-  right: '#0083cf',
-  selectedCountry: '#00A600',
-  hoveredCountry: '#00CC00',
-  //"#D0D0D0"
-  noData: 'gray',
-};
-
-function valToColor(country, selected) {
-  if (!country.hasData)
-    return colorScheme.noData;
-  if(!selected) {
-    return colorScheme.middle;
-  }
-
-  var relative_value;
-  var dist_sq = 0;
-  // Choose higher values to make the dimension with the largest distance play a larger role.
-  // Inspired by Shephard Interpolation: https://en.wikipedia.org/wiki/Inverse_distance_weighting#/media/File:Shepard_interpolation_2.png
-  // Image that three countries have the results A: (0,0), B: (0.5, 0.5), C: (0.9)
-  // With exponent = 1, C is closer to A than B as 0.9 < 0.5 + 0.5
-  // With exponent = 2, B is closeras (0.25 + 0.25)^0.5 < 0.9^2^0.5 = 0.9
-  const exponent = 2;
-  for(const k of get_keys()) {
-    dist_sq += Math.abs(country[k] - selected[k]) ** exponent;
-  }
-  relative_value = exponent * dist_sq ** (1/exponent);
-  const extreme_color = relative_value < 0 ? colorScheme.left : colorScheme.right;
-  //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
-  const absolute_value = Math.abs(relative_value);
-  return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
-};
+import colorScheme from "./colorScheme";
 
 export function LineDraw({
-  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry, selected, hovered, setHovered, svgRef, zoomLevel, zoomLevelSetter, doReset, setDoReset
+  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry, selected, hovered, setHovered, svgRef, zoomLevel, zoomLevelSetter, doReset, setDoReset, countryToColor
 }) {
 
   const gRef = useRef()
   const zoomInScaleLimit = 8
   const zoomOutScaleLimit = 0.12
-  // console.log(svgRef.current.clientWidth)
-  // console.log('PAAAAATH: ', graticule())
   const projection = geoNaturalEarth1().scale(249.5 * svgRef.current.clientHeight/950).translate([svgRef.current.clientWidth/2,svgRef.current.clientHeight/2])
-  // console.log('PROJECTION: ', projection)
   //.translate([svgRef.current.clientWidth / 2, svgRef.current.clientHeight / 1.4])
   const path = geoPath(projection)
   const graticule = geoGraticule()
@@ -114,7 +64,7 @@ export function LineDraw({
               return <path
                 key={c.id}
                 id={c.id}
-                fill={valToColor(c, selected)}
+                fill={countryToColor(c, selected)}
                 className="country"
                 d={path(c.geometry)}
                 onMouseOver={() => {
