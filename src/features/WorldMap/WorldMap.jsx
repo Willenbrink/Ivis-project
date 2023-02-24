@@ -74,8 +74,10 @@ export default function WorldMap({activeTab}) {
 
   const colors = { left: colorScheme.left, middle: colorScheme.middle, right: colorScheme.right };
   const markers = {
-    selected: selected && { id: selected.id, value: (selected[category.id] - range.min) / (range.max - range.min), color: colorScheme.selectedCountry },
-    hovered: hovered && { id: hovered.id, value: (hovered[category.id] - range.min) / (range.max - range.min), color: colorScheme.hoveredCountry },
+    selected: selected &&
+      { id: selected.id, value: (selected[category.id] - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min), color: colorScheme.selectedCountry },
+    hovered: hovered &&
+      { id: hovered.id,  value: ( hovered[category.id] - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min), color: colorScheme.hoveredCountry },
   };
 
   const svg = (
