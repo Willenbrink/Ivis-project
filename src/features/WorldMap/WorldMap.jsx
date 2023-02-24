@@ -53,8 +53,7 @@ export default function WorldMap({activeTab}) {
         : {min: -1, selected: null, max: 1};
 
 
-  function countryToColor(country, _) {
-    const value = country[category.id];
+  function valueToColor(value) {
     if (!value)
       return colorScheme.noData;
     var relative_value;
@@ -71,8 +70,16 @@ export default function WorldMap({activeTab}) {
     const absolute_value = Math.abs(relative_value);
     return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
   };
+  function countryToColor(country, _) {
+    return valueToColor(country[category.id]);
+  };
 
-  const colors = { left: colorScheme.left, mid:undefined, right: colorScheme.right };
+  const colors = { left: valueToColor(range.min), middle: colorScheme.middle, right: valueToColor(range.max) };
+  const markers = {};
+  if (selected)
+    markers[selected.id] = { ...selected, hasTooltip: !hovered, value: (selected[category.id] - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min), color: colorScheme.selectedCountry };
+  if (hovered)
+    markers[hovered.id] = { ...hovered, hasTooltip: true, value: ( hovered[category.id] - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min), color: colorScheme.hoveredCountry };
 
   const svg = (
       <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
@@ -99,6 +106,7 @@ export default function WorldMap({activeTab}) {
                 categoryStatistics={categoryStatistics}
                 selected={selected}
                 colors={colors}
+                markers={markers}
               />}
           </>
           }
