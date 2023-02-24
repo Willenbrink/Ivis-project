@@ -2,11 +2,6 @@
 	height: 100%;
 }
 
-.mark .interiorBorders {
-  fill: none;
-  stroke: #1d1d1d67;
-}
-
 .mark .earthSphere {
   fill: #eeeeee;
 }
