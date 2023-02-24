@@ -208,13 +208,12 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
         const width = 3;
         const labelWidth = GetWidth(m.name);
 
-        console.log(m);
         return (<>
           <rect key={"marker" + m.id} x={x} y={y} width={width} height={boxHeight} fill={m.color} style={{...styleTransition}}></rect>
 
           {m.hasTooltip && <>
-            <path d={bottomTooltipPath(labelWidth + 20, parseInt(fontSize) * 2, 5, 10)} fill='#EEEEEE' stroke='gray' transform={`translate(${x + width/2},${y + boxHeight + 2})`}/>
-            <text transform={`translate(${x + width/2 - labelWidth/2},${y + boxHeight + parseInt(fontSize) + 12})`}>{m.name}</text>
+            <path key={"tooltipbox" + m.id} d={bottomTooltipPath(labelWidth + 20, parseInt(fontSize) * 2, 5, 10)} fill='#EEEEEE' stroke='gray' transform={`translate(${x + width/2},${y + boxHeight + 2})`}/>
+            <text key={"tooltiplabel" + m.id} transform={`translate(${x + width/2 - labelWidth/2},${y + boxHeight + parseInt(fontSize) + 12})`}>{m.name}</text>
            </>}
         </>);
       })
@@ -242,7 +241,7 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
             <defs>
             <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" style={{ stopColor: colors.left, stopOpacity:"1"}} />
-              <stop offset={`${markers.selected?.value || 0.5}`} style={{stopColor: colors.middle, stopOpacity:"1"}} />
+                <stop offset={`${selected?.value || 0.5}`} style={{stopColor: colors.middle, stopOpacity:"1"}} />
                 <stop offset="100%" style={{stopColor: colors.right, stopOpacity:"1"}} />
             </linearGradient>
             </defs>
