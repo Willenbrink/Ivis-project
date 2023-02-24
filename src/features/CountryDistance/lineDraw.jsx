@@ -1,7 +1,6 @@
 import { zoomIdentity, geoNaturalEarth1, geoPath, geoGraticule, select, zoom, svg, interpolateRgb } from "d3";
 import React, { useState, useCallback, useEffect } from "react";
 import { useRef } from "react";
-import { categories } from "../../utils/categories";
 import { get_keys } from "../../model/dataHandler";
 /*
 const projection = geoNaturalEarth1().translate([width / 2, height / 1.4])    // translate to center of screen. You might have to fiddle with this
@@ -26,48 +25,25 @@ export const colorScheme = {
   noData: 'gray',
 };
 
-function valToColorNormal(value, range) {
-  var relative_value;
-  if(range.selected) {
-    relative_value = (value - range.selected) / (range.max - range.min);
-  } else {
-    // If range.selected is null, we have our reference at 0.
-    // But, this means that the extreme ends are only "half the bar" away from the reference.
-    // Therefore, we multiply by 2
-    relative_value = 2 * value / (range.max - range.min);
-  }
-  const extreme_color = relative_value < 0 ? colorScheme.left : colorScheme.right;
-  //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
-  const absolute_value = Math.abs(relative_value);
-  return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
-}
-
-// TODO distance map should be moved to its own tab. Then this can be simplified
-function valToColor(country, category, selected, range) {
+function valToColor(country, selected) {
   if (!country.hasData)
     return colorScheme.noData;
-
-  var value, relative_value;
-  if(category.id === "distance" && selected) {
-    var dist_sq = 0;
-    // Choose higher values to make the dimension with the largest distance play a larger role.
-    // Inspired by Shephard Interpolation: https://en.wikipedia.org/wiki/Inverse_distance_weighting#/media/File:Shepard_interpolation_2.png
-    // Image that three countries have the results A: (0,0), B: (0.5, 0.5), C: (0.9)
-    // With exponent = 1, C is closer to A than B as 0.9 < 0.5 + 0.5
-    // With exponent = 2, B is closeras (0.25 + 0.25)^0.5 < 0.9^2^0.5 = 0.9
-    const exponent = 2;
-    for(const k of get_keys()) {
-      dist_sq += Math.abs(country[k] - selected[k]) ** exponent;
-    }
-    relative_value = exponent * dist_sq ** (1/exponent);
-    // console.log(value, selected, country);
-  } else if(category.id === "distance" && !selected) {
-    // There can not be a global overview if we display distance
-    relative_value = 0;
-  } else {
-    value = country[category.id];
-    return valToColorNormal(value, range);
+  if(!selected) {
+    return colorScheme.middle;
   }
+
+  var relative_value;
+  var dist_sq = 0;
+  // Choose higher values to make the dimension with the largest distance play a larger role.
+  // Inspired by Shephard Interpolation: https://en.wikipedia.org/wiki/Inverse_distance_weighting#/media/File:Shepard_interpolation_2.png
+  // Image that three countries have the results A: (0,0), B: (0.5, 0.5), C: (0.9)
+  // With exponent = 1, C is closer to A than B as 0.9 < 0.5 + 0.5
+  // With exponent = 2, B is closeras (0.25 + 0.25)^0.5 < 0.9^2^0.5 = 0.9
+  const exponent = 2;
+  for(const k of get_keys()) {
+    dist_sq += Math.abs(country[k] - selected[k]) ** exponent;
+  }
+  relative_value = exponent * dist_sq ** (1/exponent);
   const extreme_color = relative_value < 0 ? colorScheme.left : colorScheme.right;
   //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
   const absolute_value = Math.abs(relative_value);
@@ -75,7 +51,7 @@ function valToColor(country, category, selected, range) {
 };
 
 export function LineDraw({
-  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry, selected, range, hovered, setHovered, svgRef, zoomLevel, zoomLevelSetter, doReset, setDoReset, category
+  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry, selected, hovered, setHovered, svgRef, zoomLevel, zoomLevelSetter, doReset, setDoReset
 }) {
 
   const gRef = useRef()
@@ -138,7 +114,7 @@ export function LineDraw({
               return <path
                 key={c.id}
                 id={c.id}
-                fill={valToColor(c, category, selected, range)}
+                fill={valToColor(c, selected)}
                 className="country"
                 d={path(c.geometry)}
                 onMouseOver={() => {
@@ -195,256 +171,4 @@ export function LineDraw({
           }
       </g>
   );
-}
-
-export function Legend({svgRef, category, categoryStatistics, range, selected}){
-  const [labelWidths, setLabelWidths] = useState({ left: 0, right: 0 })
-  // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
-  useEffect(()=>{
-    console.log("Computing widths!");
-    const [left, right] = GetWidths()
-    setLabelWidths({ left, right })
-  },[])
-  if (!svgRef.current) return
-  const legendRef = useRef()
-
-  const [svgHeight, svgWidth] = [svgRef.current.getBoundingClientRect().height, svgRef.current.getBoundingClientRect().width]
-
-  // TODO: fix minimum size of legend
-  const boxHeight = svgHeight * 0.05
-  const fontSize = "16" // this has to be changed if we change the font or font size
-  const lineColor = '#000000'
-  const noDataStr = 'No data'
-
-
-  const padding = {
-    x: 100,
-    y: 100
-  }
-
-  const noDataText = {
-    x: padding.x,
-    y: svgHeight - padding.y + boxHeight/2 + fontSize/4,
-    width: GetWidth(noDataStr), // this has to be measured if we change the text size or font
-    color: lineColor,
-    fontSize
-  }
-
-  const noDataBox = {
-    x: noDataText.x + noDataText.width + 5,
-    y: svgHeight - padding.y,
-    height: boxHeight,
-    width: boxHeight,
-  }
-
-  const labelLeft = {
-    x: noDataBox.x + noDataBox.width + 20,
-    y: svgHeight - padding.y + boxHeight/2 + fontSize/4,
-    width: labelWidths.left, // the longest word that appears here is passengers, so this is this word's width
-    color: lineColor,
-    fontSize
-  }
-  
-  const paddingLabelRight = 100
-  const labelRight = {
-    x: svgWidth - labelWidths.right - (padding.x * 2),
-    y: svgHeight - padding.y + boxHeight/2 + fontSize/4,
-    width: labelWidths.right, // the longest word that appears here is passengers, so this is this word's width
-    color: lineColor,
-    fontSize
-  }
-  // The available line width when you subtract the content around it
-  const availableWidthLine = svgWidth - (labelLeft.x + labelLeft.width + 5) - (svgWidth - labelRight.x)
-  // Length of the line to the left of the box
-  const lineRangeLeft = categoryStatistics.min < 0 
-    ? (1 - Math.abs(categoryStatistics.min))
-    : (1 + categoryStatistics.min)
-  const lineWidthLeft = Math.round(lineRangeLeft/2 * availableWidthLine)
-  // Lenght of the box
-  const boxWidth = Math.round(categoryStatistics.range/2 * availableWidthLine)
-  // Lenght of the line to the right of the box
-  const lineWidthRight = availableWidthLine - lineWidthLeft - boxWidth
-  //console.log('available: ', availableWidthLine)
-  //console.log('left: ', lineWidthLeft)
-  //console.log('box: ', boxWidth)
-  //console.log('box: ', lineWidthRight)
-  const vertLineLeft = {
-    x: labelLeft.x + labelLeft.width + 5,
-    y1: svgHeight - padding.y + boxHeight,
-    y2: svgHeight - padding.y,
-    strokeWidth: "2", // the longest word that appears here is passengers, so this is this word's width
-    color: lineColor
-  }
-
-  const vertLineRight = {
-    x: labelLeft.x + labelLeft.width + availableWidthLine,
-    y1: svgHeight - padding.y + boxHeight,
-    y2: svgHeight - padding.y,
-    strokeWidth: "2", // the longest word that appears here is passengers, so this is this word's width
-    color: lineColor
-  }
-
-  const hBox = {
-    x: vertLineLeft.x,
-    y: vertLineLeft.y2,
-    height: boxHeight,
-    width: vertLineRight.x - vertLineLeft.x,
-    strokeWidth: "2", // the longest word that appears here is passengers, so this is this word's width
-    color: lineColor
-  }
-
-  const rangeBox = {
-    x: labelLeft.x + labelLeft.width + lineWidthLeft,
-    y: svgHeight - padding.y,
-    height: boxHeight,
-    width: boxWidth,
-    color: '#ffffff'
-  }
-  /*
-  const hLineRight = {
-    x1: rangeBox.x + rangeBox.width,
-    y1: svgHeight - padding.y + boxHeight/2,
-    x2: rangeBox.x + rangeBox.width + lineWidthRight,
-    y2: svgHeight - padding.y + boxHeight/2,
-    strokeWidth: "2", // the longest word that appears here is passengers, so this is this word's width
-    color: lineColor
-  }
-  */
-
-  // no selected country --> colorBox has full width
-  const colorBox = range.selected
-  ? {
-    x: labelLeft.x + labelLeft.width + lineWidthLeft,
-    y: svgHeight - padding.y,
-    height: boxHeight,
-    width: boxWidth,
-    color: '#ffffff'
-  }
-  :
-  {
-    x: vertLineLeft.x,
-    y: svgHeight - padding.y,
-    height: boxHeight,
-    width: vertLineRight.x - vertLineLeft.x,
-    color: '#ffffff'
-  }
-
-  const styleTransition = {transition: "0.3s"}
-
-  const selectedToPercentage = range.selected
-        ? Math.round((range.selected - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min) * 100)
-  : 50
-
-  const countryMarker = {
-    x: rangeBox.x + ((selectedToPercentage/100) * rangeBox.width),
-    y: svgHeight - padding.y,
-    height: boxHeight,
-    width: range.selected !== null ? 3 : 0,
-    color: colorScheme.selectedCountry,
-  }
-
-  function bottomTooltipPath(width, height, offset, radius) {
-    const left = -width / 2
-    const right = width / 2
-    const bottom = offset + height
-    const top = offset
-    return `M 0,0 
-      L ${-offset},${top} 
-      H ${left + radius}
-      Q ${left},${top} ${left},${top + radius}  
-      V ${bottom - radius}   
-      Q ${left},${bottom} ${left + radius},${bottom}
-      H ${right - radius}
-      Q ${right},${bottom} ${right},${bottom - radius}
-      V ${top + radius}
-      Q ${right},${top} ${right - radius},${top}
-      H ${offset} 
-      L 0,0 z`
-  }
-
-
-  const middleMarker = {
-    x: hBox.x + Math.round(hBox.width/2) ,
-    y: svgHeight - padding.y - 10,
-    height: boxHeight + 20,
-    width: 3,
-    color: 'gray'
-  }
-
-  /* GAMMAL SVG
-  <g className='' ref={legendRef}>
-        <text fontSize={noDataText.fontSize} x={noDataText.x} y={noDataText.y} width={noDataText.width} height={noDataText.height} fill={noDataText.color}>{noDataStr}</text>
-        <rect x={noDataBox.x} y={noDataBox.y} width={noDataBox.width} height={noDataBox.height} fill={colorScheme.noData} stroke="#333" stroke-width="0.3"></rect>
-        <text x={labelLeft.x} y={labelLeft.y} width={labelLeft.width} height={labelLeft.height} fill={labelLeft.color}>{category.from}</text>
-        <line x1={vertLineLeft.x1} y1={vertLineLeft.y1} x2={vertLineLeft.x2} y2={vertLineLeft.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: vertLineLeft.strokeWidth}} />
-        <line x1={hLineLeft.x1} y1={hLineLeft.y1} x2={hLineLeft.x2} y2={hLineLeft.y2} style={{transition:"transform 300ms ease-in", stroke:"rgb(0,0,0)", strokeWidth: hLineLeft.strokeWidth}} />
-        <rect x={colorBox.x} y={colorBox.y} width={colorBox.width} height={colorBox.height} fill='none' stroke="#333" stroke-width="0.3" style={{...styleTransition, ...linearGradient}}></rect>
-        <line x1={vertLineRight.x1} y1={vertLineRight.y1} x2={vertLineRight.x2} y2={vertLineLeft.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: vertLineRight.strokeWidth}} />
-        <line x1={hLineRight.x1} y1={hLineRight.y1} x2={hLineRight.x2} y2={hLineRight.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: hLineRight.strokeWidth}} />
-        <text x={labelRight.x} y={labelRight.y} width={labelRight.width} height={labelRight.height} fill={labelRight.color}>{category.to}</text>
-    </g>
-  */
-
-  const toolTipLabelWidth = GetWidth(selected?.name)
-  const toolTip = (
-  <>
-    <path d={bottomTooltipPath(toolTipLabelWidth + 20, parseInt(fontSize) * 2, 5, 10)} fill='#EEEEEE' stroke='gray' transform={`translate(${countryMarker.x + countryMarker.width/2},${countryMarker.y + boxHeight + 2})`} style={{...styleTransition}}></path>
-    <text transform={`translate(${countryMarker.x + countryMarker.width/2 - toolTipLabelWidth/2},${countryMarker.y + boxHeight + parseInt(fontSize) + 12})`} style={{...styleTransition}}>{selected?.name}</text>
-  </>
- )
-
-  return (
-    <g className='' ref={legendRef}>
-        <text fontSize={noDataText.fontSize} x={noDataText.x} y={noDataText.y} width={noDataText.width} height={noDataText.height} fill={noDataText.color}>{noDataStr}</text>
-        <rect x={noDataBox.x} y={noDataBox.y} width={noDataBox.width} height={noDataBox.height} fill={colorScheme.noData} stroke="#333" strokeWidth="0.3"></rect>
-        {/* Line starts here */}
-        <text x={labelLeft.x} y={labelLeft.y} width={labelLeft.width} height={labelLeft.height} fill={labelLeft.color}>{category.from}</text>
-        <rect x={hBox.x} y={hBox.y} width={hBox.width} height={hBox.height} fill='white' stroke="rgb(0,0,0)" strokeWidth="2" />
-        {/* <line x1={hLineRight.x1} y1={hLineRight.y1} x2={hLineRight.x2} y2={hLineRight.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: hLineRight.strokeWidth}} /> */}
-        {/* Box with colors */}
-        <defs>
-          <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style={{ stopColor: valToColorNormal(range.min, range), stopOpacity:"1"}} />
-            <stop offset={`${selectedToPercentage}%`} style={{stopColor: colorScheme.middle, stopOpacity:"1"}} />
-            <stop offset="100%" style={{stopColor: valToColorNormal(range.max, range), stopOpacity:"1"}} />
-          </linearGradient>
-        </defs>
-        <rect x={colorBox.x} y={colorBox.y} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" strokeWidth="0.3" style={{...styleTransition}}></rect>
-        {/* Box with range */}
-        <rect x={rangeBox.x} y={rangeBox.y} width={rangeBox.width} height={rangeBox.height} fill='none' stroke="#333" strokeWidth="2" style={{...styleTransition}}></rect>
-        {/* <rect x={middleMarker.x} y={middleMarker.y} width={middleMarker.width} height={middleMarker.height} stroke={middleMarker.color} style={{...styleTransition, borderStyle: 'dotted'}}></rect>*/}
-        <path strokeDasharray={`${Math.round((boxHeight + 20)/8)}`} strokeOpacity="70%" d={`M0 0 V${boxHeight + 20} 0`} stroke='gray' strokeWidth="2" transform={`translate(${middleMarker.x},${middleMarker.y})`}/>
-        <rect x={countryMarker.x} y={countryMarker.y} width={countryMarker.width} height={countryMarker.height} fill={countryMarker.color} style={{...styleTransition}}></rect>
-        {range.selected && toolTip}
-        <text x={labelRight.x} y={labelRight.y} width={labelRight.width} height={labelRight.height} fill={labelRight.color}>{category.to}</text>
-    </g>
-  )
-}
-
-function GetWidth(text){
-  // measures a text label's width
-  const textElement = document.createElement('span');
-  textElement.innerText = text
-  // render the span element with text
-  document.body.appendChild(textElement)
-  // measure its width
-  const width = textElement.offsetWidth
-  // remove it from the dom
-  document.body.removeChild(textElement)
-  textElement.remove()
-  return width
-}
-
-function GetWidths(){
-  // calculates the max width for all from and to labels (example for from: Omission, example for to: Commission)
-  // the idea is that we assign enough space for the labels so the lines and boxes between will have a fixed width when changing categories
-  let left = 0
-  let right = 0
-  Object.values(categories).forEach((cat) => {
-    const leftNew = GetWidth(cat.from)
-    const rightNew = GetWidth(cat.to)
-    if (leftNew > left) left = leftNew
-    if (rightNew > right) right = rightNew
-  })
-  return [left, right]
 }

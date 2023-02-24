@@ -26,7 +26,9 @@ export const colorScheme = {
   noData: 'gray',
 };
 
-function valToColorNormal(value, range) {
+function valToColor(value, range) {
+  if (!value)
+    return colorScheme.noData;
   var relative_value;
   if(range.selected) {
     relative_value = (value - range.selected) / (range.max - range.min);
@@ -41,38 +43,6 @@ function valToColorNormal(value, range) {
   const absolute_value = Math.abs(relative_value);
   return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
 }
-
-// TODO distance map should be moved to its own tab. Then this can be simplified
-function valToColor(country, category, selected, range) {
-  if (!country.hasData)
-    return colorScheme.noData;
-
-  var value, relative_value;
-  if(category.id === "distance" && selected) {
-    var dist_sq = 0;
-    // Choose higher values to make the dimension with the largest distance play a larger role.
-    // Inspired by Shephard Interpolation: https://en.wikipedia.org/wiki/Inverse_distance_weighting#/media/File:Shepard_interpolation_2.png
-    // Image that three countries have the results A: (0,0), B: (0.5, 0.5), C: (0.9)
-    // With exponent = 1, C is closer to A than B as 0.9 < 0.5 + 0.5
-    // With exponent = 2, B is closeras (0.25 + 0.25)^0.5 < 0.9^2^0.5 = 0.9
-    const exponent = 2;
-    for(const k of get_keys()) {
-      dist_sq += Math.abs(country[k] - selected[k]) ** exponent;
-    }
-    relative_value = exponent * dist_sq ** (1/exponent);
-    // console.log(value, selected, country);
-  } else if(category.id === "distance" && !selected) {
-    // There can not be a global overview if we display distance
-    relative_value = 0;
-  } else {
-    value = country[category.id];
-    return valToColorNormal(value, range);
-  }
-  const extreme_color = relative_value < 0 ? colorScheme.left : colorScheme.right;
-  //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
-  const absolute_value = Math.abs(relative_value);
-  return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
-};
 
 export function LineDraw({
   data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry, selected, range, hovered, setHovered, svgRef, zoomLevel, zoomLevelSetter, doReset, setDoReset, category
@@ -138,7 +108,7 @@ export function LineDraw({
               return <path
                 key={c.id}
                 id={c.id}
-                fill={valToColor(c, category, selected, range)}
+                fill={valToColor(c[category.id], range)}
                 className="country"
                 d={path(c.geometry)}
                 onMouseOver={() => {
@@ -434,9 +404,9 @@ export function Legend({svgRef, category, categoryStatistics, range, selected}){
         {/* Box with colors */}
         <defs>
           <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style={{ stopColor: valToColorNormal(range.min, range), stopOpacity:"1"}} />
+            <stop offset="0%" style={{ stopColor: valToColor(range.min, range), stopOpacity:"1"}} />
             <stop offset={`${selectedToPercentage}%`} style={{stopColor: colorScheme.middle, stopOpacity:"1"}} />
-            <stop offset="100%" style={{stopColor: valToColorNormal(range.max, range), stopOpacity:"1"}} />
+            <stop offset="100%" style={{stopColor: valToColor(range.max, range), stopOpacity:"1"}} />
           </linearGradient>
         </defs>
         <rect x={colorBox.x} y={colorBox.y} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" strokeWidth="0.3" style={{...styleTransition}}></rect>

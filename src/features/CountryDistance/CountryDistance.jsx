@@ -1,11 +1,10 @@
 import React, { useState, useCallback, useEffect } from "react";
 import ReactDom from "react-dom";
 import { parseJSON } from "./parseMapJSON";
-import { LineDraw, Legend } from "./lineDraw";
-import { country_values_stats } from "../../model/dataHandler";
+import { LineDraw } from "./lineDraw";
+import { distance } from "../../utils/categories";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
-import { categories, distance } from "../../utils/categories";
 import InfoPopover from "./InfoPopover";
 
 // Adapted from:
@@ -42,12 +41,6 @@ export default function CountryDistance({activeTab}) {
     return <pre>Loading...</pre>;
   }
 
-  const category = distance
-  const categoryStatistics = country_values_stats(category.id);
-  const range = selected
-        ? {min: categoryStatistics.min, selected: selected[category.id], max: categoryStatistics.max}
-        : {min: -1, selected: null, max: 1};
-  
   const svg = (
       <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
           <>
@@ -56,7 +49,6 @@ export default function CountryDistance({activeTab}) {
                 data={mapData}
                 selectCountry={setSelected}
                 selected={selected}
-                range={range}
                 hovered={hovered}
                 setHovered={setHovered}
                 svgRef={svgRef}
@@ -64,17 +56,8 @@ export default function CountryDistance({activeTab}) {
                 zoomLevelSetter={zoomLevelSetter}
                 doReset={doReset}
                 setDoReset={setDoReset}
-                category={category}
               />
               }
-              {/* svgHasMounted && svgRef.current &&
-              <Legend
-                svgRef={svgRef}
-                range={range}
-                category={category}
-                categoryStatistics={categoryStatistics}
-                selected={selected}
-            />*/}
           </>
       </svg>
   );
