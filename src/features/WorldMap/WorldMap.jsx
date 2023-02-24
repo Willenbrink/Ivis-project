@@ -72,7 +72,7 @@ export default function WorldMap({activeTab}) {
     return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
   };
 
-  const colors = { left: colorScheme.left, mid:undefined, right: colorScheme.right };
+  const colors = { left: colorScheme.left, middle: colorScheme.middle, right: colorScheme.right };
   const markers = {
     selected: selected && { id: selected.id, value: (selected[category.id] - range.min) / (range.max - range.min), color: colorScheme.selectedCountry },
     hovered: hovered && { id: hovered.id, value: (hovered[category.id] - range.min) / (range.max - range.min), color: colorScheme.hoveredCountry },
