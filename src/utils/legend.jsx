@@ -4,24 +4,6 @@ import { useRef } from "react";
 import { categories } from "../utils/categories";
 import colorScheme from "./colorScheme"
 
-function valToColor(value, range) {
-  if (!value)
-    return colorScheme.noData;
-  var relative_value;
-  if(range.selected) {
-    relative_value = (value - range.selected) / (range.max - range.min);
-  } else {
-    // If range.selected is null, we have our reference at 0.
-    // But, this means that the extreme ends are only "half the bar" away from the reference.
-    // Therefore, we multiply by 2
-    relative_value = 2 * value / (range.max - range.min);
-  }
-  const extreme_color = relative_value < 0 ? colorScheme.left : colorScheme.right;
-  //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
-  const absolute_value = Math.abs(relative_value);
-  return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
-}
-
 export function Legend({svgRef, category, categoryStatistics, range, selected, colors, markers}){
   const [labelWidths, setLabelWidths] = useState({ left: 0, right: 0 })
   // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
