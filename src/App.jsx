@@ -24,8 +24,8 @@ function App() {
   return (
     <div className="h-100 vh-100 w-100 d-flex flex-column" style={{minHeight: '100%'}}>
       <TabSwitch activeTab={activeTab} setActiveTab={setActiveTab}>
-        <WorldMap activeTab={activeTab === 0} icon="" title="PerCategoryViz"/>
-        <CountryDistance activeTab={activeTab === 1} icon="" title="Country Distance"/>
+        <WorldMap activeTab={activeTab === 0} icon="" title="Single Category Map"/>
+        <CountryDistance activeTab={activeTab === 1} icon="" title="Difference Map"/>
         <div activeTab={activeTab === 2} icon="" title="RelativeToCountryViz" className='h-100'><div className='d-flex pt-5 justify-content-center h-100'>Work in progress</div></div>
         <AboutTab activeTab={activeTab === 3} icon="" title="About"/>
       </TabSwitch>

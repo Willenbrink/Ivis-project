@@ -6,7 +6,7 @@ export const distance =  {
   name: 'Total distance across all categories',
   from: 'Not a value',
   to: 'Maximal difference',
-  info: 'This is a WIP display of the total distance between the selected and all other countries. There is no absolute value so you have to select a country first. One result visualized here is: Uruguay and Paraguay differ a lot but neither a close to Europe.',
+  info: 'This is a WIP display of the total distance between the selected and all other countries. There is no absolute value so you have to select a country first. One result visualized here that is otherwise hard to see is: Germany, Turkey and China differ a lot from each other. That is, they belong to different culture groups. This is different from e.g. Venezuela and Brazil. They differ from each other a bit but both differ significantly from the rest of the world. They share a culture group. Clustering (unimplemented as of now) will show this in more detail.',
 }
 
 export const categories = {
