@@ -188,7 +188,6 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
   function countryMarkers() {
     return (<>{
       Object.values(markers).map(m => {
-        console.log(m && m.value);
         return (
           m && <rect key={"marker" + m.id} x={rangeBox.x + m.value * rangeBox.width} y={svgHeight - padding.y} width={3} height={boxHeight} fill={m.color} style={{...styleTransition}}></rect>
         );
@@ -213,15 +212,6 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
       Q ${right},${top} ${right - radius},${top}
       H ${offset}
       L 0,0 z`
-  }
-
-
-  const middleMarker = {
-    x: hBox.x + Math.round(hBox.width/2) ,
-    y: svgHeight - padding.y - 10,
-    height: boxHeight + 20,
-    width: 3,
-    color: 'gray'
   }
 
   const countryMarker = {
@@ -272,8 +262,10 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
         <rect x={rangeBox.x} y={rangeBox.y} width={rangeBox.width} height={rangeBox.height} fill='none' strokeWidth="2" style={{...styleTransition}} className="dashedRect"></rect>
 
         {/* Middle marker */}
-        <path strokeDasharray={`${Math.round((boxHeight + 20)/8)}`} strokeOpacity="70%" d={`M0 0 V${boxHeight + 20} 0`} stroke='gray' strokeWidth="2" transform={`translate(${middleMarker.x},${middleMarker.y})`}/>
-        {/* <rect x={middleMarker.x} y={middleMarker.y} width={middleMarker.width} height={middleMarker.height} stroke={middleMarker.color} style={{...styleTransition, borderStyle: 'dotted'}}></rect> */}
+        <path strokeDasharray={`${Math.round((boxHeight + 20)/8)}`}
+              strokeOpacity="70%" d={`M0 0 V${boxHeight + 20} 0`}
+              stroke='gray' strokeWidth="2"
+              transform={`translate(${hBox.x + hBox.width/2},${svgHeight - padding.y - 10})`}/>
 
         {countryMarkers()}
         {range.selected && toolTip}
