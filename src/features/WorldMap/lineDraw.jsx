@@ -17,6 +17,16 @@ const borderLineWidth = 0.5;
 const zoomLineStrength = 0.5;
 */
 
+export const colorScheme = {
+  left: '#ef4400',
+  middle: '#f7f7f7',
+  right: '#0083cf',
+  selectedCountry: '#00A600',
+  hoveredCountry: '#00CC00',
+  //"#D0D0D0"
+  noData: 'gray',
+};
+
 export function LineDraw({
   data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry,selected,hovered, setHovered,svgRef, category, categoryStatistics, minMaxColors, selectedValue, zoomLevel, zoomLevelSetter, doReset, setDoReset
 }) {
@@ -65,9 +75,6 @@ export function LineDraw({
     setLabelWidths({ left, right })
   },[])
 
-  const noDataColor = 'gray'
-  //"#D0D0D0"
-// transform={`translate(${200}, 0)`}
     return (
         <>
         <g className="mark" ref={gRef} >
@@ -90,7 +97,7 @@ export function LineDraw({
                           <path
                               key={c.alpha3}
                               id={c.alpha3}
-                              fill={c.color != null ? c.color : noDataColor}
+                              fill={c.color != null ? c.color : colorScheme.noData}
                               className="country"
                               d={path(c.geometry)}
                               onMouseOver={() => {
@@ -104,7 +111,7 @@ export function LineDraw({
             non_iso_countries.map((c, idx) => (
               <path
                 key={`no_iso_country_${idx}`}
-                fill={noDataColor}
+                fill={colorScheme.noData}
                 className="no_iso_country"
                 d={path(c.geometry)}
               />
@@ -118,7 +125,7 @@ export function LineDraw({
                                 key="hovered"
                                 id={iso_countries.find(c => c.alpha3 === hovered).alpha3}
                                 fill={iso_countries.find(c => c.alpha3 === hovered).color}
-                                className="hoveredCountry"
+                                stroke={colorScheme.hoveredCountry}
                                 strokeWidth={` ${hoveredLineWidth * zoomFactor}px`}
                                 d={path(iso_countries.find(c => c.alpha3 === hovered).geometry)}
                                 onMouseLeave={() => {
@@ -134,12 +141,12 @@ export function LineDraw({
             (selected != null) ?
             (
                 <path
-                    key={"selected"}
-                    id="selectedCountryBorder"
-                                fill="none"
-                                strokeWidth={` ${selectedLineWidth * zoomFactor}px`}
-                    className="selectedCountry"
-                    d={path(iso_countries.find(c => c.alpha3 === selected).geometry)}
+                  key={"selected"}
+                  id="selectedCountryBorder"
+                  fill="none"
+                  strokeWidth={` ${selectedLineWidth * zoomFactor}px`}
+                  stroke={colorScheme.selectedCountry}
+                  d={path(iso_countries.find(c => c.alpha3 === selected).geometry)}
                 />
             ) : ""
                 }
@@ -150,8 +157,7 @@ export function LineDraw({
           category={category} 
           labelWidths={labelWidths} 
           categoryStatistics={categoryStatistics} 
-          noDataColor={noDataColor} 
-          minMaxColors={minMaxColors} 
+          minMaxColors={minMaxColors}
           selectedValue={selectedValue} 
           selectedCountry={selected != null ? iso_countries.find(c => c.alpha3 === selected).name : null}
         />}
@@ -159,7 +165,7 @@ export function LineDraw({
   );
 }
 
-function Legend({svgRef, category, labelWidths, categoryStatistics, noDataColor, minMaxColors, selectedValue, selectedCountry}){
+function Legend({svgRef, category, labelWidths, categoryStatistics, minMaxColors, selectedValue, selectedCountry}){
   if (!svgRef.current) return
   const legendRef = useRef()
 
@@ -190,7 +196,6 @@ function Legend({svgRef, category, labelWidths, categoryStatistics, noDataColor,
     y: svgHeight - padding.y,
     height: boxHeight,
     width: boxHeight,
-    color: noDataColor
   }
 
   const labelLeft = {
@@ -298,7 +303,7 @@ function Legend({svgRef, category, labelWidths, categoryStatistics, noDataColor,
     y: svgHeight - padding.y,
     height: boxHeight,
     width: selectedValue !== null ? 3 : 0,
-    color: 'blue'
+    color: colorScheme.selectedCountry,
   }
 
   function bottomTooltipPath(width, height, offset, radius) {
@@ -332,7 +337,7 @@ function Legend({svgRef, category, labelWidths, categoryStatistics, noDataColor,
   /* GAMMAL SVG
   <g className='' ref={legendRef}>
         <text fontSize={noDataText.fontSize} x={noDataText.x} y={noDataText.y} width={noDataText.width} height={noDataText.height} fill={noDataText.color}>{noDataStr}</text>
-        <rect x={noDataBox.x} y={noDataBox.y} width={noDataBox.width} height={noDataBox.height} fill={noDataBox.color} stroke="#333" stroke-width="0.3"></rect>
+        <rect x={noDataBox.x} y={noDataBox.y} width={noDataBox.width} height={noDataBox.height} fill={colorScheme.noData} stroke="#333" stroke-width="0.3"></rect>
         <text x={labelLeft.x} y={labelLeft.y} width={labelLeft.width} height={labelLeft.height} fill={labelLeft.color}>{category.from}</text>
         <line x1={vertLineLeft.x1} y1={vertLineLeft.y1} x2={vertLineLeft.x2} y2={vertLineLeft.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: vertLineLeft.strokeWidth}} />
         <line x1={hLineLeft.x1} y1={hLineLeft.y1} x2={hLineLeft.x2} y2={hLineLeft.y2} style={{transition:"transform 300ms ease-in", stroke:"rgb(0,0,0)", strokeWidth: hLineLeft.strokeWidth}} />
@@ -354,7 +359,7 @@ function Legend({svgRef, category, labelWidths, categoryStatistics, noDataColor,
   return (
     <g className='' ref={legendRef}>
         <text fontSize={noDataText.fontSize} x={noDataText.x} y={noDataText.y} width={noDataText.width} height={noDataText.height} fill={noDataText.color}>{noDataStr}</text>
-        <rect x={noDataBox.x} y={noDataBox.y} width={noDataBox.width} height={noDataBox.height} fill={noDataBox.color} stroke="#333" strokeWidth="0.3"></rect>
+        <rect x={noDataBox.x} y={noDataBox.y} width={noDataBox.width} height={noDataBox.height} fill={colorScheme.noData} stroke="#333" strokeWidth="0.3"></rect>
         {/* Line starts here */}
         <text x={labelLeft.x} y={labelLeft.y} width={labelLeft.width} height={labelLeft.height} fill={labelLeft.color}>{category.from}</text>
         <line x1={vertLineLeft.x1} y1={vertLineLeft.y1} x2={vertLineLeft.x2} y2={vertLineLeft.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: vertLineLeft.strokeWidth}} />

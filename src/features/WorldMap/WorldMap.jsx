@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import ReactDom from "react-dom";
 import { parseJSON } from "./parseMapJSON";
-import { LineDraw } from "./lineDraw";
+import { LineDraw, colorScheme } from "./lineDraw";
 import { zoom, select, interpolateRgb } from "d3";
 import { get_country_value, country_values_range, country_values_minmax } from "../../model/dumbDataHandler";
 import { Form, InputGroup, Button } from "react-bootstrap";
@@ -46,16 +46,6 @@ export default function WorldMap() {
     }
     mount()
   },[])
-  
-
-  const colorScheme = {
-    left: 'red',
-    middle: 'white',
-    right: 'green',
-    selectedLeft: 'blue',
-    selectedMiddle: 'white',
-    selectedRight: 'yellow'
-  }
 
   function valToColor(raw_value, alpha3_for_reference) {
     //value is as in the original data set.
@@ -87,7 +77,13 @@ export default function WorldMap() {
               selectedValue={(selected != null ? get_country_value(selected, category) : null)}
               category={categoriesObjects[category]}
               categoryStatistics={categoryStatistics}
-              minMaxColors={selected != null ? {min: valToColor(categoryStatistics.min),mid: colorScheme.middle, max:valToColor(categoryStatistics.max)} : {min: colorScheme.right, mid: colorScheme.middle, max: colorScheme.left}}
+              minMaxColors={selected != null
+                            ? {min: valToColor(categoryStatistics.min),
+                               mid: colorScheme.middle,
+                               max:valToColor(categoryStatistics.max)}
+                            : {min: colorScheme.right,
+                               mid: colorScheme.middle,
+                               max: colorScheme.left}}
               zoomLevel={zoomLevel} 
               zoomLevelSetter={zoomLevelSetter}
               doReset={doReset}
