@@ -181,20 +181,6 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
 
   const styleTransition = {transition: "0.3s"}
 
-  const selectedToPercentage = range.selected
-        ? Math.round((range.selected - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min) * 100)
-  : 50
-
-  function countryMarkers() {
-    return (<>{
-      Object.values(markers).map(m => {
-        return (
-          m && <rect key={"marker" + m.id} x={rangeBox.x + m.value * rangeBox.width} y={svgHeight - padding.y} width={3} height={boxHeight} fill={m.color} style={{...styleTransition}}></rect>
-        );
-      })
-    }</>);
-  }
-
   function bottomTooltipPath(width, height, offset, radius) {
     const left = -width / 2
     const right = width / 2
@@ -214,21 +200,26 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
       L 0,0 z`
   }
 
-  const countryMarker = {
-    x: rangeBox.x + ((selectedToPercentage/100) * rangeBox.width),
-    y: svgHeight - padding.y,
-    height: boxHeight,
-    width: 3,
-    color: colorScheme.selectedCountry,
-  }
+  function countryMarkers() {
+    return (<>{
+      Object.values(markers).map(m => {
+        const x = rangeBox.x + m.value * rangeBox.width;
+        const y = svgHeight - padding.y;
+        const width = 3;
+        const labelWidth = GetWidth(m.name);
 
-  const toolTipLabelWidth = GetWidth(selected?.name)
-  const toolTip = (
-  <>
-    <path d={bottomTooltipPath(toolTipLabelWidth + 20, parseInt(fontSize) * 2, 5, 10)} fill='#EEEEEE' stroke='gray' transform={`translate(${countryMarker.x + countryMarker.width/2},${countryMarker.y + boxHeight + 2})`} style={{...styleTransition}}></path>
-    <text transform={`translate(${countryMarker.x + countryMarker.width/2 - toolTipLabelWidth/2},${countryMarker.y + boxHeight + parseInt(fontSize) + 12})`} style={{...styleTransition}}>{selected?.name}</text>
-  </>
- )
+        console.log(m);
+        return (<>
+          <rect key={"marker" + m.id} x={x} y={y} width={width} height={boxHeight} fill={m.color} style={{...styleTransition}}></rect>
+
+          {m.hasTooltip && <>
+            <path d={bottomTooltipPath(labelWidth + 20, parseInt(fontSize) * 2, 5, 10)} fill='#EEEEEE' stroke='gray' transform={`translate(${x + width/2},${y + boxHeight + 2})`}/>
+            <text transform={`translate(${x + width/2 - labelWidth/2},${y + boxHeight + parseInt(fontSize) + 12})`}>{m.name}</text>
+           </>}
+        </>);
+      })
+    }</>);
+  }
 
   return (
     <g className='' ref={legendRef}>
@@ -268,7 +259,6 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
               transform={`translate(${hBox.x + hBox.width/2},${svgHeight - padding.y - 10})`}/>
 
         {countryMarkers()}
-        {range.selected && toolTip}
     </g>
   )
 }
