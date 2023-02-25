@@ -68,7 +68,7 @@ export function LineDraw({
                 className="country"
                 d={path(c.geometry)}
                 onMouseOver={() => {
-                  if (c.hasData) setHovered(c.id);
+                  if (c.hasData) setHovered(c);
                   else setHovered(null);
                 }}
               />}
@@ -91,11 +91,11 @@ export function LineDraw({
               (
                 <path
                   key="hovered"
-                  id={hovered}
+                  id={hovered.id}
                   fill="transparent"
                   stroke={colorScheme.hoveredCountry}
                   strokeWidth={` ${hoveredLineWidth * zoomFactor}px`}
-                  d={path(iso_countries[hovered].geometry)}
+                  d={path(iso_countries[hovered.id].geometry)}
                   onMouseLeave={() => {
                     setHovered(null);
                   }}

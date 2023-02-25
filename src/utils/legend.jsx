@@ -4,25 +4,7 @@ import { useRef } from "react";
 import { categories } from "../utils/categories";
 import colorScheme from "./colorScheme"
 
-function valToColor(value, range) {
-  if (!value)
-    return colorScheme.noData;
-  var relative_value;
-  if(range.selected) {
-    relative_value = (value - range.selected) / (range.max - range.min);
-  } else {
-    // If range.selected is null, we have our reference at 0.
-    // But, this means that the extreme ends are only "half the bar" away from the reference.
-    // Therefore, we multiply by 2
-    relative_value = 2 * value / (range.max - range.min);
-  }
-  const extreme_color = relative_value < 0 ? colorScheme.left : colorScheme.right;
-  //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
-  const absolute_value = Math.abs(relative_value);
-  return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
-}
-
-export function Legend({svgRef, category, categoryStatistics, range, selected, colors}){
+export function Legend({svgRef, category, categoryStatistics, range, selected, colors, markers}){
   const [labelWidths, setLabelWidths] = useState({ left: 0, right: 0 })
   // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
   useEffect(()=>{
@@ -181,18 +163,6 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
 
   const styleTransition = {transition: "0.3s"}
 
-  const selectedToPercentage = range.selected
-        ? Math.round((range.selected - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min) * 100)
-  : 50
-
-  const countryMarker = {
-    x: rangeBox.x + ((selectedToPercentage/100) * rangeBox.width),
-    y: svgHeight - padding.y,
-    height: boxHeight,
-    width: range.selected !== null ? 3 : 0,
-    color: colorScheme.selectedCountry,
-  }
-
   function bottomTooltipPath(width, height, offset, radius) {
     const left = -width / 2
     const right = width / 2
@@ -212,22 +182,25 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
       L 0,0 z`
   }
 
+  function countryMarkers() {
+    return (<>{
+      Object.values(markers).map(m => {
+        const x = rangeBox.x + m.value * rangeBox.width;
+        const y = svgHeight - padding.y;
+        const width = 3;
+        const labelWidth = GetWidth(m.name);
 
-  const middleMarker = {
-    x: hBox.x + Math.round(hBox.width/2) ,
-    y: svgHeight - padding.y - 10,
-    height: boxHeight + 20,
-    width: 3,
-    color: 'gray'
+        return (<>
+          <rect key={"marker" + m.id} x={x} y={y} width={width} height={boxHeight} fill={m.color} style={{...styleTransition}}></rect>
+
+          {m.hasTooltip && <>
+            <path key={"tooltipbox" + m.id} d={bottomTooltipPath(labelWidth + 20, parseInt(fontSize) * 2, 5, 10)} fill='#EEEEEE' stroke='gray' transform={`translate(${x + width/2},${y + boxHeight + 2})`}/>
+            <text key={"tooltiplabel" + m.id} transform={`translate(${x + width/2 - labelWidth/2},${y + boxHeight + parseInt(fontSize) + 12})`}>{m.name}</text>
+           </>}
+        </>);
+      })
+    }</>);
   }
-
-  const toolTipLabelWidth = GetWidth(selected?.name)
-  const toolTip = (
-  <>
-    <path d={bottomTooltipPath(toolTipLabelWidth + 20, parseInt(fontSize) * 2, 5, 10)} fill='#EEEEEE' stroke='gray' transform={`translate(${countryMarker.x + countryMarker.width/2},${countryMarker.y + boxHeight + 2})`} style={{...styleTransition}}></path>
-    <text transform={`translate(${countryMarker.x + countryMarker.width/2 - toolTipLabelWidth/2},${countryMarker.y + boxHeight + parseInt(fontSize) + 12})`} style={{...styleTransition}}>{selected?.name}</text>
-  </>
- )
 
   return (
     <g className='' ref={legendRef}>
@@ -250,7 +223,7 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
             <defs>
             <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" style={{ stopColor: colors.left, stopOpacity:"1"}} />
-                {colors.mid || <stop offset={`${selectedToPercentage}%`} style={{stopColor: colorScheme.middle, stopOpacity:"1"}} />}
+                <stop offset={`${selected ? markers[selected?.id]?.value : 0.5}`} style={{stopColor: colors.middle, stopOpacity:"1"}} />
                 <stop offset="100%" style={{stopColor: colors.right, stopOpacity:"1"}} />
             </linearGradient>
             </defs>
@@ -261,13 +234,12 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
         <rect x={rangeBox.x} y={rangeBox.y} width={rangeBox.width} height={rangeBox.height} fill='none' strokeWidth="2" style={{...styleTransition}} className="dashedRect"></rect>
 
         {/* Middle marker */}
-        <path strokeDasharray={`${Math.round((boxHeight + 20)/8)}`} strokeOpacity="70%" d={`M0 0 V${boxHeight + 20} 0`} stroke='gray' strokeWidth="2" transform={`translate(${middleMarker.x},${middleMarker.y})`}/>
-        {/* <rect x={middleMarker.x} y={middleMarker.y} width={middleMarker.width} height={middleMarker.height} stroke={middleMarker.color} style={{...styleTransition, borderStyle: 'dotted'}}></rect> */}
+        <path strokeDasharray={`${Math.round((boxHeight + 20)/8)}`}
+              strokeOpacity="70%" d={`M0 0 V${boxHeight + 20} 0`}
+              stroke='gray' strokeWidth="2"
+              transform={`translate(${hBox.x + hBox.width/2},${svgHeight - padding.y - 10})`}/>
 
-        <> {/* Country marker */}
-            <rect x={countryMarker.x} y={countryMarker.y} width={countryMarker.width} height={countryMarker.height} fill={countryMarker.color} style={{...styleTransition}}></rect>
-            {range.selected && toolTip}
-        </>
+        {countryMarkers()}
     </g>
   )
 }
