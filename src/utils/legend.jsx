@@ -23,8 +23,8 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
   const lineColor = '#000000'
   const noDataStr = 'No data'
   const rangeBoxStr_1 = "The range of all"
-  const rangeBoxStr_2 = "countries answers"
-
+  const rangeBoxStr_2 = "countries' answers"
+  const boxMargins = 5;
 
   const padding = {
     x: 100,
@@ -47,16 +47,16 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
   }
 
   const rangeBoxText_1 = {
-    x: padding.x,
-    y: svgHeight - padding.y + boxHeight/2 + fontSize/4 - noDataBox.height - fontSize/2,
+    x: padding.x - GetWidth(rangeBoxStr_1) + GetWidth(noDataStr),
+    y: svgHeight - padding.y + boxHeight / 2 + fontSize / 4 - noDataBox.height - fontSize / 2 - boxMargins,
     width: GetWidth(rangeBoxStr_1), // this has to be measured if we change the text size or font
     color: lineColor,
     fontSize
   }
 
   const rangeBoxText_2 = {
-    x: padding.x,
-    y: svgHeight - padding.y + boxHeight/2 + fontSize/4 - noDataBox.height + fontSize/2,
+    x: padding.x - GetWidth(rangeBoxStr_2) + GetWidth(noDataStr),
+    y: svgHeight - padding.y + boxHeight / 2 + fontSize / 4 - noDataBox.height + fontSize / 2 - boxMargins,
     width: GetWidth(rangeBoxStr_2), // this has to be measured if we change the text size or font
     color: lineColor,
     fontSize
@@ -64,7 +64,7 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
 
   const rangeBoxBox = {
     x: noDataText.x + noDataText.width + 5,
-    y: svgHeight - noDataBox.height - padding.y,
+    y: svgHeight - noDataBox.height - padding.y - boxMargins,
     height: boxHeight,
     width: boxHeight,
   }
