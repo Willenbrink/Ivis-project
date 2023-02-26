@@ -4,7 +4,7 @@ import { useRef } from "react";
 import colorScheme from "./colorScheme";
 
 export function LineDraw({
-  data: { iso_countries, non_iso_countries, interiorBorders }, selectCountry, selected, hovered, setHovered, svgRef, zoomLevel, zoomLevelSetter, doReset, setDoReset, countryToColor
+  data: { iso_countries, non_iso_countries }, selectCountry, selected, hovered, setHovered, svgRef, zoomLevel, zoomLevelSetter, doReset, setDoReset, countryToColor
 }) {
 
   const gRef = useRef()
@@ -58,8 +58,20 @@ export function LineDraw({
                   selectCountry(null);
                 }} />
           {
-            //example country: {"color": "#040", "alpha3": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
-            //example country: {"color": "#040", "alpha3": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
+            //example country: {"geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
+            non_iso_countries.map((c, idx) => (
+              <path
+                key={`no_iso_country_${idx}`}
+                fill={colorScheme.noData}
+                className="no_iso_country"
+                stroke={colorScheme.border}
+                strokeWidth={` ${borderLineWidth * zoomFactor}px`}
+                d={path(c.geometry)}
+              />
+            ))
+          }
+          {
+            //example country: {"color": "#040", "id": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
             Object.values(iso_countries).map(c => {
               return <path
                 key={c.id}
@@ -67,6 +79,8 @@ export function LineDraw({
                 fill={countryToColor(c, selected)}
                 className="country"
                 d={path(c.geometry)}
+                stroke={colorScheme.border}
+                strokeWidth={` ${borderLineWidth * zoomFactor}px`}
                 onMouseOver={() => {
                   if (c.hasData) setHovered(c);
                   else setHovered(null);
@@ -75,20 +89,7 @@ export function LineDraw({
             )
           }
           {
-            //example country: {"geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
-            non_iso_countries.map((c, idx) => (
-              <path
-                key={`no_iso_country_${idx}`}
-                fill={colorScheme.noData}
-                className="no_iso_country"
-                d={path(c.geometry)}
-              />
-            ))
-          }
-          <path className="interiorBorders" d={path(interiorBorders)} strokeWidth={` ${borderLineWidth * zoomFactor}px`} />
-          {
-            (hovered != null) ?
-              (
+            hovered &&
                 <path
                   key="hovered"
                   id={hovered.id}
@@ -104,11 +105,9 @@ export function LineDraw({
                     selectCountry(iso_countries[e.target.id]);
                   }}
                 />
-              ) : ""
           }
           {
-            selected ?
-              (
+            selected &&
                 <path
                   key="selected"
                   id="selectedCountryBorder"
@@ -117,7 +116,6 @@ export function LineDraw({
                   stroke={colorScheme.selectedCountry}
                   d={path(selected.geometry)}
                 />
-              ) : ""
           }
       </g>
   );
