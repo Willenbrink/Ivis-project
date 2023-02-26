@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { json } from "d3";
-import { feature, mesh } from "topojson-client";
-import { get_country_data } from "../../model/dataHandler";
+import { feature } from "topojson-client";
+import { get_country_data } from "../model/dataHandler";
 import iso from "iso-3166-1";
 
 const mapJSON = "https://unpkg.com/world-atlas@2.0.2/countries-110m.json";
@@ -41,7 +41,6 @@ export const parseJSON = () => {
       setData({
         iso_countries,
         non_iso_countries,
-        interiorBorders: mesh(jsonData, jsonData.objects.countries),
       });
     });
   }, []);

@@ -1,15 +1,15 @@
 import React, { useState, useCallback, useEffect } from "react";
 import ReactDom from "react-dom";
-import { parseJSON } from "./parseMapJSON";
+import { parseJSON } from "../../utils/parseMapJSON";
 import { Legend } from "../../utils/legend";
 import { LineDraw } from "../../utils/lineDraw";
 import colorScheme from "../../utils/colorScheme";
+import InfoPopover from "../../utils/InfoPopover";
 import { interpolateRgb } from "d3";
 import { country_values_stats } from "../../model/dataHandler";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
 import { categories } from "../../utils/categories";
-import InfoPopover from "./InfoPopover";
 import useWindowDimensions from "../../hooks/windowResizeHook";
 
 // Adapted from:
