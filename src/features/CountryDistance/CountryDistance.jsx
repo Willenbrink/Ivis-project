@@ -1,11 +1,13 @@
 import React, { useState, useCallback, useEffect } from "react";
 import ReactDom from "react-dom";
 import { parseJSON } from "../../utils/parseMapJSON";
+import { Legend } from "../../utils/legend";
 import { LineDraw } from "../../utils/lineDraw";
 import colorScheme from "../../utils/colorScheme";
 import { get_keys } from "../../model/dataHandler";
 import { distance } from "../../utils/categories";
 import InfoPopover from "../../utils/InfoPopover";
+import { country_values_stats } from "../../model/dataHandler";
 import { interpolateRgb } from "d3";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
@@ -70,6 +72,17 @@ export default function CountryDistance({activeTab}) {
     return <pre>Loading...</pre>;
   }
 
+  const categoryStatistics = country_values_stats(distance);
+  const colors = { left: colorScheme.middle, right: colorScheme.right };
+
+  const markers = {};
+  if (hovered)
+      markers[hovered.id] = { ...hovered, hasTooltip: true, value: (hovered[distance.id] - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min), color: colorScheme.hoveredCountry };
+
+    const range = selected
+        ? { min: categoryStatistics.min, selected: selected[distance.id], max: categoryStatistics.max }
+      : { min: -1, selected: null, max: 1 };
+
   const svg = (
       <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
           {svgHasMounted &&
@@ -87,6 +100,16 @@ export default function CountryDistance({activeTab}) {
                 setDoReset={setDoReset}
                 countryToColor={countryToColor}
               />
+              {svgRef.current &&
+              <Legend
+                  svgRef={svgRef}
+                  range={range}
+                  categoryStatistics={categoryStatistics}
+                  category={distance}
+                  selected={selected}
+                  colors={colors}
+                  markers={markers}
+              />}
           </>
           }
       </svg>

@@ -223,7 +223,7 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
             <defs>
             <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" style={{ stopColor: colors.left, stopOpacity:"1"}} />
-                <stop offset={`${selected ? markers[selected?.id]?.value : 0.5}`} style={{stopColor: colors.middle, stopOpacity:"1"}} />
+                      {(colors.middle != null) ? <stop offset={`${selected ? markers[selected?.id]?.value : 0.5}`} style={{ stopColor: colors.middle, stopOpacity: "1" }} /> : ""}
                 <stop offset="100%" style={{stopColor: colors.right, stopOpacity:"1"}} />
             </linearGradient>
             </defs>
