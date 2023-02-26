@@ -76,8 +76,8 @@ export default function CountryDistance({activeTab}) {
   const colors = { left: colorScheme.middle, right: colorScheme.right };
 
   const markers = {};
-  if (hovered)
-      markers[hovered.id] = { ...hovered, hasTooltip: true, value: (hovered[distance.id] - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min), color: colorScheme.hoveredCountry };
+  //if (hovered)
+  //    markers[hovered.id] = { ...hovered, hasTooltip: true, value: (hovered[distance.id] + 1) / 2, color: colorScheme.hoveredCountry };
 
     const range = selected
         ? { min: categoryStatistics.min, selected: selected[distance.id], max: categoryStatistics.max }

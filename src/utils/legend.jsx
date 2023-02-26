@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { categories } from "../utils/categories";
 import colorScheme from "./colorScheme"
 
-export function Legend({svgRef, category, categoryStatistics, range, selected, colors, markers}){
+export function Legend({svgRef, category, categoryStatistics, range, showRange, selected, colors, markers}){
   const [labelWidths, setLabelWidths] = useState({ left: 0, right: 0 })
   // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
   useEffect(()=>{
@@ -207,12 +207,13 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
         <>{/* No data text */}
             <text fontSize={noDataText.fontSize} x={noDataText.x} y={noDataText.y} width={noDataText.width} height={noDataText.height} fill={noDataText.color}>{noDataStr}</text>
             <rect x={noDataBox.x} y={noDataBox.y} width={noDataBox.width} height={noDataBox.height} fill={colorScheme.noData} stroke="#333" strokeWidth="0.3"></rect>
-        </>
-        <>{/* Rangebox text */}
-            <text fontSize={rangeBoxText_1.fontSize} x={rangeBoxText_1.x} y={rangeBoxText_1.y} width={rangeBoxText_1.width} height={rangeBoxText_1.height} fill={rangeBoxText_1.color}>{rangeBoxStr_1}</text>
-            <text fontSize={rangeBoxText_2.fontSize} x={rangeBoxText_2.x} y={rangeBoxText_2.y} width={rangeBoxText_2.width} height={rangeBoxText_2.height} fill={rangeBoxText_2.color}>{rangeBoxStr_2}</text>
-            <rect x={rangeBoxBox.x} y={rangeBoxBox.y} width={rangeBoxBox.width} height={rangeBoxBox.height} fill='none' className='dashedRect' strokeWidth="2"></rect>
-        </>
+          </>
+          {showRange ?
+              <>{/* Rangebox text */}
+                  <text fontSize={rangeBoxText_1.fontSize} x={rangeBoxText_1.x} y={rangeBoxText_1.y} width={rangeBoxText_1.width} height={rangeBoxText_1.height} fill={rangeBoxText_1.color}>{rangeBoxStr_1}</text>
+                  <text fontSize={rangeBoxText_2.fontSize} x={rangeBoxText_2.x} y={rangeBoxText_2.y} width={rangeBoxText_2.width} height={rangeBoxText_2.height} fill={rangeBoxText_2.color}>{rangeBoxStr_2}</text>
+                  <rect x={rangeBoxBox.x} y={rangeBoxBox.y} width={rangeBoxBox.width} height={rangeBoxBox.height} fill='none' className='dashedRect' strokeWidth="2"></rect>
+              </> : ""}
         <>{/* Legend box and left/right labels */}
             <rect x={hBox.x} y={hBox.y} width={hBox.width} height={hBox.height} fill='white' stroke="rgb(0,0,0)" strokeWidth="1"/>
             {/* <line x1={hLineRight.x1} y1={hLineRight.y1} x2={hLineRight.x2} y2={hLineRight.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: hLineRight.strokeWidth}} /> */}
@@ -229,16 +230,16 @@ export function Legend({svgRef, category, categoryStatistics, range, selected, c
             </defs>
             <rect x={colorBox.x} y={colorBox.y} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" strokeWidth="0.3" style={{...styleTransition}}></rect>
         </>
-
+        
         {/* Dotted range box */}
-        <rect x={rangeBox.x} y={rangeBox.y} width={rangeBox.width} height={rangeBox.height} fill='none' strokeWidth="2" style={{...styleTransition}} className="dashedRect"></rect>
-
+        {showRange ?
+          <rect x={rangeBox.x} y={rangeBox.y} width={rangeBox.width} height={rangeBox.height} fill='none' strokeWidth="2" style={{ ...styleTransition }} className="dashedRect"></rect>
+      : ""}
         {/* Middle marker */}
         <path strokeDasharray={`${Math.round((boxHeight + 20)/8)}`}
               strokeOpacity="70%" d={`M0 0 V${boxHeight + 20} 0`}
               stroke='gray' strokeWidth="2"
               transform={`translate(${hBox.x + hBox.width/2},${svgHeight - padding.y - 10})`}/>
-
         {countryMarkers()}
     </g>
   )
