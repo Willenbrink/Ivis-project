@@ -102,6 +102,7 @@ export default function WorldMap({activeTab}) {
               <Legend
                 svgRef={svgRef}
                 range={range}
+                showRange={true}
                 category={category}
                 categoryStatistics={categoryStatistics}
                 selected={selected}
