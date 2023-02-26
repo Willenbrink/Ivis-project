@@ -8,7 +8,6 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
   const [labelWidths, setLabelWidths] = useState({ left: 0, right: 0 })
   // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
   useEffect(()=>{
-    console.log("Computing widths!");
     const [left, right] = GetWidths()
     setLabelWidths({ left, right })
   },[])
@@ -71,7 +70,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
 
   const labelLeft = {
     x: noDataBox.x + noDataBox.width + 20,
-    y: svgHeight - padding.y + boxHeight/2 + fontSize/4,
+    y: svgHeight - padding.y + boxHeight/2 + fontSize/4 - fontSize - (category.from.length > 1 ? fontSize/2 * (Math.floor(category.from.length/2)) : 0),
     width: labelWidths.left, // the longest word that appears here is passengers, so this is this word's width
     color: lineColor,
     fontSize
@@ -80,7 +79,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
   const paddingLabelRight = 100
   const labelRight = {
     x: svgWidth - labelWidths.right - (padding.x * 2),
-    y: svgHeight - padding.y + boxHeight/2 + fontSize/4,
+    y: svgHeight - padding.y + boxHeight/2 + fontSize/4 - fontSize - (category.to.length > 1 ? fontSize/2 * (Math.floor(category.to.length/2)) : 0),
     width: labelWidths.right, // the longest word that appears here is passengers, so this is this word's width
     color: lineColor,
     fontSize
@@ -217,8 +216,12 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
         <>{/* Legend box and left/right labels */}
             <rect x={hBox.x} y={hBox.y} width={hBox.width} height={hBox.height} fill='white' stroke="rgb(0,0,0)" strokeWidth="1"/>
             {/* <line x1={hLineRight.x1} y1={hLineRight.y1} x2={hLineRight.x2} y2={hLineRight.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: hLineRight.strokeWidth}} /> */}
-            <text x={labelLeft.x} y={labelLeft.y} width={labelLeft.width} height={labelLeft.height} fill={labelLeft.color}>{category.from}</text>
-            <text x={labelRight.x} y={labelRight.y} width={labelRight.width} height={labelRight.height} fill={labelRight.color}>{category.to}</text>
+            <text x={labelLeft.x} y={labelLeft.y} width={labelLeft.width} height={labelLeft.height} fill={labelLeft.color}>
+              {category.from.map((row)=> <tspan x={labelLeft.x} dy="1em">{row}</tspan>)}
+            </text>
+            <text x={labelRight.x} y={labelRight.y} width={labelRight.width} height={labelRight.height} fill={labelRight.color}>
+              {category.to.map((row)=> <tspan x={labelRight.x} dy="1em">{row}</tspan>)}
+            </text>
         </>
         <>{/* Box with colors */}
             <defs>
@@ -265,10 +268,20 @@ function GetWidths(){
   let left = 0
   let right = 0
   Object.values(categories).forEach((cat) => {
+    cat.from.forEach((row)=>{
+      const leftNew = GetWidth(row)
+      if (leftNew > left) left = leftNew
+    })
+    cat.to.forEach((row)=>{
+      const rightNew = GetWidth(row)
+      if (rightNew > right) right = rightNew
+    })
+    /*
     const leftNew = GetWidth(cat.from)
     const rightNew = GetWidth(cat.to)
     if (leftNew > left) left = leftNew
     if (rightNew > right) right = rightNew
+    */
   })
   return [left, right]
 }
