@@ -11,6 +11,8 @@ import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
 import { categories } from "../../utils/categories";
 import useWindowDimensions from "../../hooks/windowResizeHook";
+import CategorySelectorInfo from "./CategorySelectorInfo";
+import ResetZoomButton from "./ResetZoomButton";
 
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
@@ -19,27 +21,37 @@ const canvasWidth = "100%";
 const canvasHeight = "100%";
 
 export default function WorldMap({activeTab}) {
-  //currently selected country
+  // Currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
-   const [zoomLevel, zoomLevelSetter] = useState(null);
-  //interactive category selection
+  // Interactive category selection
   const [category, setCategory] = useState(categories.intervention);
-  const [svgHasMounted, setSvgHasMounted] = useState(false)
-  //for reseting the map
+  // Zooming
+  const [zoomLevel, zoomLevelSetter] = useState(null);
+  // For reseting the map zoom
   const [doReset, setDoReset] = useState(false);
-  const svgRef = useRef()
+  // Zoom/pan callback
+  const [zoomCall, setZoomCall] = useState(()=>{})
 
-  // Temporary fix for map not rendering on start
+  // Fix for map not rendering on start
+  const svgRef = useRef(null)
+  const [svgHasMounted, setSvgHasMounted] = useState(false)
   useEffect(()=>{
-    async function mount() {
-      await setTimeout(()=>{
-        setSvgHasMounted(activeTab)
-      }, 300)
-      // if (!svgHasMounted && svgRef.current?.clientWidth > 0) setSvgHasMounted(true)
+    /* 
+    Only render the map when the svg element has been assigned to the react reference (svgRef).
+    We do this because svgRef is used in child components to draw the map.
+    */
+    if(svgRef.current !== null) {
+      setSvgHasMounted(true)
+    } else {
+      // When we switch tab, svgRef is set to null, so we also se svgHasMounted to false
+      setSvgHasMounted(false)
     }
-    mount()
-  },[activeTab])
+    /* 
+    svgRef?.current?.clientWidth: when the width of the svg changes it triggers the useEffect (it rerenders the map)
+    This solves a bug where the map is rendered but with height, width = 0
+    */
+  },[activeTab, svgRef?.current?.clientWidth])
 
 
   const mapData = parseJSON();
@@ -97,6 +109,7 @@ export default function WorldMap({activeTab}) {
                 zoomLevelSetter={zoomLevelSetter}
                 doReset={doReset}
                 setDoReset={setDoReset}
+                setZoomCall={setZoomCall}
               />
               {svgRef.current &&
               <Legend
@@ -108,42 +121,29 @@ export default function WorldMap({activeTab}) {
                 selected={selected}
                 colors={colors}
                 markers={markers}
+                zoomCall={zoomCall}
               />}
           </>
           }
       </svg>
   );
   return (
-    activeTab && <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
+    activeTab && (
+    <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
       <div className="d-flex flex-column flex-grow-1 position-relative">
         {svg}
       </div>
-          <InputGroup className="px-5 pt-2 position-absolute" style={{width: "90%"}}>
-            <InputGroup.Text id='basic-addon2' className='bg-light'>Categories:</InputGroup.Text>
-            <Form.Select 
-            aria-label="Default select example!"
-            onChange={((e) => setCategory(categories[e.target.value]))}
-            value={category?.id}
-            className='fw-bold'
-            >
-              {Object.entries(categories).map(([id, cat]) => {
-                return <option key={id} value={id}>{cat.name}</option> ;
-              })}
-            </Form.Select>
-            <InfoPopover title={categories[category.id].name_short || categories[category.id].name} info={categories[category.id].info}/>
-          </InputGroup>
-
-      <div id="zoomDiv" style={{position:"absolute", margin:"10px", right: 0}}>
-        <p hidden={true} style={{textAlign: "right"}}>Zoom: {zoomLevel?zoomLevel.toFixed(2):"1.00"}</p>
-        <Button onClick={(e) => {setDoReset(true);}} hidden={!zoomLevel || !(zoomLevel < 0.5 || zoomLevel > 2)}>Reset Map</Button>
-      </div>
+      <CategorySelectorInfo category={category} setCategory={setCategory} />
+      <ResetZoomButton zoomLevel={zoomLevel} setDoReset={setDoReset}/>
       {/* 
       <div className="w-25 mx-3">
         <p className="fs-4 mb-2 border-bottom">{categoriesObjects[category].title}</p>
         <p>{categoriesObjects[category].info}</p>
+        HERE WE CAN PLACE A POSSIBLE COUNTRY SELECTOR FOR COMPARIONS
       </div>
       */}
-    </div>);
+    </div>)
+    )
 }
 
 export const useD3 = (renderChartFn, dependencies) => {

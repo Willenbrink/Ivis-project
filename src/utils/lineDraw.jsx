@@ -3,36 +3,44 @@ import React, { useState, useCallback, useEffect } from "react";
 import { useRef } from "react";
 import colorScheme from "./colorScheme";
 
-export function LineDraw({
-  data: { iso_countries, non_iso_countries }, selectCountry, selected, hovered, setHovered, svgRef, zoomLevel, zoomLevelSetter, doReset, setDoReset, countryToColor
-}) {
+export function LineDraw({ data: { iso_countries, non_iso_countries }, selectCountry, selected, hovered, setHovered, svgRef, zoomLevel, zoomLevelSetter, doReset, setDoReset, countryToColor, setZoomCall}) {
 
   const gRef = useRef()
-  const zoomInScaleLimit = 8
-  const zoomOutScaleLimit = 0.12
+  
+  // Create projection after the svg's size
   const projection = geoNaturalEarth1().scale(249.5 * svgRef.current.clientHeight/950).translate([svgRef.current.clientWidth/2,svgRef.current.clientHeight/2])
-  //.translate([svgRef.current.clientWidth / 2, svgRef.current.clientHeight / 1.4])
   const path = geoPath(projection)
   const graticule = geoGraticule()
 
+  // Line width variables
   const selectedLineWidth = 1;
   const hoveredLineWidth = 1.3;
   const borderLineWidth = 0.5;
   const zoomLineStrength = 0.5;
-
-  const zoomFactor = (1 / (Math.max(1, zoomLevel) * zoomLineStrength))
+  
   // Zooming and panning
+  const zoomFactor = (1 / (Math.max(1, zoomLevel) * zoomLineStrength))
+
   useEffect(()=>{
     if (svgRef && gRef) {
-      const svg = select(svgRef.current)
-      const g = select(gRef.current)
-      svg.call(zoom().scaleExtent([zoomOutScaleLimit, zoomInScaleLimit])
-                     .translateExtent([[0, 0], [svgRef.current.clientWidth,svgRef.current.clientHeight]]).on('zoom', (event) => {
-                       g.attr('transform', event.transform)
-                       zoomLevelSetter(event.transform.k)
-                     }))
-    }
+      function ZoomCall(){
+        const zoomInScaleLimit = 8
+        const zoomOutScaleLimit = 0.12
+        const svg = select(svgRef.current)
+          const g = select(gRef.current)
+          svg.call(zoom().scaleExtent([zoomOutScaleLimit, zoomInScaleLimit])
+                         .translateExtent([[0, 0], [svgRef.current.clientWidth,svgRef.current.clientHeight]]).on('zoom', (event) => {
+                           g.attr('transform', event.transform)
+                           zoomLevelSetter(event.transform.k)
+                         }))
+        }
+      // Turn on the zoom function
+      ZoomCall()
+      // Save the turn on zoom function to parent component
+      setZoomCall(() => ZoomCall)
+      }
   }, [])
+
   //resetting the zoom
   if (doReset) {
     setDoReset(false)
