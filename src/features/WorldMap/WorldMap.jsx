@@ -20,7 +20,7 @@ import ResetZoomButton from "./ResetZoomButton";
 const canvasWidth = "100%";
 const canvasHeight = "100%";
 
-export default function WorldMap({activeTab}) {
+export default function WorldMap({activetab}) {
   // Currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
@@ -32,6 +32,8 @@ export default function WorldMap({activeTab}) {
   const [doReset, setDoReset] = useState(false);
   // Zoom/pan callback
   const [zoomCall, setZoomCall] = useState(()=>{})
+  // Brushing
+  const [brushRange, setBrushRange] = useState([-1.0,1.0])
 
   // Fix for map not rendering on start
   const svgRef = useRef(null)
@@ -51,7 +53,7 @@ export default function WorldMap({activeTab}) {
     svgRef?.current?.clientWidth: when the width of the svg changes it triggers the useEffect (it rerenders the map)
     This solves a bug where the map is rendered but with height, width = 0
     */
-  },[activeTab, svgRef?.current?.clientWidth])
+  },[activetab, svgRef?.current?.clientWidth])
 
 
   const mapData = parseJSON();
@@ -65,17 +67,26 @@ export default function WorldMap({activeTab}) {
         : {min: -1, selected: null, max: 1};
 
 
-  function valueToColor(value) {
+  function valueToColor(value, colorForLegend=false) {
     if (!value)
       return colorScheme.noData;
     var relative_value;
     if(range.selected) {
       relative_value = (value - range.selected) / (range.max - range.min);
+      //if (!colorForLegend && (relative_value < brushRange[0] || relative_value) > brushRange[1]) return colorScheme.outOfRange    
     } else {
+      /*
+      function ValueInRange(val, brushRange){
+        val >= brushRange[0] && val <= brushRange[1]
+          ? true
+          : false
+      }
+      */
       // If range.selected is null, we have our reference at 0.
       // But, this means that the extreme ends are only "half the bar" away from the reference.
       // Therefore, we multiply by 2
       relative_value = 2 * value / (range.max - range.min);
+      if (!colorForLegend && (relative_value < brushRange[0] || relative_value) > brushRange[1]) return colorScheme.outOfRange    
     }
     const extreme_color = relative_value < 0 ? colorScheme.left : colorScheme.right;
     //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
@@ -86,7 +97,7 @@ export default function WorldMap({activeTab}) {
     return valueToColor(country[category.id]);
   };
 
-  const colors = { left: valueToColor(range.min), middle: colorScheme.middle, right: valueToColor(range.max) };
+  const colors = { left: valueToColor(range.min, true), middle: colorScheme.middle, right: valueToColor(range.max, true) };
   const markers = {};
   if (selected)
     markers[selected.id] = { ...selected, hasTooltip: !hovered, value: (selected[category.id] - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min), color: colorScheme.selectedCountry };
@@ -110,6 +121,7 @@ export default function WorldMap({activeTab}) {
                 doReset={doReset}
                 setDoReset={setDoReset}
                 setZoomCall={setZoomCall}
+                brushRange={brushRange}
               />
               {svgRef.current &&
               <Legend
@@ -122,13 +134,15 @@ export default function WorldMap({activeTab}) {
                 colors={colors}
                 markers={markers}
                 zoomCall={zoomCall}
+                brushActive
+                setBrushRange={setBrushRange}
               />}
           </>
           }
       </svg>
   );
   return (
-    activeTab && (
+    activetab && (
     <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
       <div className="d-flex flex-column flex-grow-1 position-relative">
         {svg}

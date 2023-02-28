@@ -44,7 +44,7 @@ function countryToColor(country, selected) {
 };
 
 
-export default function CountryDistance({activeTab}) {
+export default function CountryDistance({activetab}) {
   //currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
@@ -60,12 +60,12 @@ export default function CountryDistance({activeTab}) {
   useEffect(()=>{
     async function mount() {
       await setTimeout(()=>{
-        setSvgHasMounted(activeTab)
+        setSvgHasMounted(activetab)
       }, 300)
       // if (!svgHasMounted && svgRef.current?.clientWidth > 0) setSvgHasMounted(true)
     }
     mount()
-  },[activeTab])
+  },[activetab])
 
   const mapData = parseJSON();
   if (!mapData) {
@@ -99,6 +99,8 @@ export default function CountryDistance({activeTab}) {
                 doReset={doReset}
                 setDoReset={setDoReset}
                 countryToColor={countryToColor}
+                setZoomCall={()=>{}}
+                brushRange={[-1.0,1.0]}
               />
               {svgRef.current &&
               <Legend
@@ -109,13 +111,14 @@ export default function CountryDistance({activeTab}) {
                   selected={selected}
                   colors={colors}
                   markers={markers}
+                  zoomCall={()=>{}}
               />}
           </>
           }
       </svg>
   );
   return (
-    activeTab && <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
+    activetab && <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
       <div className="d-flex flex-column flex-grow-1 position-relative">
         {svg}
       </div>

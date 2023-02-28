@@ -3,7 +3,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { useRef } from "react";
 import colorScheme from "./colorScheme";
 
-export function LineDraw({ data: { iso_countries, non_iso_countries }, selectCountry, selected, hovered, setHovered, svgRef, zoomLevel, zoomLevelSetter, doReset, setDoReset, countryToColor, setZoomCall}) {
+export function LineDraw({ data: { iso_countries, non_iso_countries }, selectCountry, selected, hovered, setHovered, svgRef, zoomLevel, zoomLevelSetter, doReset, setDoReset, countryToColor, setZoomCall }) {
 
   const gRef = useRef()
   
@@ -50,6 +50,7 @@ export function LineDraw({ data: { iso_countries, non_iso_countries }, selectCou
       zoomLevelSetter(null)
     } 
   }
+  // console.log('ISO:', iso_countries)
 
   return (
       <g className="mark" ref={gRef} >
@@ -85,6 +86,8 @@ export function LineDraw({ data: { iso_countries, non_iso_countries }, selectCou
                 key={c.id}
                 id={c.id}
                 fill={countryToColor(c, selected)}
+                fillOpacity={countryToColor(c, selected) === colorScheme.outOfRange ? '10%' : '100%'}
+                strokeOpacity={countryToColor(c, selected) === colorScheme.outOfRange ? '10%' : '100%'}
                 className="country"
                 d={path(c.geometry)}
                 stroke={colorScheme.border}

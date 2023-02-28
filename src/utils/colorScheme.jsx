@@ -6,4 +6,5 @@ export default {
   selectedCountry: '#00A600',
   hoveredCountry: '#00CC00',
   noData: 'gray',
+  outOfRange: 'black'
 };

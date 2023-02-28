@@ -6,7 +6,7 @@ import CountryDistance from './features/CountryDistance/CountryDistance'
 import { useEffect, useState } from 'react'
 
 function App() {
-  const [activeTab, setActiveTab] = useState(0)
+  const [activetab, setActivetab] = useState(0)
   const [height, setHeight] = useState(null)
   const [width, setWidth] = useState(null)
 
@@ -23,11 +23,11 @@ function App() {
 
   return (
     <div className="h-100 vh-100 w-100 d-flex flex-column" style={{minHeight: '100%'}}>
-      <TabSwitch activeTab={activeTab} setActiveTab={setActiveTab}>
-        <WorldMap activeTab={activeTab === 0} icon="" title="Single Category Map"/>
-        <CountryDistance activeTab={activeTab === 1} icon="" title="Difference Map"/>
-        <div activeTab={activeTab === 2} icon="" title="RelativeToCountryViz" className='h-100'><div className='d-flex pt-5 justify-content-center h-100'>Work in progress</div></div>
-        <AboutTab activeTab={activeTab === 3} icon="" title="About"/>
+      <TabSwitch activetab={activetab} setActivetab={setActivetab}>
+        <WorldMap activetab={activetab === 0 ? true : undefined} icon="" title="Single Category Map"/>
+        <CountryDistance activetab={activetab === 1 ? true : undefined} icon="" title="Difference Map"/>
+        <div activetab={activetab === 2 ? true : undefined} icon="" title="RelativeToCountryViz" className='h-100'><div className='d-flex pt-5 justify-content-center h-100'>Work in progress</div></div>
+        <AboutTab activetab={activetab === 3 ? true : undefined} icon="" title="About"/>
       </TabSwitch>
     </div>
   )

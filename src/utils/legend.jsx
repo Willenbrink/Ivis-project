@@ -5,7 +5,7 @@ import { categories } from "../utils/categories";
 import colorScheme from "./colorScheme"
 import * as d3 from "d3"
 
-export function Legend({svgRef, category, categoryStatistics, range, showRange, selected, colors, markers, zoomCall}){
+export function Legend({svgRef, category, categoryStatistics, range, showRange, selected, colors, markers, zoomCall, brushActive=false, setBrushRange}){
   const [labelWidths, setLabelWidths] = useState(null)
   const legendRef = useRef()
 
@@ -16,7 +16,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
   },[])
 
   useEffect(()=>{
-    if (legendRef.current !== null) {
+    if (brushActive && legendRef.current !== null) {
       const brush = d3.brushX()
       .on("brush", brushed)
       .on("end", brushended)
@@ -25,22 +25,23 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
 
       function brushed({selection}) {
         if (selection) {
-          svg.property("value", selection.map(x.invert, x).map(d3.utcDay.round));
+          // selection.map(x.invert, x).map(d3.utcDay.round)
+         // convert to values between -1 and 1
+         const getRange = (selection) => [selection[0]/(legendRef.current.width.baseVal.value*0.5) - 1, selection[1]/(legendRef.current.width.baseVal.value*0.5)-1]
+          svg.property("value", () => {setBrushRange(getRange(selection))})
           svg.dispatch("input");
         }
       }
-
-      function brushended({selection}) {
-        /*
-        if (!selection) {
-          gb.call(brush.move, defaultSelection);
-        }
-        */
-      }
-  
       const gb = svg.append("g")
           .call(brush)
           //.call(brush.move, defaultSelection)
+
+      function brushended({selection}) {
+        if (!selection) {
+          gb.call(brush.move, setBrushRange([-1,1]));
+        }
+      }
+
     }
     },[legendRef?.current])
 
@@ -128,10 +129,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
   const boxWidth = Math.round(categoryStatistics.range/2 * availableWidthLine)
   // Lenght of the line to the right of the box
   const lineWidthRight = availableWidthLine - lineWidthLeft - boxWidth
-  //console.log('available: ', availableWidthLine)
-  //console.log('left: ', lineWidthLeft)
-  //console.log('box: ', boxWidth)
-  //console.log('box: ', lineWidthRight)
+
   const vertLineLeft = {
     x: labelLeft.x + labelLeft.width + 5,
     y1: svgHeight - padding.y + boxHeight,
@@ -176,7 +174,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
   */
 
   // no selected country --> colorBox has full width
-  const colorBox = range.selected
+  const colorBox = selected
   ? {
     x: lineWidthLeft - 5,
     y: svgHeight - padding.y,
@@ -222,14 +220,14 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
         const width = 3;
         const labelWidth = GetWidth(m.name);
 
-        return (<>
+        return (<svg key={"marker" + m.id}>
           <rect key={"marker" + m.id} x={x} y={y} width={width} height={boxHeight} fill={m.color} style={{...styleTransition}}></rect>
 
           {m.hasTooltip && <>
             <path key={"tooltipbox" + m.id} d={bottomTooltipPath(labelWidth + 20, parseInt(fontSize) * 2, 5, 10)} fill='#EEEEEE' stroke='gray' transform={`translate(${x + width/2},${y + boxHeight + 2})`}/>
             <text key={"tooltiplabel" + m.id} transform={`translate(${x + width/2 - labelWidth/2},${y + boxHeight + parseInt(fontSize) + 12})`}>{m.name}</text>
            </>}
-        </>);
+        </svg>);
       })
     }</>);
   }
@@ -254,10 +252,10 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
               </> : ""}
         <>{/* Legend box and left/right labels */}       
             <text x={labelLeft.x} y={labelLeft.y} width={labelLeft.width} height={labelLeft.height} fill={labelLeft.color} textAnchor='end' fontWeight='bold'>
-              {category.from.map((row, idx)=> <tspan x={labelLeft.x + labelLeft.width} dy="1em">{row}</tspan>)}
+              {category.from.map((row, idx)=> <tspan key={'rightLabel_' + idx} x={labelLeft.x + labelLeft.width} dy="1em">{row}</tspan>)}
             </text>
             <text x={labelRight.x} y={labelRight.y} width={labelRight.width} height={labelRight.height} fill={labelRight.color} fontWeight='bold'>
-              {category.to.map((row)=> <tspan x={labelRight.x} dy="1em">{row}</tspan>)}
+              {category.to.map((row, idx)=> <tspan key={'leftLabel_' + idx} x={labelRight.x} dy="1em">{row}</tspan>)}
             </text>
         </>
         <>{/* Two boxes; one with and one without colors */}
