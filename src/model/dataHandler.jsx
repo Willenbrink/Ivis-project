@@ -1,35 +1,42 @@
 // data is an object of form: {keys: id list, countries: (id -> data) object}.
 // Where keys is a list of 3-letter country code
 // and data is an object containing a countrys id and a (key -> float) mapping with the keys defined before.
-var data = null;
-
-fetch("CountriesChangePr.json").then((x) => x.json()).then((x) => data = x);
-
-export function get_keys() {
-  if (!data)
-    return null;
-  return data.keys;
-}
-
-export function get_country_data(country) {
-  if (!data || !country || !data.countries[country])
-    return null;
-  return data.countries[country];
-}
-
-export function country_values_stats(category) {
-  if (!data)
-    return null;
-  let min = Number.POSITIVE_INFINITY;
-  let max = Number.NEGATIVE_INFINITY;
-  for (let country in data.countries) {
-      const value = get_country_data(country)[category];
+//ES6 class:
+class Data {
+  // @fields: json_data, keys
+  // @methods: get_country_data(country), country_values_stats(cathegory)
+  constructor(json_data) {
+    this.json_data = json_data;
+    this.keys = [];
+    if (json_data !== undefined && json_data !== null) {
+      this.keys = this.json_data.keys 
+    }
+  }
+  get_country_data(country) {
+    if (!this.json_data || !country || !this.json_data.countries[country]) {
+      return null;
+    }
+    return this.json_data.countries[country];
+  }
+  country_values_stats(category) {
+    if (!this.json_data) return null;
+    let min = Number.POSITIVE_INFINITY;
+    let max = Number.NEGATIVE_INFINITY;
+    for (let country in this.json_data.countries) {
+      const value = this.get_country_data(country)[category];
       if (value < min) {
-          min = value;
+        min = value;
       }
       if (value > max) {
-          max = value;
+        max = value;
       }
+    }
+    return { min, max, range: max - min };
   }
-  return {min, max, range: max - min}
+}
+/*
+ * fetch data from json, @return Data
+ */
+export async function fetch_data() {
+  return fetch("CountriesChangePr.json").then((x) => x.json()).then(x => new Data(x));
 }
