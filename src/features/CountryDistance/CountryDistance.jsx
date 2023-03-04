@@ -96,7 +96,7 @@ export default function CountryDistance({ data, map, isActiveTab }) {
       {svgHasMounted && (
         <>
           <LineDraw
-            data={map}
+            mapWithData={map}
             selectCountry={setSelected}
             selected={selected}
             hovered={hovered}

@@ -4,7 +4,7 @@ import { useRef } from "react";
 import colorScheme from "./colorScheme";
 
 export function LineDraw({
-  data: { iso_countries, non_iso_countries }, selectCountry, selected, hovered, setHovered, svgRef, zoomLevel, zoomLevelSetter, doReset, setDoReset, countryToColor
+  mapWithData: { iso_countries, non_iso_countries }, selectCountry, selected, hovered, setHovered, svgRef, zoomLevel, zoomLevelSetter, doReset, setDoReset, countryToColor
 }) {
 
   const gRef = useRef()

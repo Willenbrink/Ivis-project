@@ -78,7 +78,7 @@ export default function WorldMap({data, map, isActiveTab}) {
           {svgHasMounted &&
            <>
               <LineDraw
-                data={map}
+                mapWithData={map}
                 countryToColor={countryToColor}
                 selectCountry={setSelected}
                 selected={selected}
