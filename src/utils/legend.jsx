@@ -184,20 +184,21 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
 
   function countryMarkers() {
     return (<>{
-      Object.values(markers).map(m => {
+      Object.keys(markers).map(id => {
+        const m = markers[id]
         const x = rangeBox.x + m.value * rangeBox.width;
         const y = svgHeight - padding.y;
         const width = 3;
         const labelWidth = GetWidth(m.name);
 
-        return (<>
+        return (<g key={id}>
           <rect key={"marker" + m.id} x={x} y={y} width={width} height={boxHeight} fill={m.color} style={{...styleTransition}}></rect>
 
           {m.hasTooltip && <>
             <path key={"tooltipbox" + m.id} d={bottomTooltipPath(labelWidth + 20, parseInt(fontSize) * 2, 5, 10)} fill='#EEEEEE' stroke='gray' transform={`translate(${x + width/2},${y + boxHeight + 2})`}/>
             <text key={"tooltiplabel" + m.id} transform={`translate(${x + width/2 - labelWidth/2},${y + boxHeight + parseInt(fontSize) + 12})`}>{m.name}</text>
            </>}
-        </>);
+        </g>);
       })
     }</>);
   }
