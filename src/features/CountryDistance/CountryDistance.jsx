@@ -15,14 +15,14 @@ import { useRef } from "react";
 const canvasWidth = "100%";
 const canvasHeight = "100%";
 /*
-* selectedCathegories: array of ids (strings) of cathegories. country to draw: country-object, selected: country-object
-*/
+ * selectedCathegories: array of ids (strings) of cathegories. country to draw: country-object, selected: country-object
+ */
 const countryToColor = (selectedCathegories) => (country, selected) => {
   //console.log("countryToColor", country, selected)
   if (selectedCathegories.length === 0) return colorScheme.noData;
   if (!country.hasData) return colorScheme.noData;
   if (!selected) return colorScheme.middle;
-  
+
   var relative_value;
   var dist_sq = 0;
   // Choose higher values to make the dimension with the largest distance play a larger role.
@@ -40,7 +40,7 @@ const countryToColor = (selectedCathegories) => (country, selected) => {
   //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
   const absolute_value = Math.abs(relative_value);
   return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
-}
+};
 
 export default function CountryDistance({ data, map, isActiveTab }) {
   //currently selected country
@@ -55,7 +55,7 @@ export default function CountryDistance({ data, map, isActiveTab }) {
   const svgRef = useRef();
 
   // which checkboxes are checked
-  const [checkedCathegories, setCheckedCathegories] = useState(
+  const [selectedCathegories, setSelectedCathegories] = useState(
     data.keys.map((name) => true)
   );
   // Temporary fix for map not rendering on start
@@ -106,7 +106,7 @@ export default function CountryDistance({ data, map, isActiveTab }) {
             zoomLevelSetter={zoomLevelSetter}
             doReset={doReset}
             setDoReset={setDoReset}
-            countryToColor={countryToColor(getSelectedCathegories())}
+            countryToColor={countryToColor(data.keys.filter((_, idx) => selectedCathegories[idx]))} //countryToColor(names of selected cathegories)
           />
           {svgRef.current && (
             <Legend
@@ -126,20 +126,24 @@ export default function CountryDistance({ data, map, isActiveTab }) {
 
   //multi-select of cathegories
   function selectAll() {
-    setCheckedCathegories(data.keys.map(_ => true))
+    setSelectedCathegories(data.keys.map((_) => true));
   }
-  function getSelectedCathegories() {
-    return data.keys.filter((_, idx) => checkedCathegories[idx]);
+  function selectNone() {
+    setSelectedCathegories(data.keys.map((_) => false));
   }
   function toggleCathegory(index) {
-    setCheckedCathegories(checkedCathegories.map((checked, idx) => idx === index ? !checked : checked))
+    setSelectedCathegories(
+      selectedCathegories.map((checked, idx) =>
+        idx === index ? !checked : checked
+      )
+    );
   }
   const checkboxes = data.keys.map((name, idx) => (
     <Form.Check
       type="checkbox"
       label={name}
       key={name}
-      checked={checkedCathegories[idx]}
+      checked={selectedCathegories[idx]}
       onChange={() => toggleCathegory(idx)}
     />
   ));
@@ -160,10 +164,20 @@ export default function CountryDistance({ data, map, isActiveTab }) {
               info={distance.info}
             />
           </InputGroup>
-          {checkboxes}
-          <Button variant="primary" size="sm" onClick={selectAll}>
-            Select all
-          </Button>
+          {selected === null ? (
+            <div style={{ textAlign: "center", borderRadius: ".3em", borderStyle: "solid", borderWidth: ".2em", padding: ".2em", margin: ".2em", marginLeft: "0", borderColor:colorScheme.hoveredCountry}}>
+              Please select a country as reference point.
+            </div>
+          ) : (
+            <div>
+              {checkboxes}
+              {selectedCathegories.every(Boolean) ? 
+              <Button variant="light" size="sm" onClick={selectNone}>Select none</Button> : 
+              <Button variant="primary" size="sm" onClick={selectAll}>
+                Select all
+              </Button>}
+            </div>
+          )}
         </div>
 
         <div
