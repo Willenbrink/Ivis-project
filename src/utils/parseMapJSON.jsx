@@ -5,12 +5,9 @@ import iso from "iso-3166-1";
 
 const mapJSON = "https://unpkg.com/world-atlas@2.0.2/countries-110m.json";
 //gets a dataHandler-data-object
-var data_lazy = null;
-var result_lazy = null;
+//will only be executed once (App useEffect)
 export async function parseJSON(data) {
-  if (data_lazy === data) {
-    return result_lazy;
-  }
+
   return json(mapJSON).then((jsonData) => {
     const { features } = feature(jsonData, jsonData.objects.countries);
     //[{ "alpha3": "FJI", "name": "Fiji", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]]]] }]
@@ -35,11 +32,9 @@ export async function parseJSON(data) {
     const non_iso_countries = features
       .filter((d) => d.id === undefined)
       .map((d) => ({ name: d.properties.name, geometry: d.geometry }));
-    data_lazy = data;
-    result_lazy = {
+    return {
       iso_countries,
       non_iso_countries,
     };
-    return result_lazy;
   });
 }
