@@ -8,7 +8,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
   const [labelWidths, setLabelWidths] = useState({ left: 0, right: 0 })
   // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
   useEffect(()=>{
-    console.log("Computing widths!");
+    //console.log("Computing widths!");
     const [left, right] = GetWidths()
     setLabelWidths({ left, right })
   },[])
