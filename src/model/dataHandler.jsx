@@ -12,6 +12,10 @@ class Data {
       this.keys = this.json_data.keys 
     }
   }
+  /*
+    * @param {String} country: 3-letter country code
+    * @return {Object} country data
+    */
   get_country_data(country) {
     if (!this.json_data || !country || !this.json_data.countries[country]) {
       return null;
