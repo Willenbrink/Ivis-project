@@ -14,23 +14,24 @@ import { useRef } from "react";
 
 const canvasWidth = "100%";
 const canvasHeight = "100%";
-
-function countryToColor(country, selected) {
+/*
+* selectedCathegories: array of ids (strings) of cathegories. country to draw: country-object, selected: country-object
+*/
+const countryToColor = (selectedCathegories) => (country, selected) => {
   //console.log("countryToColor", country, selected)
+  if (selectedCathegories.length === 0) return colorScheme.noData;
   if (!country.hasData) return colorScheme.noData;
-  if (!selected) {
-    return colorScheme.middle;
-  }
+  if (!selected) return colorScheme.middle;
   
   var relative_value;
   var dist_sq = 0;
   // Choose higher values to make the dimension with the largest distance play a larger role.
   // Inspired by Shephard Interpolation: https://en.wikipedia.org/wiki/Inverse_distance_weighting#/media/File:Shepard_interpolation_2.png
-  // Image that three countries have the results A: (0,0), B: (0.5, 0.5), C: (0.9)
+  // Image that three countries have the results A: (0,0), B: (0.5, 0.5), C: (0, 0.9)
   // With exponent = 1, C is closer to A than B as 0.9 < 0.5 + 0.5
-  // With exponent = 2, B is closeras (0.25 + 0.25)^0.5 < 0.9^2^0.5 = 0.9
+  // With exponent = 2, B is closer as (0.25 + 0.25)^0.5 < 0.9^2^0.5 = 0.9
   const exponent = 2;
-  for (const k of data.keys) {
+  for (const k of selectedCathegories) {
     dist_sq += Math.abs(country[k] - selected[k]) ** exponent;
   }
   relative_value = exponent * dist_sq ** (1 / exponent);
@@ -105,7 +106,7 @@ export default function CountryDistance({ data, map, isActiveTab }) {
             zoomLevelSetter={zoomLevelSetter}
             doReset={doReset}
             setDoReset={setDoReset}
-            countryToColor={countryToColor}
+            countryToColor={countryToColor(getSelectedCathegories())}
           />
           {svgRef.current && (
             <Legend
@@ -122,15 +123,24 @@ export default function CountryDistance({ data, map, isActiveTab }) {
       )}
     </svg>
   );
+
+  //multi-select of cathegories
   function selectAll() {
-    //TODO
+    setCheckedCathegories(data.keys.map(_ => true))
   }
-  const buttons = data.keys.map((name, idx) => (
+  function getSelectedCathegories() {
+    return data.keys.filter((_, idx) => checkedCathegories[idx]);
+  }
+  function toggleCathegory(index) {
+    setCheckedCathegories(checkedCathegories.map((checked, idx) => idx === index ? !checked : checked))
+  }
+  const checkboxes = data.keys.map((name, idx) => (
     <Form.Check
       type="checkbox"
       label={name}
       key={name}
       checked={checkedCathegories[idx]}
+      onChange={() => toggleCathegory(idx)}
     />
   ));
   return (
@@ -150,7 +160,7 @@ export default function CountryDistance({ data, map, isActiveTab }) {
               info={distance.info}
             />
           </InputGroup>
-          {buttons}
+          {checkboxes}
           <Button variant="primary" size="sm" onClick={selectAll}>
             Select all
           </Button>
