@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { useRef } from "react";
 import colorScheme from "./colorScheme";
 
-export function LineDraw({ data: { iso_countries, non_iso_countries }, svgRef, countryToColor, selected, setSelected, hovered, setHovered, zoomLevel, setZoomLevel, doResetZoom, setDoResetZoom, setZoomCall, category, brushRange }) {
+export function LineDraw({ mapWithData: { iso_countries, non_iso_countries }, svgRef, countryToColor, selected, setSelected, hovered, setHovered, zoomLevel, setZoomLevel, doResetZoom, setDoResetZoom, setZoomCall, category, brushRange }) {
   /*
   selected: null OR {id: 'BRA', intervention: 0.0301955307022192, passengers: .... 
   hovered: null OR {id: 'BRA', intervention: 0.0301955307022192, passengers: ....

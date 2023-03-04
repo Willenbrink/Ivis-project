@@ -11,6 +11,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
 
   // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
   useEffect(()=>{
+    //console.log("Computing widths!");
     const [left, right] = GetWidths()
     setLabelWidths({ left, right })
   },[])
@@ -45,10 +46,10 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
     }
     },[legendRef?.current])
 
-    if (!svgRef.current || labelWidths == null) return
+    if (!svgRef.current || labelWidths == null || svgRef.current.getBoundingClientRect().width === 0) return
 
     const [svgHeight, svgWidth] = [svgRef.current.getBoundingClientRect().height, svgRef.current.getBoundingClientRect().width]
-  
+    console.log(svgHeight, svgWidth)
 
   // TODO: fix minimum size of legend
   const boxHeight = svgHeight * 0.05
@@ -214,20 +215,21 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
 
   function countryMarkers() {
     return (<>{
-      Object.values(markers).map(m => {
+      Object.keys(markers).map(id => {
+        const m = markers[id]
         const x = rangeBox.x + m.value * rangeBox.width;
         const y = svgHeight - padding.y;
         const width = 3;
         const labelWidth = GetWidth(m.name);
 
-        return (<svg key={"marker" + m.id}>
+        return (<g key={id}>
           <rect key={"marker" + m.id} x={x} y={y} width={width} height={boxHeight} fill={m.color} style={{...styleTransition}}></rect>
 
           {m.hasTooltip && <>
             <path key={"tooltipbox" + m.id} d={bottomTooltipPath(labelWidth + 20, parseInt(fontSize) * 2, 5, 10)} fill='#EEEEEE' stroke='gray' transform={`translate(${x + width/2},${y + boxHeight + 2})`}/>
             <text key={"tooltiplabel" + m.id} transform={`translate(${x + width/2 - labelWidth/2},${y + boxHeight + parseInt(fontSize) + 12})`}>{m.name}</text>
            </>}
-        </svg>);
+        </g>);
       })
     }</>);
   }
@@ -313,9 +315,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
         </>
         
         {/* Dotted range box */}
-        {showRange ?
-          <rect x={rangeBox.x} y={rangeBox.y} width={rangeBox.width} height={rangeBox.height} fill='none' strokeWidth="2" style={{ ...styleTransition }} className="dashedRect"></rect>
-      : ""}
+        {showRange && <rect x={rangeBox.x} y={rangeBox.y} width={rangeBox.width} height={rangeBox.height} fill='none' strokeWidth="2" style={{ ...styleTransition }} className="dashedRect"></rect>}
         {/* Middle marker */}
         <path strokeDasharray={`${Math.round((boxHeight + 20)/8)}`}
               strokeOpacity="70%" d={`M0 0 V${boxHeight + 20} 0`}

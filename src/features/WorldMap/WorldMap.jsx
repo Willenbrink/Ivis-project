@@ -1,12 +1,10 @@
 import React, { useState, useCallback, useEffect } from "react";
 import ReactDom from "react-dom";
-import { parseJSON } from "../../utils/parseMapJSON";
 import { Legend } from "../../utils/legend";
 import { LineDraw } from "../../utils/lineDraw";
 import colorScheme from "../../utils/colorScheme";
 import InfoPopover from "../../utils/InfoPopover";
 import { interpolateRgb } from "d3";
-import { country_values_stats } from "../../model/dataHandler";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
 import { categories } from "../../utils/categories";
@@ -21,8 +19,8 @@ import useRenderOnSvgMount from "../../hooks/useRenderOnSvgMount";
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
 
 
-export default function WorldMap({activetab}) {
-  // Currently selected and hovered country
+export default function WorldMap({data, map, isActiveTab}) {
+  //currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
   // Interactive category selection
@@ -37,15 +35,9 @@ export default function WorldMap({activetab}) {
   // Render map when svg element has mounted
   const svgRef = useRef(null)
   const [svgHasMounted, setSvgHasMounted] = useState(false)
-  useRenderOnSvgMount(svgRef, svgHasMounted, setSvgHasMounted, activetab)
+  useRenderOnSvgMount(svgRef, svgHasMounted, setSvgHasMounted, isActiveTab)
 
-
-  const mapData = parseJSON();
-  if (!mapData) {
-    return <pre>Loading...</pre>;
-  }
-
-  const categoryStatistics = country_values_stats(category.id)
+  const categoryStatistics = data.country_values_stats(category.id)
   const range = getRange(selected, category, categoryStatistics)
 
 
@@ -80,7 +72,7 @@ export default function WorldMap({activetab}) {
           {svgHasMounted &&
            <>
               <LineDraw
-                data={mapData}
+                mapWithData={map}
                 svgRef={svgRef}
                 countryToColor={countryToColor}
                 selected={selected}
@@ -115,8 +107,7 @@ export default function WorldMap({activetab}) {
       </svg>
   );
   return (
-    activetab && (
-    <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
+    isActiveTab && <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
       <div className="d-flex flex-column flex-grow-1 position-relative">
         {svg}
       </div>
@@ -130,7 +121,6 @@ export default function WorldMap({activetab}) {
       </div>
       */}
     </div>)
-    )
 }
 
 export const useD3 = (renderChartFn, dependencies) => {
