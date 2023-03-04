@@ -15,11 +15,11 @@ import { useRef } from "react";
 const canvasWidth = "100%";
 const canvasHeight = "100%";
 /*
- * selectedCathegories: array of ids (strings) of cathegories. country to draw: country-object, selected: country-object
+ * selectedCategories: array of ids (strings) of categories. country to draw: country-object, selected: country-object
  */
-const countryToColor = (selectedCathegories) => (country, selected) => {
+const countryToColor = (selectedCategories) => (country, selected) => {
   //console.log("countryToColor", country, selected)
-  if (selectedCathegories.length === 0) return colorScheme.noData;
+  if (selectedCategories.length === 0) return colorScheme.noData;
   if (!country.hasData) return colorScheme.noData;
   if (!selected) return colorScheme.middle;
 
@@ -31,7 +31,7 @@ const countryToColor = (selectedCathegories) => (country, selected) => {
   // With exponent = 1, C is closer to A than B as 0.9 < 0.5 + 0.5
   // With exponent = 2, B is closer as (0.25 + 0.25)^0.5 < 0.9^2^0.5 = 0.9
   const exponent = 2;
-  for (const k of selectedCathegories) {
+  for (const k of selectedCategories) {
     dist_sq += Math.abs(country[k] - selected[k]) ** exponent;
   }
   relative_value = exponent * dist_sq ** (1 / exponent);
@@ -55,8 +55,8 @@ export default function CountryDistance({ data, map, isActiveTab }) {
   const svgRef = useRef();
 
   // which checkboxes are checked
-  const [selectedCathegories, setSelectedCathegories] = useState(
-    data.keys.map((name) => true)
+  const [selectedCategories, setSelectedCategories] = useState(
+    data.keys.map(_ => true)
   );
   // Temporary fix for map not rendering on start
   useEffect(() => {
@@ -106,7 +106,7 @@ export default function CountryDistance({ data, map, isActiveTab }) {
             zoomLevelSetter={zoomLevelSetter}
             doReset={doReset}
             setDoReset={setDoReset}
-            countryToColor={countryToColor(data.keys.filter((_, idx) => selectedCathegories[idx]))} //countryToColor(names of selected cathegories)
+            countryToColor={countryToColor(data.keys.filter((_, idx) => selectedCategories[idx]))} //countryToColor(names of selected categories)
           />
           {svgRef.current && (
             <Legend
@@ -124,16 +124,16 @@ export default function CountryDistance({ data, map, isActiveTab }) {
     </svg>
   );
 
-  //multi-select of cathegories
+  //multi-select of categories
   function selectAll() {
-    setSelectedCathegories(data.keys.map((_) => true));
+    setSelectedCategories(data.keys.map((_) => true));
   }
   function selectNone() {
-    setSelectedCathegories(data.keys.map((_) => false));
+    setSelectedCategories(data.keys.map((_) => false));
   }
   function toggleCathegory(index) {
-    setSelectedCathegories(
-      selectedCathegories.map((checked, idx) =>
+    setSelectedCategories(
+      selectedCategories.map((checked, idx) =>
         idx === index ? !checked : checked
       )
     );
@@ -143,7 +143,7 @@ export default function CountryDistance({ data, map, isActiveTab }) {
       type="checkbox"
       label={name}
       key={name}
-      checked={selectedCathegories[idx]}
+      checked={selectedCategories[idx]}
       onChange={() => toggleCathegory(idx)}
     />
   ));
@@ -171,7 +171,7 @@ export default function CountryDistance({ data, map, isActiveTab }) {
           ) : (
             <div>
               {checkboxes}
-              {selectedCathegories.every(Boolean) ? 
+              {selectedCategories.every(Boolean) ? 
               <Button variant="light" size="sm" onClick={selectNone}>Select none</Button> : 
               <Button variant="primary" size="sm" onClick={selectAll}>
                 Select all
