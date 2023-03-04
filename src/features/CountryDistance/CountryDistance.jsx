@@ -9,14 +9,12 @@ import { distance } from "../../utils/categories";
 import InfoPopover from "../../utils/InfoPopover";
 import { country_values_stats } from "../../model/dataHandler";
 import { interpolateRgb } from "d3";
-import { Form, InputGroup, Button } from "react-bootstrap";
+import { InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
+import useRenderOnSvgMount from "../../hooks/useRenderOnSvgMount";
 
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
-
-const canvasWidth = "100%";
-const canvasHeight = "100%";
 
 function countryToColor(country, selected) {
   if (!country.hasData)
@@ -44,28 +42,19 @@ function countryToColor(country, selected) {
 };
 
 
-export default function CountryDistance({activeTab}) {
+export default function CountryDistance({activetab}) {
   //currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
-   const [zoomLevel, zoomLevelSetter] = useState(null);
-  //interactive category selection
 
-  const [svgHasMounted, setSvgHasMounted] = useState(false)
-  //for reseting the map
-  const [doReset, setDoReset] = useState(false);
-  const svgRef = useRef()
+  // Zooming and panning
+  const [zoomLevel, setZoomLevel] = useState(null);
+  const [doResetZoom, setDoResetZoom] = useState(false);
   
-  // Temporary fix for map not rendering on start
-  useEffect(()=>{
-    async function mount() {
-      await setTimeout(()=>{
-        setSvgHasMounted(activeTab)
-      }, 300)
-      // if (!svgHasMounted && svgRef.current?.clientWidth > 0) setSvgHasMounted(true)
-    }
-    mount()
-  },[activeTab])
+  // Fix for map not rendering on start
+  const svgRef = useRef()
+  const [svgHasMounted, setSvgHasMounted] = useState(false)
+  useRenderOnSvgMount(svgRef, svgHasMounted, setSvgHasMounted, activetab)
 
   const mapData = parseJSON();
   if (!mapData) {
@@ -76,46 +65,48 @@ export default function CountryDistance({activeTab}) {
   const colors = { left: colorScheme.middle, right: colorScheme.right };
 
   const markers = {};
-  //if (hovered)
-  //    markers[hovered.id] = { ...hovered, hasTooltip: true, value: (hovered[distance.id] + 1) / 2, color: colorScheme.hoveredCountry };
 
     const range = selected
         ? { min: categoryStatistics.min, selected: selected[distance.id], max: categoryStatistics.max }
       : { min: -1, selected: null, max: 1 };
 
   const svg = (
-      <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
+      <svg width='100%' height='100%' ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
           {svgHasMounted &&
           <>
               <LineDraw
                 data={mapData}
-                selectCountry={setSelected}
+                svgRef={svgRef}
+                countryToColor={countryToColor}
                 selected={selected}
+                setSelected={setSelected}
                 hovered={hovered}
                 setHovered={setHovered}
-                svgRef={svgRef}
                 zoomLevel={zoomLevel}
-                zoomLevelSetter={zoomLevelSetter}
-                doReset={doReset}
-                setDoReset={setDoReset}
-                countryToColor={countryToColor}
+                setZoomLevel={setZoomLevel}
+                doResetZoom={doResetZoom}
+                setDoResetZoom={setDoResetZoom}
+                setZoomCall={()=>{}}
+                category={distance}
+                brushRange={[-1.0,1.0]}
               />
               {svgRef.current &&
               <Legend
-                  svgRef={svgRef}
-                  range={range}
-                  categoryStatistics={categoryStatistics}
-                  category={distance}
-                  selected={selected}
-                  colors={colors}
-                  markers={markers}
-              />}
+                svgRef={svgRef}
+                range={range}
+                category={distance}
+                categoryStatistics={categoryStatistics}
+                selected={null}
+                colors={colors}
+                markers={markers}
+                zoomCall={()=>{}}
+            />}
           </>
           }
       </svg>
   );
   return (
-    activeTab && <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
+    activetab && <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
       <div className="d-flex flex-column flex-grow-1 position-relative">
         {svg}
       </div>

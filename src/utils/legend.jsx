@@ -3,19 +3,52 @@ import React, { useState, useCallback, useEffect } from "react";
 import { useRef } from "react";
 import { categories } from "../utils/categories";
 import colorScheme from "./colorScheme"
+import * as d3 from "d3"
 
-export function Legend({svgRef, category, categoryStatistics, range, showRange, selected, colors, markers}){
-  const [labelWidths, setLabelWidths] = useState({ left: 0, right: 0 })
+export function Legend({svgRef, category, categoryStatistics, range, showRange, selected, colors, markers, zoomCall, brushActive=false, setBrushRange, showScaleNumbers=false}){
+  const [labelWidths, setLabelWidths] = useState(null)
+  const legendRef = useRef()
+
   // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
   useEffect(()=>{
-    console.log("Computing widths!");
     const [left, right] = GetWidths()
     setLabelWidths({ left, right })
   },[])
-  if (!svgRef.current) return
-  const legendRef = useRef()
 
-  const [svgHeight, svgWidth] = [svgRef.current.getBoundingClientRect().height, svgRef.current.getBoundingClientRect().width]
+  useEffect(()=>{
+    if (brushActive && legendRef.current !== null) {
+      const brush = d3.brushX()
+      .on("brush", brushed)
+      .on("end", brushended)
+
+      const svg = d3.select(legendRef.current)
+
+      function brushed({selection}) {
+        if (selection) {
+          // selection.map(x.invert, x).map(d3.utcDay.round)
+         // convert to values between -1 and 1
+         const getRange = (selection) => [selection[0]/(legendRef.current.width.baseVal.value*0.5) - 1, selection[1]/(legendRef.current.width.baseVal.value*0.5)-1]
+          svg.property("value", () => {setBrushRange(getRange(selection))})
+          svg.dispatch("input");
+        }
+      }
+      const gb = svg.append("g")
+          .call(brush)
+          //.call(brush.move, defaultSelection)
+
+      function brushended({selection}) {
+        if (!selection) {
+          gb.call(brush.move, setBrushRange([-1,1]));
+        }
+      }
+
+    }
+    },[legendRef?.current])
+
+    if (!svgRef.current || labelWidths == null) return
+
+    const [svgHeight, svgWidth] = [svgRef.current.getBoundingClientRect().height, svgRef.current.getBoundingClientRect().width]
+  
 
   // TODO: fix minimum size of legend
   const boxHeight = svgHeight * 0.05
@@ -71,7 +104,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
 
   const labelLeft = {
     x: noDataBox.x + noDataBox.width + 20,
-    y: svgHeight - padding.y + boxHeight/2 + fontSize/4,
+    y: svgHeight - padding.y + boxHeight/2 + fontSize/4 - fontSize - (category.from.length > 1 ? fontSize/2 * (Math.floor(category.from.length/2)) : 0),
     width: labelWidths.left, // the longest word that appears here is passengers, so this is this word's width
     color: lineColor,
     fontSize
@@ -80,7 +113,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
   const paddingLabelRight = 100
   const labelRight = {
     x: svgWidth - labelWidths.right - (padding.x * 2),
-    y: svgHeight - padding.y + boxHeight/2 + fontSize/4,
+    y: svgHeight - padding.y + boxHeight/2 + fontSize/4 - fontSize - (category.to.length > 1 ? fontSize/2 * (Math.floor(category.to.length/2)) : 0),
     width: labelWidths.right, // the longest word that appears here is passengers, so this is this word's width
     color: lineColor,
     fontSize
@@ -96,10 +129,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
   const boxWidth = Math.round(categoryStatistics.range/2 * availableWidthLine)
   // Lenght of the line to the right of the box
   const lineWidthRight = availableWidthLine - lineWidthLeft - boxWidth
-  //console.log('available: ', availableWidthLine)
-  //console.log('left: ', lineWidthLeft)
-  //console.log('box: ', boxWidth)
-  //console.log('box: ', lineWidthRight)
+
   const vertLineLeft = {
     x: labelLeft.x + labelLeft.width + 5,
     y1: svgHeight - padding.y + boxHeight,
@@ -144,9 +174,9 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
   */
 
   // no selected country --> colorBox has full width
-  const colorBox = range.selected
+  const colorBox = selected
   ? {
-    x: labelLeft.x + labelLeft.width + lineWidthLeft,
+    x: lineWidthLeft - 5,
     y: svgHeight - padding.y,
     height: boxHeight,
     width: boxWidth,
@@ -154,7 +184,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
   }
   :
   {
-    x: vertLineLeft.x,
+    x: 0,
     y: svgHeight - padding.y,
     height: boxHeight,
     width: vertLineRight.x - vertLineLeft.x,
@@ -190,37 +220,76 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
         const width = 3;
         const labelWidth = GetWidth(m.name);
 
-        return (<>
+        return (<svg key={"marker" + m.id}>
           <rect key={"marker" + m.id} x={x} y={y} width={width} height={boxHeight} fill={m.color} style={{...styleTransition}}></rect>
 
           {m.hasTooltip && <>
             <path key={"tooltipbox" + m.id} d={bottomTooltipPath(labelWidth + 20, parseInt(fontSize) * 2, 5, 10)} fill='#EEEEEE' stroke='gray' transform={`translate(${x + width/2},${y + boxHeight + 2})`}/>
             <text key={"tooltiplabel" + m.id} transform={`translate(${x + width/2 - labelWidth/2},${y + boxHeight + parseInt(fontSize) + 12})`}>{m.name}</text>
            </>}
-        </>);
+        </svg>);
       })
     }</>);
   }
 
+
+  // Scale numbers
+  const scaleNumberCommons = {
+    y: hBox.y - 10,
+    height: parseInt(fontSize) + 10,
+    fill: 'black',
+    style: {textAnchor: 'middle', fontSize: `${parseInt(fontSize) - 3}`}
+  }
+
+  const scaleNumber_1 = {
+    ...scaleNumberCommons,
+    x: hBox.x
+  }
+  const scaleNumber_2 = {
+    ...scaleNumberCommons,
+    x: hBox.x + hBox.width/4,
+  }
+  const scaleNumber_3 = {
+    ...scaleNumberCommons,
+    x: hBox.x + hBox.width/2
+  }
+  const scaleNumber_4 = {
+    ...scaleNumberCommons,
+    x: hBox.x + ((hBox.width/4) * 3)
+  }
+
+  const scaleNumber_5 = {
+    ...scaleNumberCommons,
+    x: hBox.x + hBox.width
+  }
+
   return (
-    <g className='' ref={legendRef}>
+    <svg className=''>
+        <defs>
+          <filter id="blur">
+          <feGaussianBlur stdDeviation="30"></feGaussianBlur>
+          </filter>
+        </defs>
+        <rect x={15} y={rangeBoxBox.y - 10} width={svgWidth -30} height={100} fill='#EEEEEE' rx="15" stroke='gray' filter={'url(#blur)'}></rect>
         <>{/* No data text */}
             <text fontSize={noDataText.fontSize} x={noDataText.x} y={noDataText.y} width={noDataText.width} height={noDataText.height} fill={noDataText.color}>{noDataStr}</text>
             <rect x={noDataBox.x} y={noDataBox.y} width={noDataBox.width} height={noDataBox.height} fill={colorScheme.noData} stroke="#333" strokeWidth="0.3"></rect>
           </>
           {showRange ?
-              <>{/* Rangebox text */}
-                  <text fontSize={rangeBoxText_1.fontSize} x={rangeBoxText_1.x} y={rangeBoxText_1.y} width={rangeBoxText_1.width} height={rangeBoxText_1.height} fill={rangeBoxText_1.color}>{rangeBoxStr_1}</text>
-                  <text fontSize={rangeBoxText_2.fontSize} x={rangeBoxText_2.x} y={rangeBoxText_2.y} width={rangeBoxText_2.width} height={rangeBoxText_2.height} fill={rangeBoxText_2.color}>{rangeBoxStr_2}</text>
-                  <rect x={rangeBoxBox.x} y={rangeBoxBox.y} width={rangeBoxBox.width} height={rangeBoxBox.height} fill='none' className='dashedRect' strokeWidth="2"></rect>
-              </> : ""}
-        <>{/* Legend box and left/right labels */}
-            <rect x={hBox.x} y={hBox.y} width={hBox.width} height={hBox.height} fill='white' stroke="rgb(0,0,0)" strokeWidth="1"/>
-            {/* <line x1={hLineRight.x1} y1={hLineRight.y1} x2={hLineRight.x2} y2={hLineRight.y2} style={{...styleTransition, stroke:"rgb(0,0,0)", strokeWidth: hLineRight.strokeWidth}} /> */}
-            <text x={labelLeft.x} y={labelLeft.y} width={labelLeft.width} height={labelLeft.height} fill={labelLeft.color}>{category.from}</text>
-            <text x={labelRight.x} y={labelRight.y} width={labelRight.width} height={labelRight.height} fill={labelRight.color}>{category.to}</text>
+            <>{/* Rangebox text */}
+                <text fontSize={rangeBoxText_1.fontSize} x={rangeBoxText_1.x} y={rangeBoxText_1.y} width={rangeBoxText_1.width} height={rangeBoxText_1.height} fill={rangeBoxText_1.color}>{rangeBoxStr_1}</text>
+                <text fontSize={rangeBoxText_2.fontSize} x={rangeBoxText_2.x} y={rangeBoxText_2.y} width={rangeBoxText_2.width} height={rangeBoxText_2.height} fill={rangeBoxText_2.color}>{rangeBoxStr_2}</text>
+                <rect x={rangeBoxBox.x} y={rangeBoxBox.y} width={rangeBoxBox.width} height={rangeBoxBox.height} fill='none' className='dashedRect' strokeWidth="2"></rect>
+            </> : ""}
+        <>{/* Legend box and left/right labels */}       
+            <text x={labelLeft.x} y={labelLeft.y} width={labelLeft.width} height={labelLeft.height} fill={labelLeft.color} textAnchor='end' fontWeight='bold'>
+              {category.from.map((row, idx)=> <tspan key={'rightLabel_' + idx} x={labelLeft.x + labelLeft.width} dy="1em">{row}</tspan>)}
+            </text>
+            <text x={labelRight.x} y={labelRight.y} width={labelRight.width} height={labelRight.height} fill={labelRight.color} fontWeight='bold'>
+              {category.to.map((row, idx)=> <tspan key={'leftLabel_' + idx} x={labelRight.x} dy="1em">{row}</tspan>)}
+            </text>
         </>
-        <>{/* Box with colors */}
+        <>{/* Two boxes; one with and one without colors */}
             <defs>
             <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" style={{ stopColor: colors.left, stopOpacity:"1"}} />
@@ -228,7 +297,19 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
                 <stop offset="100%" style={{stopColor: colors.right, stopOpacity:"1"}} />
             </linearGradient>
             </defs>
-            <rect x={colorBox.x} y={colorBox.y} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" strokeWidth="0.3" style={{...styleTransition}}></rect>
+            <svg ref={legendRef} x={hBox.x} y={hBox.y} width={hBox.width} height={hBox.height} onMouseOver={()=>{d3.select(svgRef.current).on('.zoom', null)}} onMouseLeave={()=>{console.log('GO'); zoomCall()}}>
+              <rect width={hBox.width} height={hBox.height} fill='white' stroke="rgb(0,0,0)" strokeWidth="1"/>          
+              <rect x={colorBox.x} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" strokeWidth="0.3" style={{...styleTransition}}></rect>
+            </svg>
+            {showScaleNumbers && (
+              <>
+                <text x={scaleNumber_1.x} y={scaleNumber_1.y} height={scaleNumber_1.height} fill={scaleNumber_1.fill} style={scaleNumber_1.style}>100%</text>
+                <text x={scaleNumber_2.x} y={scaleNumber_2.y} height={scaleNumber_2.height} fill={scaleNumber_2.fill} style={scaleNumber_2.style}>50%</text>
+                <text x={scaleNumber_3.x} y={scaleNumber_3.y} height={scaleNumber_3.height} fill={scaleNumber_3.fill} style={scaleNumber_3.style}>0%</text>
+                <text x={scaleNumber_4.x} y={scaleNumber_4.y} height={scaleNumber_4.height} fill={scaleNumber_4.fill} style={scaleNumber_4.style}>50%</text>
+                <text x={scaleNumber_5.x} y={scaleNumber_5.y} height={scaleNumber_5.height} fill={scaleNumber_5.fill} style={scaleNumber_5.style}>100%</text>
+              </>
+            )}
         </>
         
         {/* Dotted range box */}
@@ -241,7 +322,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
               stroke='gray' strokeWidth="2"
               transform={`translate(${hBox.x + hBox.width/2},${svgHeight - padding.y - 10})`}/>
         {countryMarkers()}
-    </g>
+    </svg>
   )
 }
 
@@ -265,10 +346,20 @@ function GetWidths(){
   let left = 0
   let right = 0
   Object.values(categories).forEach((cat) => {
+    cat.from.forEach((row, idx)=>{
+      const leftNew = GetWidth(row)
+      if (leftNew > left) left = leftNew
+    })
+    cat.to.forEach((row, idx)=>{
+      const rightNew = GetWidth(row)
+      if (rightNew > right) right = rightNew
+    })
+    /*
     const leftNew = GetWidth(cat.from)
     const rightNew = GetWidth(cat.to)
     if (leftNew > left) left = leftNew
     if (rightNew > right) right = rightNew
+    */
   })
   return [left, right]
 }
