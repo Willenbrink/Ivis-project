@@ -5,7 +5,7 @@ import { categories } from "../utils/categories";
 import colorScheme from "./colorScheme"
 import * as d3 from "d3"
 
-export function Legend({svgRef, category, categoryStatistics, range, showRange, selected, colors, markers, zoomCall, brushActive=false, setBrushRange}){
+export function Legend({svgRef, category, categoryStatistics, range, showRange, selected, colors, markers, zoomCall, brushActive=false, setBrushRange, showScaleNumbers=false}){
   const [labelWidths, setLabelWidths] = useState(null)
   const legendRef = useRef()
 
@@ -232,6 +232,37 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
     }</>);
   }
 
+
+  // Scale numbers
+  const scaleNumberCommons = {
+    y: hBox.y - 10,
+    height: parseInt(fontSize) + 10,
+    fill: 'black',
+    style: {textAnchor: 'middle', fontSize: `${parseInt(fontSize) - 3}`}
+  }
+
+  const scaleNumber_1 = {
+    ...scaleNumberCommons,
+    x: hBox.x
+  }
+  const scaleNumber_2 = {
+    ...scaleNumberCommons,
+    x: hBox.x + hBox.width/4,
+  }
+  const scaleNumber_3 = {
+    ...scaleNumberCommons,
+    x: hBox.x + hBox.width/2
+  }
+  const scaleNumber_4 = {
+    ...scaleNumberCommons,
+    x: hBox.x + ((hBox.width/4) * 3)
+  }
+
+  const scaleNumber_5 = {
+    ...scaleNumberCommons,
+    x: hBox.x + hBox.width
+  }
+
   return (
     <svg className=''>
         <defs>
@@ -245,11 +276,11 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
             <rect x={noDataBox.x} y={noDataBox.y} width={noDataBox.width} height={noDataBox.height} fill={colorScheme.noData} stroke="#333" strokeWidth="0.3"></rect>
           </>
           {showRange ?
-              <>{/* Rangebox text */}
-                  <text fontSize={rangeBoxText_1.fontSize} x={rangeBoxText_1.x} y={rangeBoxText_1.y} width={rangeBoxText_1.width} height={rangeBoxText_1.height} fill={rangeBoxText_1.color}>{rangeBoxStr_1}</text>
-                  <text fontSize={rangeBoxText_2.fontSize} x={rangeBoxText_2.x} y={rangeBoxText_2.y} width={rangeBoxText_2.width} height={rangeBoxText_2.height} fill={rangeBoxText_2.color}>{rangeBoxStr_2}</text>
-                  <rect x={rangeBoxBox.x} y={rangeBoxBox.y} width={rangeBoxBox.width} height={rangeBoxBox.height} fill='none' className='dashedRect' strokeWidth="2"></rect>
-              </> : ""}
+            <>{/* Rangebox text */}
+                <text fontSize={rangeBoxText_1.fontSize} x={rangeBoxText_1.x} y={rangeBoxText_1.y} width={rangeBoxText_1.width} height={rangeBoxText_1.height} fill={rangeBoxText_1.color}>{rangeBoxStr_1}</text>
+                <text fontSize={rangeBoxText_2.fontSize} x={rangeBoxText_2.x} y={rangeBoxText_2.y} width={rangeBoxText_2.width} height={rangeBoxText_2.height} fill={rangeBoxText_2.color}>{rangeBoxStr_2}</text>
+                <rect x={rangeBoxBox.x} y={rangeBoxBox.y} width={rangeBoxBox.width} height={rangeBoxBox.height} fill='none' className='dashedRect' strokeWidth="2"></rect>
+            </> : ""}
         <>{/* Legend box and left/right labels */}       
             <text x={labelLeft.x} y={labelLeft.y} width={labelLeft.width} height={labelLeft.height} fill={labelLeft.color} textAnchor='end' fontWeight='bold'>
               {category.from.map((row, idx)=> <tspan key={'rightLabel_' + idx} x={labelLeft.x + labelLeft.width} dy="1em">{row}</tspan>)}
@@ -270,6 +301,15 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
               <rect width={hBox.width} height={hBox.height} fill='white' stroke="rgb(0,0,0)" strokeWidth="1"/>          
               <rect x={colorBox.x} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" strokeWidth="0.3" style={{...styleTransition}}></rect>
             </svg>
+            {showScaleNumbers && (
+              <>
+                <text x={scaleNumber_1.x} y={scaleNumber_1.y} height={scaleNumber_1.height} fill={scaleNumber_1.fill} style={scaleNumber_1.style}>100%</text>
+                <text x={scaleNumber_2.x} y={scaleNumber_2.y} height={scaleNumber_2.height} fill={scaleNumber_2.fill} style={scaleNumber_2.style}>50%</text>
+                <text x={scaleNumber_3.x} y={scaleNumber_3.y} height={scaleNumber_3.height} fill={scaleNumber_3.fill} style={scaleNumber_3.style}>0%</text>
+                <text x={scaleNumber_4.x} y={scaleNumber_4.y} height={scaleNumber_4.height} fill={scaleNumber_4.fill} style={scaleNumber_4.style}>50%</text>
+                <text x={scaleNumber_5.x} y={scaleNumber_5.y} height={scaleNumber_5.height} fill={scaleNumber_5.fill} style={scaleNumber_5.style}>100%</text>
+              </>
+            )}
         </>
         
         {/* Dotted range box */}

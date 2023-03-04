@@ -13,47 +13,31 @@ import { categories } from "../../utils/categories";
 import useWindowDimensions from "../../hooks/windowResizeHook";
 import CategorySelectorInfo from "./CategorySelectorInfo";
 import ResetZoomButton from "./ResetZoomButton";
+import { getMarkers } from "../../utils/getMarkers";
+import { getRange } from "../../utils/getRange";
+import useRenderOnSvgMount from "../../hooks/useRenderOnSvgMount";
 
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
 
-const canvasWidth = "100%";
-const canvasHeight = "100%";
 
 export default function WorldMap({activetab}) {
-  // Currently selected country
+  // Currently selected and hovered country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
   // Interactive category selection
   const [category, setCategory] = useState(categories.intervention);
-  // Zooming
-  const [zoomLevel, zoomLevelSetter] = useState(null);
-  // For reseting the map zoom
-  const [doReset, setDoReset] = useState(false);
-  // Zoom/pan callback
-  const [zoomCall, setZoomCall] = useState(()=>{})
+  // Zooming/panning
+  const [zoomLevel, setZoomLevel] = useState(null);
+  const [doResetZoom, setDoResetZoom] = useState(false); // Reset zoom/pan
+  const [zoomCall, setZoomCall] = useState(()=>{}) // Turn on zoom/pan callback
   // Brushing
   const [brushRange, setBrushRange] = useState([-1.0,1.0])
 
-  // Fix for map not rendering on start
+  // Render map when svg element has mounted
   const svgRef = useRef(null)
   const [svgHasMounted, setSvgHasMounted] = useState(false)
-  useEffect(()=>{
-    /* 
-    Only render the map when the svg element has been assigned to the react reference (svgRef).
-    We do this because svgRef is used in child components to draw the map.
-    */
-    if(svgRef.current !== null) {
-      setSvgHasMounted(true)
-    } else {
-      // When we switch tab, svgRef is set to null, so we also se svgHasMounted to false
-      setSvgHasMounted(false)
-    }
-    /* 
-    svgRef?.current?.clientWidth: when the width of the svg changes it triggers the useEffect (it rerenders the map)
-    This solves a bug where the map is rendered but with height, width = 0
-    */
-  },[activetab, svgRef?.current?.clientWidth])
+  useRenderOnSvgMount(svgRef, svgHasMounted, setSvgHasMounted, activetab)
 
 
   const mapData = parseJSON();
@@ -61,10 +45,8 @@ export default function WorldMap({activetab}) {
     return <pre>Loading...</pre>;
   }
 
-  const categoryStatistics = country_values_stats(category.id);
-  const range = selected
-        ? {min: categoryStatistics.min, selected: selected[category.id], max: categoryStatistics.max}
-        : {min: -1, selected: null, max: 1};
+  const categoryStatistics = country_values_stats(category.id)
+  const range = getRange(selected, category, categoryStatistics)
 
 
   function valueToColor(value, colorForLegend=false) {
@@ -75,18 +57,11 @@ export default function WorldMap({activetab}) {
       relative_value = (value - range.selected) / (range.max - range.min);
       //if (!colorForLegend && (relative_value < brushRange[0] || relative_value) > brushRange[1]) return colorScheme.outOfRange    
     } else {
-      /*
-      function ValueInRange(val, brushRange){
-        val >= brushRange[0] && val <= brushRange[1]
-          ? true
-          : false
-      }
-      */
       // If range.selected is null, we have our reference at 0.
       // But, this means that the extreme ends are only "half the bar" away from the reference.
       // Therefore, we multiply by 2
       relative_value = 2 * value / (range.max - range.min);
-      if (!colorForLegend && (relative_value < brushRange[0] || relative_value) > brushRange[1]) return colorScheme.outOfRange    
+      // if (!colorForLegend && (relative_value < brushRange[0] || relative_value) > brushRange[1]) return colorScheme.outOfRange    
     }
     const extreme_color = relative_value < 0 ? colorScheme.left : colorScheme.right;
     //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
@@ -98,29 +73,26 @@ export default function WorldMap({activetab}) {
   };
 
   const colors = { left: valueToColor(range.min, true), middle: colorScheme.middle, right: valueToColor(range.max, true) };
-  const markers = {};
-  if (selected)
-    markers[selected.id] = { ...selected, hasTooltip: !hovered, value: (selected[category.id] - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min), color: colorScheme.selectedCountry };
-  if (hovered)
-    markers[hovered.id] = { ...hovered, hasTooltip: true, value: ( hovered[category.id] - categoryStatistics.min) / (categoryStatistics.max - categoryStatistics.min), color: colorScheme.hoveredCountry };
+  const markers = getMarkers(selected, hovered, category, categoryStatistics)
 
   const svg = (
-      <svg width={canvasWidth} height={canvasHeight} ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
+      <svg width="100%" height="100%" ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
           {svgHasMounted &&
            <>
               <LineDraw
                 data={mapData}
+                svgRef={svgRef}
                 countryToColor={countryToColor}
-                selectCountry={setSelected}
                 selected={selected}
+                setSelected={setSelected}
                 hovered={hovered}
                 setHovered={setHovered}
-                svgRef={svgRef}
                 zoomLevel={zoomLevel}
-                zoomLevelSetter={zoomLevelSetter}
-                doReset={doReset}
-                setDoReset={setDoReset}
+                setZoomLevel={setZoomLevel}
+                doResetZoom={doResetZoom}
+                setDoResetZoom={setDoResetZoom}
                 setZoomCall={setZoomCall}
+                category={category}
                 brushRange={brushRange}
               />
               {svgRef.current &&
@@ -136,6 +108,7 @@ export default function WorldMap({activetab}) {
                 zoomCall={zoomCall}
                 brushActive
                 setBrushRange={setBrushRange}
+                showScaleNumbers
               />}
           </>
           }
@@ -148,7 +121,7 @@ export default function WorldMap({activetab}) {
         {svg}
       </div>
       <CategorySelectorInfo category={category} setCategory={setCategory} />
-      <ResetZoomButton zoomLevel={zoomLevel} setDoReset={setDoReset}/>
+      <ResetZoomButton zoomLevel={zoomLevel} setDoResetZoom={setDoResetZoom}/>
       {/* 
       <div className="w-25 mx-3">
         <p className="fs-4 mb-2 border-bottom">{categoriesObjects[category].title}</p>
