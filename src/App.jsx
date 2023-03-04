@@ -32,10 +32,10 @@ function App() {
 
   return (
     <div className="h-100 vh-100 w-100 d-flex flex-column" style={{minHeight: '100%'}}>
-      <TabSwitch activeTab={activeTab} setActiveTab={setActiveTab}>{}
-        {(data !== null && map !== null) ? <WorldMap data={data} map={map}activeTab={activeTab === 0} icon="" title="Single Category Map"/>: <pre>"Loading..."</pre>}
-        {(data !== null && map !== null) ? <CountryDistance data={data} map={map} activeTab={activeTab === 1} icon="" title="Difference Map"/> : <pre>"Loading..."</pre>}
-        <div activeTab={activeTab === 2} icon="" title="RelativeToCountryViz" className='h-100'><div className='d-flex pt-5 justify-content-center h-100'>Work in progress</div></div>
+      <TabSwitch activeTab={activeTab} setActiveTab={setActiveTab}>
+        {(data !== null && map !== null) ? <WorldMap data={data} map={map} isActiveTab={activeTab === 0} icon="" title="Single Category Map"/>: <pre>"Loading..."</pre>}
+        {(data !== null && map !== null) ? <CountryDistance data={data} map={map} isActiveTab={activeTab === 1} icon="" title="Difference Map"/> : <pre>"Loading..."</pre>}
+        <div icon="" title="RelativeToCountryViz" className='h-100'><div className='d-flex pt-5 justify-content-center h-100'>Work in progress</div></div>
         <AboutTab activeTab={activeTab === 3} icon="" title="About"/>
       </TabSwitch>
     </div>

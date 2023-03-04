@@ -41,7 +41,7 @@ function countryToColor(country, selected) {
   return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
 }
 
-export default function CountryDistance({ data, map, activeTab }) {
+export default function CountryDistance({ data, map, isActiveTab }) {
   //currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
@@ -61,12 +61,12 @@ export default function CountryDistance({ data, map, activeTab }) {
   useEffect(() => {
     async function mount() {
       setTimeout(() => {
-        setSvgHasMounted(activeTab);
+        setSvgHasMounted(isActiveTab);
       }, 300);
       // if (!svgHasMounted && svgRef.current?.clientWidth > 0) setSvgHasMounted(true)
     }
     mount();
-  }, [activeTab]);
+  }, [isActiveTab]);
 
   const categoryStatistics = data.country_values_stats();
   const colors = { left: colorScheme.middle, right: colorScheme.right };
@@ -129,11 +129,12 @@ export default function CountryDistance({ data, map, activeTab }) {
     <Form.Check
       type="checkbox"
       label={name}
+      key={name}
       checked={checkedCathegories[idx]}
     />
   ));
   return (
-    activeTab && (
+    isActiveTab && (
       <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
         <div className="d-flex flex-column flex-grow-1 position-relative">
           {svg}

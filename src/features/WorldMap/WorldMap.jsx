@@ -16,7 +16,7 @@ import useWindowDimensions from "../../hooks/windowResizeHook";
 const canvasWidth = "100%";
 const canvasHeight = "100%";
 
-export default function WorldMap({data, map, activeTab}) {
+export default function WorldMap({data, map, isActiveTab}) {
   //currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
@@ -32,12 +32,12 @@ export default function WorldMap({data, map, activeTab}) {
   useEffect(()=>{
     async function mount() {
       await setTimeout(()=>{
-        setSvgHasMounted(activeTab)
+        setSvgHasMounted(isActiveTab)
       }, 300)
       // if (!svgHasMounted && svgRef.current?.clientWidth > 0) setSvgHasMounted(true)
     }
     mount()
-  },[activeTab])
+  },[isActiveTab])
 
   const categoryStatistics = data.country_values_stats(category.id);
   const range = selected
@@ -106,7 +106,7 @@ export default function WorldMap({data, map, activeTab}) {
       </svg>
   );
   return (
-    activeTab && <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
+    isActiveTab && <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
       <div className="d-flex flex-column flex-grow-1 position-relative">
         {svg}
       </div>
