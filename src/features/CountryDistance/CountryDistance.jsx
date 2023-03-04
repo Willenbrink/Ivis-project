@@ -139,13 +139,11 @@ export default function CountryDistance({ data, map, isActiveTab }) {
     );
   }
   const checkboxes = data.keys.map((name, idx) => (
-    <Form.Check
-      type="checkbox"
-      label={name}
+    <div><Button variant={"light"} size="sm"
       key={name}
-      checked={selectedCathegories[idx]}
-      onChange={() => toggleCathegory(idx)}
-    />
+      onClick={() => toggleCathegory(idx)}
+      style={{marginTop:".3em",marginLeft: selectedCathegories[idx]?"1em":"0", border: "solid", borderWidth: ".2em", borderColor: selectedCathegories[idx]?colorScheme.right:""}}
+    >{name}</Button></div>
   ));
   return (
     isActiveTab && (
@@ -172,8 +170,8 @@ export default function CountryDistance({ data, map, isActiveTab }) {
             <div>
               {checkboxes}
               {selectedCathegories.every(Boolean) ? 
-              <Button variant="light" size="sm" onClick={selectNone}>Select none</Button> : 
-              <Button variant="primary" size="sm" onClick={selectAll}>
+              <Button style={{marginTop:".5em"}} variant="light" size="sm" onClick={selectNone}>Select none</Button> : 
+              <Button style={{marginTop:".5em"}} variant="primary" size="sm" onClick={selectAll}>
                 Select all
               </Button>}
             </div>
