@@ -1,12 +1,10 @@
 import React, { useState, useCallback, useEffect } from "react";
 import ReactDom from "react-dom";
-import { parseJSON } from "../../utils/parseMapJSON";
 import { Legend } from "../../utils/legend";
 import { LineDraw } from "../../utils/lineDraw";
 import colorScheme from "../../utils/colorScheme";
 import InfoPopover from "../../utils/InfoPopover";
 import { interpolateRgb } from "d3";
-import { country_values_stats } from "../../model/dataHandler";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
 import { categories } from "../../utils/categories";
@@ -18,7 +16,7 @@ import useWindowDimensions from "../../hooks/windowResizeHook";
 const canvasWidth = "100%";
 const canvasHeight = "100%";
 
-export default function WorldMap({activeTab}) {
+export default function WorldMap({data, map, isActiveTab}) {
   //currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
@@ -34,20 +32,14 @@ export default function WorldMap({activeTab}) {
   useEffect(()=>{
     async function mount() {
       await setTimeout(()=>{
-        setSvgHasMounted(activeTab)
+        setSvgHasMounted(isActiveTab)
       }, 300)
       // if (!svgHasMounted && svgRef.current?.clientWidth > 0) setSvgHasMounted(true)
     }
     mount()
-  },[activeTab])
+  },[isActiveTab])
 
-
-  const mapData = parseJSON();
-  if (!mapData) {
-    return <pre>Loading...</pre>;
-  }
-
-  const categoryStatistics = country_values_stats(category.id);
+  const categoryStatistics = data.country_values_stats(category.id);
   const range = selected
         ? {min: categoryStatistics.min, selected: selected[category.id], max: categoryStatistics.max}
         : {min: -1, selected: null, max: 1};
@@ -86,7 +78,7 @@ export default function WorldMap({activeTab}) {
           {svgHasMounted &&
            <>
               <LineDraw
-                data={mapData}
+                mapWithData={map}
                 countryToColor={countryToColor}
                 selectCountry={setSelected}
                 selected={selected}
@@ -114,7 +106,7 @@ export default function WorldMap({activeTab}) {
       </svg>
   );
   return (
-    activeTab && <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
+    isActiveTab && <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
       <div className="d-flex flex-column flex-grow-1 position-relative">
         {svg}
       </div>
