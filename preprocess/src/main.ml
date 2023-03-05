@@ -26,6 +26,103 @@ type country_assoc = (string * country) list
 
 let country_assoc_to_yojson xs = `Assoc (List.map (fun (id,c) -> id, country_to_yojson c) xs)
 
+module Country = struct
+  type t = country
+
+  let dist a b =
+    let exp = 2. in
+    let cats = [
+      a.intervention, b.intervention;
+      a.passengers, b.passengers;
+      a.law, b.law;
+      a.gender, b.gender;
+      a.fitness, b.fitness;
+      a.status, b.status;
+      a.age, b.age;
+      a.number, b.number;
+      a.species, b.species;
+    ]
+    in
+    List.fold_left (fun acc (x,y) -> acc +. Float.pow (x -. y) exp ) 0. cats
+    |> (fun x -> Float.pow x (1. /. exp))
+
+  let compare a b =
+    let d = dist a b in
+    if d < 0.
+    then -1
+    else if d > 0.
+    then 1
+    else 0
+end
+
+module CountrySet = Set.Make (Country)
+
+module CountryCluster = struct
+  include CountrySet
+  type t = CountrySet.t
+  type elt = CountrySet.elt
+
+  let singleton = CountrySet.singleton
+  let join = CountrySet.union
+
+  let dist a b =
+    let seq =
+      CountrySet.to_seq a
+      |> Seq.flat_map (fun c1 -> CountrySet.to_seq b |> Seq.map (fun c2 -> c1,c2))
+    in
+    let single_linkage seq =
+      Seq.fold_left (fun acc (c1,c2) -> min acc @@ Country.dist c1 c2) Float.infinity seq
+    in
+    let maximum_linkage seq =
+      Seq.fold_left (fun acc (c1,c2) -> max acc @@ Country.dist c1 c2) 0. seq
+    in
+    (* TODO *)
+    (* let ward_linkage seq = *)
+    (*   Seq.fold_left (fun acc (c1,c2) -> max acc @@ Country.dist c1 c2) 0. seq *)
+    (* in *)
+    maximum_linkage seq
+
+
+  let to_string_list set =
+      to_seq set |> Seq.map (fun c -> c.id) |> List.of_seq
+  let to_yojson set =
+      to_string_list set |> [%to_yojson: string list]
+end
+
+module ClusterAlgo = struct
+  include Clustering.Agglomerative.Make (Country) (CountryCluster)
+end
+
+type cluster =
+  | Node of CountryCluster.t * cluster * cluster
+  | Leaf of CountryCluster.t [@@deriving to_yojson]
+
+(* type cluster_proxy = {countries : CountryCluster.t; children : } *)
+
+(* let cluster_to_yojson {set; tree; _} = match tree with *)
+(*   | Leaf -> `Null *)
+(*   | Node (c1,c2) -> "" *)
+
+let clustering (countries : country list) =
+  let clusters = ClusterAlgo.cluster countries in
+  let depth_list =
+    ClusterAlgo.all_clusters clusters
+    (* |> List.iter (fun (cluster, depth) -> Printf.printf "%i (size: %i): %s\n" depth (CountryCluster.cardinal cluster) (CountryCluster.fold (fun c acc -> acc ^ ", " ^ c.id) cluster "")) *)
+    |> List.map (fun (cluster,depth) -> CountryCluster.to_string_list cluster, depth)
+    |> [%to_yojson: (string list * int) list]
+  in
+  let rec convert_cluster ({ set; tree; _ } : ClusterAlgo.cluster) = match tree with
+    | Leaf ->
+      assert (CountryCluster.cardinal set = 1);
+      (* Leaf ((CountryCluster.choose set).id) *)
+      Leaf set
+    | Node (left, right) ->
+      Node (set, convert_cluster left, convert_cluster right)
+  in
+  let cluster_tree = [%to_yojson: cluster] (convert_cluster clusters) in
+
+  depth_list, cluster_tree
+
 let () =
   let path_data =
     let error () = failwith {|
@@ -45,11 +142,13 @@ Instead, use the Google Drive link.
   let country_file = "CountriesChangePr.csv" in
   let path_public = Filename.concat path_data "../../../public" in
   let country_csv = Filename.concat path_data country_file in
-  let country_json =
+  let full_path file =
     let open Filename in
-    concat path_public @@ (chop_extension country_file) ^ ".json"
+    concat path_public @@ file ^ ".json"
   in
-  print_endline country_json;
+  let country_json = full_path (Filename.chop_extension country_file) in
+  let depth_list_json = full_path "depth_list" in
+  let cluster_tree_json = full_path "cluster_tree" in
 
   let row_to_country = function
     | id, [
@@ -88,12 +187,18 @@ Instead, use the Google Drive link.
         | _ -> failwith "Invalid format")
     |> List.map row_to_country
   in
+  let depth_list, cluster_tree = clustering countries in
   let yojson : Yojson.Safe.t =
     `Assoc [
       ("keys", [%to_yojson: string list] @@ List.tl Yojson_meta_country.keys); (* We do not want to export id *)
       ("countries", [%to_yojson: country_assoc] @@ List.map (fun c -> (c.id, c)) countries);
     ]
   in
-  Yojson.Safe.to_file ~std:true country_json yojson;
-  print_endline (Yojson.Safe.to_string yojson);
-  Printf.printf "Successfully wrote file to %s.\n" country_json
+  let write_file path data =
+    Yojson.Safe.to_file ~std:true path data;
+    Printf.printf "Successfully wrote file to %s.\n" path;
+  in
+  write_file country_json yojson;
+  write_file depth_list_json depth_list;
+  write_file cluster_tree_json cluster_tree;
+  (* print_endline (Yojson.Safe.to_string yojson); *)
