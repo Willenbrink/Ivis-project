@@ -93,25 +93,33 @@ module ClusterAlgo = struct
   include Clustering.Agglomerative.Make (Country) (CountryCluster)
 end
 
-type cluster = ClusterAlgo.cluster = { set : CountryCluster.t; tree : tree; uid : int } [@@deriving to_yojson]
-and tree = ClusterAlgo.tree =
-  | Node of cluster * cluster
-  | Leaf [@@deriving to_yojson]
+type cluster =
+  | Node of cluster * CountryCluster.t * cluster
+  | Leaf of CountryCluster.t [@@deriving to_yojson]
+
+(* type cluster_proxy = {countries : CountryCluster.t; children : } *)
 
 (* let cluster_to_yojson {set; tree; _} = match tree with *)
 (*   | Leaf -> `Null *)
 (*   | Node (c1,c2) -> "" *)
 
 let clustering (countries : country list) =
-  let open ClusterAlgo in
-  let clusters = cluster countries in
+  let clusters = ClusterAlgo.cluster countries in
   let depth_list =
-    all_clusters clusters
+    ClusterAlgo.all_clusters clusters
     (* |> List.iter (fun (cluster, depth) -> Printf.printf "%i (size: %i): %s\n" depth (CountryCluster.cardinal cluster) (CountryCluster.fold (fun c acc -> acc ^ ", " ^ c.id) cluster "")) *)
     |> List.map (fun (cluster,depth) -> CountryCluster.to_string_list cluster, depth)
     |> [%to_yojson: (string list * int) list]
   in
-  let cluster_tree = [%to_yojson: cluster] clusters in
+  let rec convert_cluster ({ set; tree; _ } : ClusterAlgo.cluster) = match tree with
+    | Leaf ->
+      assert (CountryCluster.cardinal set = 1);
+      (* Leaf ((CountryCluster.choose set).id) *)
+      Leaf set
+    | Node (left, right) ->
+      Node (convert_cluster left, set, convert_cluster right)
+  in
+  let cluster_tree = [%to_yojson: cluster] (convert_cluster clusters) in
 
   depth_list, cluster_tree
 
