@@ -94,7 +94,7 @@ module ClusterAlgo = struct
 end
 
 type cluster =
-  | Node of cluster * CountryCluster.t * cluster
+  | Node of CountryCluster.t * cluster * cluster
   | Leaf of CountryCluster.t [@@deriving to_yojson]
 
 (* type cluster_proxy = {countries : CountryCluster.t; children : } *)
@@ -117,7 +117,7 @@ let clustering (countries : country list) =
       (* Leaf ((CountryCluster.choose set).id) *)
       Leaf set
     | Node (left, right) ->
-      Node (convert_cluster left, set, convert_cluster right)
+      Node (set, convert_cluster left, convert_cluster right)
   in
   let cluster_tree = [%to_yojson: cluster] (convert_cluster clusters) in
 
