@@ -90,7 +90,7 @@ export default function CountryDistance({data, map, isActiveTab}) {
                 setDoResetZoom={setDoResetZoom}
                 setZoomCall={()=>{}}
                 category={distance}
-                brushRange={[-1.0,1.0]}
+                brushRange={[-2.0,2.0]}
               />
               {svgRef.current &&
               <Legend
