@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Children, useRef, useState } from "react"
 import { Nav, Tab } from "react-bootstrap";
 
-export default function TabSwitch({children, activetab, setActivetab}) {
+export default function TabSwitch({children, activeTabNumber, setActiveTabNumber}) {
   const tabsRef = useRef()
   // This code was an attempt to solve a window size issue
   //
@@ -32,12 +32,12 @@ export default function TabSwitch({children, activetab, setActivetab}) {
   const tab = "bg-white fw-light rounded-0 text-secondary"
 
   return (
-    <Tab.Container id="left-tabs-example" defaultActiveKey={activetab}>
+    <Tab.Container id="left-tabs-example" defaultActiveKey={activeTabNumber}>
       <Nav ref={tabsRef} className="shadow px-5" variant="pills" >
       {Children.map(children, (child, idx) => {
         return(
         <Nav.Item className=''>
-        <Nav.Link as="button" eventKey={idx} onClick={()=>setActivetab(idx)} className={`d-flex justify-content-center ${activetab === idx ? chosenTab : tab}`}><div className='d-flex align-items-center justify-content-center gap-2 fs-5 px-4'>{child.props.icon}<p className='m-0'>{child.props.title}</p></div></Nav.Link>
+        <Nav.Link as="button" eventKey={idx} onClick={()=>setActiveTabNumber(idx)} className={`d-flex justify-content-center ${activeTabNumber === idx ? chosenTab : tab}`}><div className='d-flex align-items-center justify-content-center gap-2 fs-5 px-4'>{child.props.icon}<p className='m-0'>{child.props.title}</p></div></Nav.Link>
       </Nav.Item>
         )
       })}
@@ -45,7 +45,7 @@ export default function TabSwitch({children, activetab, setActivetab}) {
           <Tab.Content className='w-100 d-flex flex-column flex-grow-1' >
           {Children.map(children, (child, idx) => {
             return(
-            <Tab.Pane eventKey={idx} key={idx} className={activetab === idx ? 'd-flex flex-column flex-grow-1' : ''}>
+            <Tab.Pane eventKey={idx} key={idx} className={activeTabNumber === idx ? 'd-flex flex-column flex-grow-1' : ''}>
             {child}
           </Tab.Pane>
          ) })}

@@ -13,8 +13,6 @@ import useRenderOnSvgMount from "../../hooks/useRenderOnSvgMount";
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
 
-const canvasWidth = "100%";
-const canvasHeight = "100%";
 /*
  * selectedCategories: array of ids (strings) of categories. country to draw: country-object, selected: country-object
  */
@@ -79,7 +77,7 @@ export default function CountryDistance({data, map, isActiveTab}) {
           {svgHasMounted &&
           <>
               <LineDraw
-                mapwithdata={map}
+                mapWithData={map}
                 svgRef={svgRef}
                 countryToColor={countryToColor(data.keys.filter((_, idx) => selectedCategories[idx]))} //countryToColor(names of selected categories)
                 selected={selected}

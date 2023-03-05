@@ -71,16 +71,21 @@ export function LineDraw({ mapWithData: { iso_countries, non_iso_countries }, sv
           />
           {
             //example country: {"geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
-            non_iso_countries.map((c, idx) => (
+            non_iso_countries.map((c, idx) => {
+              const isBrushOn = brushRange[0] > -2
+              return (
               <path
                 key={`no_iso_country_${idx}`}
-                fill={colorScheme.noData}
+                id={c.name}
+                fill={isBrushOn ? colorScheme.outOfRange : colorScheme.noData}
+                fillOpacity={isBrushOn ? '10%' : '100%'}
+                strokeOpacity={isBrushOn ? '10%' : '100%'}
                 className="no_iso_country"
                 stroke={colorScheme.border}
                 strokeWidth={` ${borderLineWidth * zoomFactor}px`}
                 d={path(c.geometry)}
               />
-            ))
+            )})
           }
           {
             //example country: {"color": "#040", "id": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
@@ -135,6 +140,7 @@ export function LineDraw({ mapWithData: { iso_countries, non_iso_countries }, sv
 }
 
 function isInRange(val, brushRange){
+  if (!val && brushRange[0] > -2) return false
   if (val < brushRange[0] || val > brushRange[1]) return false 
   else return true
 }

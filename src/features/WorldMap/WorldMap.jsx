@@ -30,7 +30,7 @@ export default function WorldMap({data, map, isActiveTab}) {
   const [doResetZoom, setDoResetZoom] = useState(false); // Reset zoom/pan
   const [zoomCall, setZoomCall] = useState(()=>{}) // Turn on zoom/pan callback
   // Brushing
-  const [brushRange, setBrushRange] = useState([-1.0,1.0])
+  const [brushRange, setBrushRange] = useState([-2.0,2.0]) // when brush is off, range is [-2,2]. When brush is on, the range is maximum [-1,1]
 
   // Render map when svg element has mounted
   const svgRef = useRef(null)
@@ -40,9 +40,6 @@ export default function WorldMap({data, map, isActiveTab}) {
   const categoryStatistics = data.country_values_stats(category.id)
   const range = getRange(selected, category, categoryStatistics)
 
-  useEffect(()=>{
-    console.log(svgRef.current)
-  },[svgRef.current])
   function valueToColor(value, colorForLegend=false) {
     if (!value)
       return colorScheme.noData;

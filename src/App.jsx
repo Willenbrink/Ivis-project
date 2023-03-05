@@ -8,7 +8,7 @@ import { parseJSON } from './utils/parseMapJSON'
 import { fetch_data } from './model/dataHandler'
 
 function App() {
-  const [activeTabNumber, setActiveTabNumber ] = useState(0)
+  const [activeTabNumber, setActiveTabNumber] = useState(0)
   const [height, setHeight] = useState(null)
   const [width, setWidth] = useState(null)
   const [data, setData] = useState(null)
@@ -32,7 +32,7 @@ function App() {
 
   return (
     <div className="h-100 vh-100 w-100 d-flex flex-column" style={{minHeight: '100%'}}>
-      <TabSwitch activeTab={activeTabNumber} setActiveTab={setActiveTabNumber}>
+      <TabSwitch activeTabNumber={activeTabNumber} setActiveTabNumber={setActiveTabNumber}>
         {(data !== null && map !== null) ? <WorldMap data={data} map={map} isActiveTab={activeTabNumber === 0 ? true : undefined} icon="" title="Single Category Map"/>: <pre>"Loading..."</pre>}
         {(data !== null && map !== null) ? <CountryDistance data={data} map={map} isActiveTab={activeTabNumber === 1 ? true : undefined} icon="" title="Difference Map"/> : <pre>"Loading..."</pre>}
         <div icon="" title="RelativeToCountryViz" className='h-100'><div className='d-flex pt-5 justify-content-center h-100'>Work in progress</div></div>

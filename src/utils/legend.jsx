@@ -11,7 +11,6 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
 
   // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
   useEffect(()=>{
-    //console.log("Computing widths!");
     const [left, right] = GetWidths()
     setLabelWidths({ left, right })
   },[])
@@ -26,20 +25,22 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
 
       function brushed({selection}) {
         if (selection) {
-          // selection.map(x.invert, x).map(d3.utcDay.round)
          // convert to values between -1 and 1
-         const getRange = (selection) => [selection[0]/(legendRef.current.width.baseVal.value*0.5) - 1, selection[1]/(legendRef.current.width.baseVal.value*0.5)-1]
+         const getRange = (selection) => {
+          return [selection[0]/(legendRef.current.width.baseVal.value*0.5) - 1, selection[1]/(legendRef.current.width.baseVal.value*0.5)-1]
+        }
           svg.property("value", () => {setBrushRange(getRange(selection))})
           svg.dispatch("input");
         }
       }
       const gb = svg.append("g")
           .call(brush)
-          //.call(brush.move, defaultSelection)
+          // .call(brush.move, [-2.0,2.0])
 
       function brushended({selection}) {
         if (!selection) {
-          gb.call(brush.move, setBrushRange([-1,1]));
+          // gb.call(brush.move, [-1.0,1.0])
+          setBrushRange([-2.0, 2.0])
         }
       }
 
@@ -49,7 +50,6 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
     if (!svgRef.current || labelWidths == null || svgRef.current.getBoundingClientRect().width === 0) return
 
     const [svgHeight, svgWidth] = [svgRef.current.getBoundingClientRect().height, svgRef.current.getBoundingClientRect().width]
-    console.log(svgHeight, svgWidth)
 
   // TODO: fix minimum size of legend
   const boxHeight = svgHeight * 0.05
@@ -299,7 +299,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
                 <stop offset="100%" style={{stopColor: colors.right, stopOpacity:"1"}} />
             </linearGradient>
             </defs>
-            <svg ref={legendRef} x={hBox.x} y={hBox.y} width={hBox.width} height={hBox.height} onMouseOver={()=>{d3.select(svgRef.current).on('.zoom', null)}} onMouseLeave={()=>{console.log('GO'); zoomCall()}}>
+            <svg ref={legendRef} x={hBox.x} y={hBox.y} width={hBox.width} height={hBox.height} onMouseOver={()=>{console.log('Zoom OFF'); d3.select(svgRef.current).on('.zoom', null)}} onMouseLeave={()=>{console.log('Zoom ON'); zoomCall()}}>
               <rect width={hBox.width} height={hBox.height} fill='white' stroke="rgb(0,0,0)" strokeWidth="1"/>          
               <rect x={colorBox.x} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" strokeWidth="0.3" style={{...styleTransition}}></rect>
             </svg>
@@ -354,12 +354,6 @@ function GetWidths(){
       const rightNew = GetWidth(row)
       if (rightNew > right) right = rightNew
     })
-    /*
-    const leftNew = GetWidth(cat.from)
-    const rightNew = GetWidth(cat.to)
-    if (leftNew > left) left = leftNew
-    if (rightNew > right) right = rightNew
-    */
   })
   return [left, right]
 }
