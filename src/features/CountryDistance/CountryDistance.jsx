@@ -6,14 +6,13 @@ import colorScheme from "../../utils/colorScheme";
 import { distance } from "../../utils/categories";
 import InfoPopover from "../../utils/InfoPopover";
 import { interpolateRgb } from "d3";
-import { Form, InputGroup, Button } from "react-bootstrap";
+import { InputGroup, Button, Form } from "react-bootstrap";
 import { useRef } from "react";
+import useRenderOnSvgMount from "../../hooks/useRenderOnSvgMount";
 
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
 
-const canvasWidth = "100%";
-const canvasHeight = "100%";
 /*
  * selectedCategories: array of ids (strings) of categories. country to draw: country-object, selected: country-object
  */
@@ -42,39 +41,28 @@ const countryToColor = (selectedCategories) => (country, selected) => {
   return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
 };
 
-export default function CountryDistance({ data, map, isActiveTab }) {
+
+export default function CountryDistance({data, map, isActiveTab}) {
   //currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
-  const [zoomLevel, zoomLevelSetter] = useState(null);
-  //interactive category selection
 
-  const [svgHasMounted, setSvgHasMounted] = useState(false);
-  //for reseting the map
-  const [doReset, setDoReset] = useState(false);
-  const svgRef = useRef();
+  // Zooming and panning
+  const [zoomLevel, setZoomLevel] = useState(null);
+  const [doResetZoom, setDoResetZoom] = useState(false);
 
-  // which checkboxes are checked
-  const [selectedCategories, setSelectedCategories] = useState(
-    data.keys.map(_ => true)
-  );
-  // Temporary fix for map not rendering on start
-  useEffect(() => {
-    async function mount() {
-      setTimeout(() => {
-        setSvgHasMounted(isActiveTab);
-      }, 300);
-      // if (!svgHasMounted && svgRef.current?.clientWidth > 0) setSvgHasMounted(true)
-    }
-    mount();
-  }, [isActiveTab]);
+   // which checkboxes are checked
+   const [selectedCategories, setSelectedCategories] = useState(data.keys.map(_ => true))
+  
+  // Fix for map not rendering on start
+  const svgRef = useRef()
+  const [svgHasMounted, setSvgHasMounted] = useState(false)
+  useRenderOnSvgMount(svgRef, svgHasMounted, setSvgHasMounted, isActiveTab)
 
   const categoryStatistics = data.country_values_stats();
   const colors = { left: colorScheme.middle, right: colorScheme.right };
 
   const markers = {};
-  //if (hovered)
-  //    markers[hovered.id] = { ...hovered, hasTooltip: true, value: (hovered[distance.id] + 1) / 2, color: colorScheme.hoveredCountry };
 
   const range = selected
     ? {
@@ -85,43 +73,39 @@ export default function CountryDistance({ data, map, isActiveTab }) {
     : { min: -1, selected: null, max: 1 };
 
   const svg = (
-    <svg
-      width={canvasWidth}
-      height={canvasHeight}
-      ref={svgRef}
-      onMouseLeave={() => {
-        setHovered(null);
-      }}
-    >
-      {svgHasMounted && (
-        <>
-          <LineDraw
-            mapWithData={map}
-            selectCountry={setSelected}
-            selected={selected}
-            hovered={hovered}
-            setHovered={setHovered}
-            svgRef={svgRef}
-            zoomLevel={zoomLevel}
-            zoomLevelSetter={zoomLevelSetter}
-            doReset={doReset}
-            setDoReset={setDoReset}
-            countryToColor={countryToColor(data.keys.filter((_, idx) => selectedCategories[idx]))} //countryToColor(names of selected categories)
-          />
-          {svgRef.current && (
-            <Legend
-              svgRef={svgRef}
-              range={range}
-              categoryStatistics={categoryStatistics}
-              category={distance}
-              selected={selected}
-              colors={colors}
-              markers={markers}
-            />
-          )}
-        </>
-      )}
-    </svg>
+      <svg width='100%' height='100%' ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
+          {svgHasMounted &&
+          <>
+              <LineDraw
+                mapWithData={map}
+                svgRef={svgRef}
+                countryToColor={countryToColor(data.keys.filter((_, idx) => selectedCategories[idx]))} //countryToColor(names of selected categories)
+                selected={selected}
+                setSelected={setSelected}
+                hovered={hovered}
+                setHovered={setHovered}
+                zoomLevel={zoomLevel}
+                setZoomLevel={setZoomLevel}
+                doResetZoom={doResetZoom}
+                setDoResetZoom={setDoResetZoom}
+                setZoomCall={()=>{}}
+                category={distance}
+                brushRange={[-2.0,2.0]}
+              />
+              {svgRef.current &&
+              <Legend
+                svgRef={svgRef}
+                range={range}
+                category={distance}
+                categoryStatistics={categoryStatistics}
+                selected={null}
+                colors={colors}
+                markers={markers}
+                zoomCall={()=>{}}
+            />}
+          </>
+          }
+      </svg>
   );
 
   //multi-select of categories
