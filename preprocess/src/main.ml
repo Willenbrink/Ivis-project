@@ -43,16 +43,10 @@ module Country = struct
       a.species, b.species;
     ]
     in
-    List.fold_left (fun acc (x,y) -> acc +. Float.pow (x -. y) exp ) 0. cats
+    List.fold_left (fun acc (x,y) -> acc +. Float.pow (abs_float (x -. y)) exp ) 0. cats
     |> (fun x -> Float.pow x (1. /. exp))
 
-  let compare a b =
-    let d = dist a b in
-    if d < 0.
-    then -1
-    else if d > 0.
-    then 1
-    else 0
+  let compare a b = String.compare a.id b.id
 
   let null = {
     id = "NULL";
@@ -131,6 +125,45 @@ module Country = struct
      number = abs_float number;
      species = abs_float species;
     }
+
+  let normalize countries =
+    let avg getter =
+      List.fold_left (fun acc x -> acc +. getter x) 0. countries
+      /. float_of_int (List.length countries)
+    in
+    let std getter =
+      let mean = avg getter in
+      List.fold_left (fun acc x -> let dev = getter x -. mean in acc +. Float.pow dev 2.) 0. countries
+      /. float_of_int (List.length countries)
+      |> sqrt
+    in
+    let values = [
+      (fun x -> x.intervention);
+      (fun x -> x.passengers);
+      (fun x -> x.law);
+      (fun x -> x.gender);
+      (fun x -> x.fitness);
+      (fun x -> x.status);
+      (fun x -> x.age);
+      (fun x -> x.number);
+      (fun x -> x.species);
+    ]
+      |> List.map (fun cat x -> (x -. avg cat) /. std cat)
+    in
+    List.map (fun c -> {
+          id = c.id;
+          intervention = List.nth values 0 c.intervention;
+          passengers = List.nth values 1 c.passengers;
+          law = List.nth values 2 c.law;
+          gender = List.nth values 3 c.gender;
+          fitness = List.nth values 4 c.fitness;
+          status = List.nth values 5 c.status;
+          age = List.nth values 6 c.age;
+          number = List.nth values 7 c.number;
+          species = List.nth values 8 c.species;
+        }
+      ) countries
+
 end
 
 module CountrySet = Set.Make (Country)
@@ -176,16 +209,12 @@ module ClusterAlgo = struct
 end
 
 type cluster =
-  | Node of CountryCluster.t * cluster * cluster
+  | Node of CountryCluster.t * cluster * cluster * float
   | Leaf of CountryCluster.t [@@deriving to_yojson]
 
-(* type cluster_proxy = {countries : CountryCluster.t; children : } *)
-
-(* let cluster_to_yojson {set; tree; _} = match tree with *)
-(*   | Leaf -> `Null *)
-(*   | Node (c1,c2) -> "" *)
 
 let clustering (countries : country list) =
+  let countries = Country.normalize countries in
   let clusters = ClusterAlgo.cluster countries in
   let depth_list =
     ClusterAlgo.all_clusters clusters
@@ -193,13 +222,13 @@ let clustering (countries : country list) =
     |> List.map (fun (cluster,depth) -> CountryCluster.to_string_list cluster, depth)
     |> [%to_yojson: (string list * int) list]
   in
-  let rec convert_cluster ({ set; tree; _ } : ClusterAlgo.cluster) = match tree with
-    | Leaf ->
+  let rec convert_cluster ({ set; children; merged_at; _ } : ClusterAlgo.cluster) = match children with
+    | None ->
       assert (CountryCluster.cardinal set = 1);
       (* Leaf ((CountryCluster.choose set).id) *)
       Leaf set
-    | Node (left, right) ->
-      Node (set, convert_cluster left, convert_cluster right)
+    | Some (left, right) ->
+      Node (set, convert_cluster left, convert_cluster right, merged_at)
   in
   let cluster_tree = [%to_yojson: cluster] (convert_cluster clusters) in
 

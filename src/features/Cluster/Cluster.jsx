@@ -103,7 +103,7 @@ export default function Cluster({clusterData, map, isActiveTab}) {
       <div className="d-flex flex-column flex-grow-1 position-relative">
         {svg}
       </div>
-      <input type="range" min="1" max="10" value={numClusters} onChange={(ev) => {setNumClusters(ev.target.valueAsNumber);}}/>
+      <input type="range" min="1" max="7" value={numClusters} onChange={(ev) => {setNumClusters(ev.target.valueAsNumber);}}/>
       <ResetZoomButton zoomLevel={zoomLevel} setDoResetZoom={setDoResetZoom}/>
       {/* 
       <div className="w-25 mx-3">
