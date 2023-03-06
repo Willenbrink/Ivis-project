@@ -148,21 +148,21 @@ module CountryCluster = struct
       CountrySet.to_seq a
       |> Seq.flat_map (fun c1 -> CountrySet.to_seq b |> Seq.map (fun c2 -> c1,c2))
     in
-    let single_linkage seq =
+    let single_linkage =
       Seq.fold_left (fun acc (c1,c2) -> min acc @@ Country.dist c1 c2) Float.infinity seq
     in
-    let maximum_linkage seq =
+    let maximum_linkage =
       Seq.fold_left (fun acc (c1,c2) -> max acc @@ Country.dist c1 c2) 0. seq
     in
-    let ward_linkage seq =
+    let ward_linkage =
       let open Country in
       let card_a = float_of_int @@ CountrySet.cardinal a in
       let card_b = float_of_int @@ CountrySet.cardinal b in
-      let mean_a = CountrySet.fold (fun acc x -> acc +| absolute x) a null /| card_a in
-      let mean_b = CountrySet.fold (fun acc x -> acc +| absolute x) b null /| card_b in
-      norm_2 (mean_a -| mean_b) *. card_a *. card_b /. (card_a +. card_b)
+      let mean_a = CountrySet.fold (fun acc x -> acc +| x) a null /| card_a in
+      let mean_b = CountrySet.fold (fun acc x -> acc +| x) b null /| card_b in
+      norm_2 (mean_a -| mean_b) *. sqrt (2. *. card_a *. card_b /. (card_a +. card_b))
     in
-    ward_linkage seq
+    ward_linkage
 
 
   let to_string_list set =
