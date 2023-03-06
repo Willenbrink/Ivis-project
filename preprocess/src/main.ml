@@ -53,6 +53,84 @@ module Country = struct
     else if d > 0.
     then 1
     else 0
+
+  let null = {
+    id = "NULL";
+    intervention = 0.;
+    passengers = 0.;
+    law = 0.;
+    gender = 0.;
+    fitness = 0.;
+    status = 0.;
+    age = 0.;
+    number = 0.;
+    species = 0.;
+  }
+
+  let (+|) a b = {
+    id = a.id ^ b.id;
+    intervention = a.intervention +. b.intervention;
+    passengers = a.passengers +. b.passengers;
+    law = a.law +. b.law;
+    gender = a.gender +. b.gender;
+    fitness = a.fitness +. b.fitness;
+    status = a.status +. b.status;
+    age = a.age +. b.age;
+    number = a.number +. b.number;
+    species = a.species +. b.species;
+  }
+  let (/|) a f = {
+    id = a.id;
+    intervention = a.intervention /. f;
+    passengers = a.passengers /. f;
+    law = a.law /. f;
+    gender = a.gender /. f;
+    fitness = a.fitness /. f;
+    status = a.status /. f;
+    age = a.age /. f;
+    number = a.number /. f;
+    species = a.species /. f;
+  }
+  let ( *|) a f = a /| (1. /. f)
+  let (-|) a b = a +| (b *| (-1.))
+
+  let norm_2 {id;
+              intervention;
+              passengers;
+              law;
+              gender;
+              fitness;
+              status;
+              age;
+              number;
+              species;
+             } =
+    ignore id;
+    List.fold_left (fun acc cat -> Float.pow cat 2. +. acc) 0. [intervention; passengers; law; gender; fitness; status; age; number; species; ]
+    |> sqrt
+
+  let absolute {id;
+              intervention;
+              passengers;
+              law;
+              gender;
+              fitness;
+              status;
+              age;
+              number;
+              species;
+             } =
+    {id;
+     intervention = abs_float intervention;
+     passengers = abs_float passengers;
+     law = abs_float law;
+     gender = abs_float gender;
+     fitness = abs_float fitness;
+     status = abs_float status;
+     age = abs_float age;
+     number = abs_float number;
+     species = abs_float species;
+    }
 end
 
 module CountrySet = Set.Make (Country)
@@ -76,11 +154,15 @@ module CountryCluster = struct
     let maximum_linkage seq =
       Seq.fold_left (fun acc (c1,c2) -> max acc @@ Country.dist c1 c2) 0. seq
     in
-    (* TODO *)
-    (* let ward_linkage seq = *)
-    (*   Seq.fold_left (fun acc (c1,c2) -> max acc @@ Country.dist c1 c2) 0. seq *)
-    (* in *)
-    maximum_linkage seq
+    let ward_linkage seq =
+      let open Country in
+      let card_a = float_of_int @@ CountrySet.cardinal a in
+      let card_b = float_of_int @@ CountrySet.cardinal b in
+      let mean_a = CountrySet.fold (fun acc x -> acc +| absolute x) a null /| card_a in
+      let mean_b = CountrySet.fold (fun acc x -> acc +| absolute x) b null /| card_b in
+      norm_2 (mean_a -| mean_b) *. card_a *. card_b /. (card_a +. card_b)
+    in
+    ward_linkage seq
 
 
   let to_string_list set =
