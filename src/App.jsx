@@ -6,6 +6,7 @@ import CountryDistance from './features/CountryDistance/CountryDistance'
 import { useEffect, useState } from 'react'
 import { parseJSON } from './utils/parseMapJSON'
 import { fetch_data } from './model/dataHandler'
+import MMLogo from './assets/MMLogo'
 
 function App() {
   const [activeTabNumber, setActiveTabNumber] = useState(0)
@@ -33,8 +34,9 @@ function App() {
   return (
     <div className="h-100 vh-100 w-100 d-flex flex-column" style={{minHeight: '100%'}}>
       <TabSwitch activeTabNumber={activeTabNumber} setActiveTabNumber={setActiveTabNumber}>
-        {(data !== null && map !== null) ? <WorldMap data={data} map={map} isActiveTab={activeTabNumber === 0 ? true : undefined} icon="" title="Single Category Map"/>: <pre>"Loading..."</pre>}
-        {(data !== null && map !== null) ? <CountryDistance data={data} map={map} isActiveTab={activeTabNumber === 1 ? true : undefined} icon="" title="Difference Map"/> : <pre>"Loading..."</pre>}
+        <div title='MMVIZ' icon={<div className='' style={{height: '2rem'}}><MMLogo/></div>}>landing page</div>
+        {(data !== null && map !== null) ? <WorldMap data={data} map={map} isActiveTab={activeTabNumber === 1 ? true : undefined} icon="" title="Single Category Map"/>: <pre>"Loading..."</pre>}
+        {(data !== null && map !== null) ? <CountryDistance data={data} map={map} isActiveTab={activeTabNumber === 2 ? true : undefined} icon="" title="Difference Map"/> : <pre>"Loading..."</pre>}
         <div icon="" title="RelativeToCountryViz" className='h-100'><div className='d-flex pt-5 justify-content-center h-100'>Work in progress</div></div>
         <AboutTab isActiveTab={activeTabNumber === 3 ? true : undefined} icon="" title="About"/>
       </TabSwitch>

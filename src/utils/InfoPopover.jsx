@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, OverlayTrigger, Popover } from "react-bootstrap";
 
 const popover = (title, info) => 
@@ -9,15 +9,20 @@ const popover = (title, info) =>
     </Popover.Body>
   </Popover>
 
-export default function InfoPopover({title, info}){
+export default function InfoPopover({title, info, isActiveTab}){
   const buttonRef = useRef()
+  const [hasBeenClosed, setHasBeenClosed] = useState(false)
+
   useEffect(() => {
-    if (buttonRef.current) buttonRef.current.click()
-  }, [])
+    //if (buttonRef.current && !hasBeenClosed) buttonRef.current.click()
+  }, [isActiveTab])
+
   
-  return (
-    <OverlayTrigger trigger="click" placement="bottom" overlay={popover(title, info)}>
-      <Button ref={buttonRef} variant="light" className='border'>Info</Button>
+  return isActiveTab 
+  ? (
+    <OverlayTrigger trigger="click" placement="bottom" rootClose overlay={popover(title, info)} show={isActiveTab && !hasBeenClosed}>
+      <Button ref={buttonRef} variant="light" className='border' onClick={()=>{setHasBeenClosed(!hasBeenClosed)}}>Info</Button>
    </OverlayTrigger>
   )
+  :<></>
 }

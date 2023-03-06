@@ -1,6 +1,7 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
-export default function useRenderOnSvgMount(svgRef, svgHasMounted, setSvgHasMounted, activetab){
+export default function useRenderOnSvgMount(svgRef, activetab){
+  const [svgHasMounted, setSvgHasMounted] = useState(false)
   useEffect(()=>{
     /* 
     Only render the map when the svg element has been assigned to the react reference (svgRef).
@@ -17,4 +18,6 @@ export default function useRenderOnSvgMount(svgRef, svgHasMounted, setSvgHasMoun
     This solves a bug where the map is rendered but with height, width = 0
     */
   },[activetab, svgRef?.current?.clientWidth])
+
+  return svgHasMounted
 }

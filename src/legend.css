@@ -1,6 +1,5 @@
 .dashedRect {
-  stroke-dasharray: 5;
-  stroke: black;
+  stroke-dasharray: 4;
 }
 
 .label {
