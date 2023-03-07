@@ -2,8 +2,37 @@
 	height: 100%;
 }
 
+.countryZoom0:hover {
+	stroke: green;
+	stroke-width: .1em;
+}
+.countryZoom1:hover {
+	stroke: green;
+	stroke-width: .07em;
+}
+.countryZoom2:hover {
+	stroke: green;
+	stroke-width: .05em;
+}
+.countryZoom3:hover {
+	stroke: green;
+	stroke-width: .02em;
+}
+.countryZoom4:hover {
+	stroke: green;
+	stroke-width: .008em;
+}
+.countryZoom5:hover {
+	stroke: green;
+	stroke-width: .003em;
+}
+.countryZoom6:hover {
+	stroke: green;
+	stroke-width: .002em;
+}
+
 .mark .earthSphere {
-  fill: #eeeeee;
+	fill: #eeeeee;
 }
 
 .mark .graticule {
