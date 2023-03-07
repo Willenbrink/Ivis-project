@@ -4,7 +4,7 @@ export default function HomePage({setActiveTabNumber}){
   return(
     <div className="d-flex flex-grow-1 flex-column align-items-center">
       <div className="w-75 d-flex flex-column align-items-center pt-5">
-        <p className="fs-2">The moral machine map</p>
+        <p className="fs-1">The moral machine map</p>
         <p>This app is a visual representation of the data gathered by the &nbsp;
           <a href='https://www.moralmachine.net/'>Moral Machine project.</a></p>
         <p className="fs-4">Moral Machine project</p>
