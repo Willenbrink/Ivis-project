@@ -222,7 +222,7 @@ let clustering (countries : country list) =
     |> List.map (fun (cluster,depth) -> CountryCluster.to_string_list cluster, depth)
     |> [%to_yojson: (string list * int) list]
   in
-  let rec convert_cluster ({ set; children; merged_at; _ } : ClusterAlgo.cluster) = match children with
+  let rec convert_cluster ({ set; tree; merged_at; _ } : ClusterAlgo.cluster) = match tree with
     | None ->
       assert (CountryCluster.cardinal set = 1);
       (* Leaf ((CountryCluster.choose set).id) *)
