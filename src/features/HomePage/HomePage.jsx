@@ -5,8 +5,9 @@ export default function HomePage({setActiveTabNumber}){
     <div className="d-flex flex-grow-1 flex-column align-items-center">
       <div className="w-75 d-flex flex-column align-items-center pt-5">
         <p className="fs-2">The moral machine map</p>
-        <p>This app is a visual representation of the data gathered by the
-          Moral Machine project.</p>
+        <p>This app is a visual representation of the data gathered by the &nbsp;
+          <a href='https://www.moralmachine.net/'>Moral Machine project.</a></p>
+        <p className="fs-4">Moral Machine project</p>
         <p>
           The aim of the project is to gather a
           human perspective on how ‘intelligent’ machine systems, in
@@ -14,6 +15,7 @@ export default function HomePage({setActiveTabNumber}){
           situations such as when all avaliable actions will lead to the loss
           of life.
         </p>
+        <p className="fs-4">Our visualization</p>
         <p>
         This visualization has grouped the answers given to the
           dilemmas presented byt the Moral Machine project based on the

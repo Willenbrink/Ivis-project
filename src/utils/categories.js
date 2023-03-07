@@ -31,17 +31,17 @@ export const distance =  {
 export const categories = {
   intervention: {
     id: 'intervention',
-    name: 'Avoiding intervention: Omission vs. Commission',
-    name_short: 'Avoiding intervention',
+    name: 'Intervention: Staying in the same lane vs. Switching lane',
+    name_short: 'Intervention',
     from: ['Staying in the same', 'lane matters most'],
     to: ['Switching lane','matters most'],
-    info:'Should we favor continuing on the same path(omission) or intervention(commission)?',
+    info:'Is it more important to stay in the same lane or to switch?',
     fromIcon: <InterventionFrom/>,
     toIcon: <InterventionTo/>
   }, 
   passengers: {
     id: 'passengers',
-    name: 'Passengers vs. Pedestrians',
+    name: 'Self-protection: Passengers vs. Pedestrians',
     from: ['Saving passengers', 'matters most'],
     to: ['Saving pedestrians', 'matters most'],
     info:'What is more important: saving the passengers or the pedestrians?',
@@ -54,7 +54,7 @@ export const categories = {
     name_short: 'Legal bias',
     from: ['Saving lawbreakers', 'matters most'],
     to: ['Saving law-abiding', 'people matters most'],
-    info:'How important is it to follow the law?',
+    info:'Is it more important to save law-abiding people or lawbreakers?',
     fromIcon: <LawFrom/>,
     toIcon: <LawTo/>
   }, 
@@ -100,7 +100,7 @@ export const categories = {
   }, 
   number: {
     id: 'number',
-    name: 'Number of Characters: Less vs. More',
+    name: 'Number of casualities: Less vs. More',
     name_short: 'Number of casualities',
     from: ['Saving less lives', 'matters most'],
     to: ['Saving more lives', 'matters most'],
@@ -114,7 +114,7 @@ export const categories = {
     name_short: 'Species bias',
     from: ['Saving pets', 'matters most'],
     to: ['Saving humans', 'matters most'],
-    info: 'Is it more important to save humans or other animals?',
+    info: 'Is it more important to save humans or pets?',
     fromIcon: <SpeciesFrom/>,
     toIcon: <SpeciesTo/>
   }

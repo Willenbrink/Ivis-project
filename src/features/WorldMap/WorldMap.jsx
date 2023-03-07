@@ -89,7 +89,7 @@ export default function WorldMap({data, map, isActiveTab}) {
                 category={category}
                 brushRange={brushRange}
               />
-              { /*svgRef.current &&
+              { svgRef.current &&
               <Legend
                 svgRef={svgRef}
                 range={range}
@@ -103,12 +103,12 @@ export default function WorldMap({data, map, isActiveTab}) {
                 brushActive
                 setBrushRange={setBrushRange}
                 showScaleNumbers
-          /> */}
+          /> }
           </>
           }
       </svg>
   )
-
+          /*
   const legend = (
     <svg ref={svgLegendRef} height='100%' width='100%'>
       {svgLegendHasMounted && svgLegendRef.current && 
@@ -127,7 +127,8 @@ export default function WorldMap({data, map, isActiveTab}) {
                 showScaleNumbers
           />}
     </svg>
-  )
+  
+  )*/
   // backdropFilter: 'blur(2px)',
   return (
     <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column position-relative">
@@ -136,9 +137,11 @@ export default function WorldMap({data, map, isActiveTab}) {
       </div>
       <CategorySelectorInfo category={category} setCategory={setCategory} isActiveTab={isActiveTab}/>
       <ResetZoomButton zoomLevel={zoomLevel} setDoResetZoom={setDoResetZoom}/>
+      {/* 
       <div className="position-absolute start-0 bottom-0 w-100" style={{ background: 'linear-gradient(360deg, rgb(256,256,256,0.5) 80%, transparent)', backdropFilter: 'blur(1px)', height: '25%'}}>
         {legend}
       </div>
+      */}
       {/* 
       <div className="w-25 mx-3">
         <p className="fs-4 mb-2 border-bottom">{categoriesObjects[category].title}</p>

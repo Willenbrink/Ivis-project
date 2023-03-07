@@ -94,7 +94,7 @@ export default function CountryDistance({data, map, isActiveTab}) {
                 category={distance}
                 brushRange={[-2.0,2.0]}
               />
-              {/* svgRef.current &&
+              { svgRef.current &&
               <Legend
                 svgRef={svgRef}
                 range={range}
@@ -104,7 +104,7 @@ export default function CountryDistance({data, map, isActiveTab}) {
                 colors={colors}
                 markers={markers}
                 zoomCall={()=>{}}
-          />*/}
+          />}
           </>
           }
       </svg>
@@ -190,16 +190,18 @@ export default function CountryDistance({data, map, isActiveTab}) {
           </p>
           <Button
             onClick={(e) => {
-              setDoReset(true);
+              setDoResetZoom(true);
             }}
             hidden={!zoomLevel || !(zoomLevel < 0.5 || zoomLevel > 2)}
           >
             Reset Map
           </Button>
         </div>
+        {/* 
         <div className="position-absolute start-0 bottom-0 w-100" style={{ background: 'linear-gradient(360deg, rgb(256,256,256,0.5) 80%, transparent)', backdropFilter: 'blur(1px)', height: '25%'}}>
         {legend}
       </div>
+      */}
         {/* 
       <div className="w-25 mx-3">
         <p className="fs-4 mb-2 border-bottom">{categoriesObjects[category].title}</p>
