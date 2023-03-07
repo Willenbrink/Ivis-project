@@ -1,19 +1,13 @@
 import React, { useState, useCallback, useEffect } from "react";
-import ReactDom from "react-dom";
-import { Legend } from "../../utils/legend";
 import { LineDraw } from "../../utils/lineDraw";
 import colorScheme from "../../utils/colorScheme";
 import InfoPopover from "../../utils/InfoPopover";
-import { interpolateRgb } from "d3";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
 import { categories } from "../../utils/categories";
-import useWindowDimensions from "../../hooks/windowResizeHook";
-import CategorySelectorInfo from "./CategorySelectorInfo";
 import ResetZoomButton from "./ResetZoomButton";
-import { getMarkers } from "../../utils/getMarkers";
-import { getRange } from "../../utils/getRange";
 import useRenderOnSvgMount from "../../hooks/useRenderOnSvgMount";
+import './Input.css'
 
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
@@ -38,14 +32,14 @@ export default function Cluster({clusterData, map, isActiveTab}) {
   const [svgHasMounted, setSvgHasMounted] = useState(false)
   useRenderOnSvgMount(svgRef, svgHasMounted, setSvgHasMounted, isActiveTab)
 
-  const colors = [
-  'red',
-  'blue',
-  'green',
-  'pink',
-  'yellow',
-    'white',
-    'brown',
+  const labelsAndColors = [
+  {label: 'Cluster 1', color: 'red'},
+  {label: 'Cluster 2', color: 'blue'},
+  {label: 'Cluster 3', color: 'green'},
+  {label: 'Cluster 4', color: 'pink'},
+  {label: 'Cluster 5', color: 'yellow'},
+  {label: 'Cluster 6', color: 'white'},
+  {label: 'Cluster 7', color: 'brown'},
   ];
 
   function clustersOfLevel(tree, depth) {
@@ -68,7 +62,7 @@ export default function Cluster({clusterData, map, isActiveTab}) {
     // console.log(country);
     for(let i = 0; i < clusters.length; i++) {
       if(clusters[i].includes(country.id)) {
-        return colors[i];
+        return labelsAndColors[i].color;
       }
     }
     return colorScheme.noData;
@@ -94,17 +88,53 @@ export default function Cluster({clusterData, map, isActiveTab}) {
                 category={category}
                 brushRange={brushRange}
               />
+              {/*svgRef.current && 
+              <ClusterLegend svgRef={svgRef} numClusters={numClusters} setNumClusters={setNumClusters}/>
+          */}
           </>
           }
       </svg>
   );
+  const boxHeight = 25
+
+  function ColorBoxLabel({color='', label='', visible=false}){
+    return (
+      <div className='d-flex gap-2' style={{transition: 'opacity 3s', opacity: `${visible ? 1 : 0}`}}>
+        <div className='border rounded' style={{height: `${boxHeight}px`, width: `${boxHeight}px`, background: `${color}`}}></div>
+        <p className="text-nowrap">{label}</p>
+      </div>
+    )
+  }
   return (
     isActiveTab && <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
       <div className="d-flex flex-column flex-grow-1 position-relative">
         {svg}
       </div>
-      <input type="range" min="1" max="7" value={numClusters} onChange={(ev) => {setNumClusters(ev.target.valueAsNumber);}}/>
       <ResetZoomButton zoomLevel={zoomLevel} setDoResetZoom={setDoResetZoom}/>
+      <div className="position-absolute w-100 bottom-0 d-flex justify-content-center small" style={{pointerEvents: 'none'}}>
+        <div className="w-75 p-2 px-5 bg-white rounded mx-5 my-4 d-flex flex-column border shadow">
+          <p className="fs-6 fw-bold">Clustering based on answer similarities for all cateories</p>
+          <div className="d-flex gap-3">
+            <div className="d-flex flex-column">
+              <p className="text-nowrap">Number of clusters:</p>
+              <p className=" invisible m-0">Number of clusters:</p>
+              <ColorBoxLabel color={colorScheme.noData} label="No data" visible={true}/>
+            </div>
+            <div className="d-flex flex-column w-100">
+              <div className='d-flex justify-content-between'>
+                {labelsAndColors.map((obj, idx) => <p className="m-0">{idx + 1}</p>)}
+              </div>
+              <input type="range" min="1" max="7" value={numClusters} onChange={(ev) => {setNumClusters(ev.target.valueAsNumber)}} style={{pointerEvents: 'auto'}}/>
+              <div className='d-flex justify-content-between mt-4 flex-wrap'>
+                {labelsAndColors.map((obj, idx) => <ColorBoxLabel key={obj.label} color={obj.color} label={obj.label} visible={numClusters >= idx+1}/>)}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>  
+
+
       {/* 
       <div className="w-25 mx-3">
         <p className="fs-4 mb-2 border-bottom">{categoriesObjects[category].title}</p>
