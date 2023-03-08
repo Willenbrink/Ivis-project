@@ -4,7 +4,7 @@ import { Legend } from "../../utils/legend";
 import { LineDraw } from "../../utils/lineDraw";
 import colorScheme from "../../utils/colorScheme";
 import InfoPopover from "../../utils/InfoPopover";
-import { interpolateRgb } from "d3";
+import { active, interpolateRgb } from "d3";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
 import { categories } from "../../utils/categories";
@@ -39,6 +39,8 @@ export default function WorldMap({data, map, isActiveTab}) {
 
   const svgLegendRef = useRef(null)
   const svgLegendHasMounted = useRenderOnSvgMount(svgLegendRef, isActiveTab)
+
+  if (!isActiveTab) return <></>
 
   const categoryStatistics = data.country_values_stats(category.id)
   const range = getRange(selected, category, categoryStatistics)

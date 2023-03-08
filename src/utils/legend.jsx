@@ -8,7 +8,7 @@ import AgeFrom from "../assets/legendImages/age/AgeFrom";
 import SpeciesFrom from "../assets/legendImages/species/SpeciesFrom";
 import SpeciesTo from "../assets/legendImages/species/SpeciesTo";
 
-export function Legend({svgRef, category, categoryStatistics, range, showRange, selected, colors, markers, zoomCall, brushActive=false, setBrushRange, showScaleNumbers=false}){
+export function Legend({svgRef, category, categoryStatistics, range, showRange, selected, colors, markers, zoomCall=false, brushActive=false, setBrushRange, showScaleNumbers=false}){
   const [labelWidths, setLabelWidths] = useState(null)
   const legendRef = useRef()
 
@@ -350,7 +350,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
                 <stop offset="100%" style={{stopColor: colors.right, stopOpacity:"1"}} />
             </linearGradient>
             </defs>
-            <svg ref={legendRef} x={hBox.x} y={hBox.y} width={hBox.width} height={hBox.height} onMouseOver={()=>{console.log('Zoom OFF'); d3.select(svgRef.current).on('.zoom', null)}} onMouseLeave={()=>{console.log('Zoom ON'); zoomCall()}}>
+            <svg ref={legendRef} x={hBox.x} y={hBox.y} width={hBox.width} height={hBox.height} onMouseOver={()=>{if(zoomCall) {console.log('Zoom OFF'); d3.select(svgRef.current).on('.zoom', null)}}} onMouseLeave={()=>{ if(zoomCall) { console.log('Zoom ON'); zoomCall() }}}>
               <rect width={hBox.width} height={hBox.height} fill='white' stroke="rgb(156, 162, 168)" strokeWidth="2" rx={5}/>          
               <rect x={colorBox.x} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" strokeWidth="0.3" style={{...styleTransition}} rx={roundedCorners}></rect>
             </svg>

@@ -24,8 +24,8 @@ export default function HomePage({setActiveTabNumber}){
           countries in the context of these moral dilemmas.
         </p>
         <div className="d-flex gap-5">
-          <Button onClick={()=>{}}>More About</Button>
-          <Button onClick={()=>{}}>Start exploring</Button>
+          <Button onClick={()=>{setActiveTabNumber(4)}}>More About</Button>
+          <Button onClick={()=>{setActiveTabNumber(1)}}>Start exploring</Button>
         </div>
         <p>
           Disclaimer: This application is only meant to visualize the data gathered by the moral
