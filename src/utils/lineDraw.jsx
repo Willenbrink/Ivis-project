@@ -105,7 +105,7 @@ export function LineDraw({ mapWithData: { iso_countries, non_iso_countries }, sv
                       fill={cInRange ? countryToColor(c, selected) : colorScheme.outOfRange}
                       fillOpacity={cInRange ? '100%' : '10%'}
                       strokeOpacity={cInRange ? '100%' : '10%'}
-                      className={c.hasData ? zoomName : "unselectableCountry"}
+                      className={c.hasData ? "country" : "unselectableCountry"}
                 d={path(c.geometry)}
                 stroke={colorScheme.border}
                 strokeWidth={` ${borderLineWidth * zoomFactor}px`}
@@ -113,12 +113,35 @@ export function LineDraw({ mapWithData: { iso_countries, non_iso_countries }, sv
                   if (c.hasData) setHovered(c);
                   else setHovered(null);
                 }}*/
-                  onClick={(e) => {
-                      if (c.hasData) setSelected(iso_countries[e.target.id]);
-                      else setSelected(null);
-                  }}
               />}
             )
+          }
+          {
+              //example country: {"color": "#040", "id": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
+              Object.values(iso_countries).map(c => {
+                  if (c.hasData) {
+                      const cInRange = isInRange(c[category.id], brushRange)
+                      return <path
+                          key={c.id}
+                          id={c.id}
+                          fill={countryToColor(c, selected)}
+
+                          className="hoverCountry"
+                          d={path(c.geometry)}
+                          stroke={colorScheme.hoveredCountry}
+                          strokeWidth={` ${hoveredLineWidth * zoomFactor}px`}
+                          /*onMouseOver={() => {
+                            if (c.hasData) setHovered(c);
+                            else setHovered(null);
+                          }}*/
+                          onClick={(e) => {
+                              if (c.hasData) setSelected(iso_countries[e.target.id]);
+                              else setSelected(null);
+                          }}
+                      />
+                    }
+                  }
+              )
           }
           {/*
             hovered &&
