@@ -29,8 +29,7 @@ export default function Cluster({clusterData, map, isActiveTab}) {
 
   // Render map when svg element has mounted
   const svgRef = useRef(null)
-  const [svgHasMounted, setSvgHasMounted] = useState(false)
-  useRenderOnSvgMount(svgRef, svgHasMounted, setSvgHasMounted, isActiveTab)
+  const svgHasMounted = useRenderOnSvgMount(svgRef, isActiveTab)
 
   // Created using IWantHue
   const colors_7 =

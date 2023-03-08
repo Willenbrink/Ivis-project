@@ -4,7 +4,7 @@ import { Legend } from "../../utils/legend";
 import { LineDraw } from "../../utils/lineDraw";
 import colorScheme from "../../utils/colorScheme";
 import InfoPopover from "../../utils/InfoPopover";
-import { interpolateRgb } from "d3";
+import { active, interpolateRgb } from "d3";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
 import { categories } from "../../utils/categories";
@@ -34,8 +34,13 @@ export default function WorldMap({data, map, isActiveTab}) {
 
   // Render map when svg element has mounted
   const svgRef = useRef(null)
-  const [svgHasMounted, setSvgHasMounted] = useState(false)
-  useRenderOnSvgMount(svgRef, svgHasMounted, setSvgHasMounted, isActiveTab)
+  // const [svgHasMounted, setSvgHasMounted] = useState(false)
+  const svgHasMounted = useRenderOnSvgMount(svgRef, isActiveTab)
+
+  const svgLegendRef = useRef(null)
+  const svgLegendHasMounted = useRenderOnSvgMount(svgLegendRef, isActiveTab)
+
+  if (!isActiveTab) return <></>
 
   const categoryStatistics = data.country_values_stats(category.id)
   const range = getRange(selected, category, categoryStatistics)
@@ -86,7 +91,7 @@ export default function WorldMap({data, map, isActiveTab}) {
                 category={category}
                 brushRange={brushRange}
               />
-              {svgRef.current &&
+              { svgRef.current &&
               <Legend
                 svgRef={svgRef}
                 range={range}
@@ -100,18 +105,45 @@ export default function WorldMap({data, map, isActiveTab}) {
                 brushActive
                 setBrushRange={setBrushRange}
                 showScaleNumbers
-              />}
+          /> }
           </>
           }
       </svg>
-  );
+  )
+          /*
+  const legend = (
+    <svg ref={svgLegendRef} height='100%' width='100%'>
+      {svgLegendHasMounted && svgLegendRef.current && 
+              <Legend
+                svgRef={svgLegendRef}
+                range={range}
+                showRange={true}
+                category={category}
+                categoryStatistics={categoryStatistics}
+                selected={selected}
+                colors={colors}
+                markers={markers}
+                zoomCall={zoomCall}
+                brushActive
+                setBrushRange={setBrushRange}
+                showScaleNumbers
+          />}
+    </svg>
+  
+  )*/
+  // backdropFilter: 'blur(2px)',
   return (
-    isActiveTab && <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
+    <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column position-relative">
       <div className="d-flex flex-column flex-grow-1 position-relative">
         {svg}
       </div>
-      <CategorySelectorInfo category={category} setCategory={setCategory} />
+      <CategorySelectorInfo category={category} setCategory={setCategory} isActiveTab={isActiveTab}/>
       <ResetZoomButton zoomLevel={zoomLevel} setDoResetZoom={setDoResetZoom}/>
+      {/* 
+      <div className="position-absolute start-0 bottom-0 w-100" style={{ background: 'linear-gradient(360deg, rgb(256,256,256,0.5) 80%, transparent)', backdropFilter: 'blur(1px)', height: '25%'}}>
+        {legend}
+      </div>
+      */}
       {/* 
       <div className="w-25 mx-3">
         <p className="fs-4 mb-2 border-bottom">{categoriesObjects[category].title}</p>
@@ -121,7 +153,7 @@ export default function WorldMap({data, map, isActiveTab}) {
       */}
     </div>)
 }
-
+/*
 export const useD3 = (renderChartFn, dependencies) => {
   const ref = React.useRef();
 
@@ -131,3 +163,4 @@ export const useD3 = (renderChartFn, dependencies) => {
   }, dependencies);
   return ref;
 };
+*/

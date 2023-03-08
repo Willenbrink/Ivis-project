@@ -32,7 +32,7 @@ export default function TabSwitch({children, activeTabNumber, setActiveTabNumber
   const tab = "bg-white fw-light rounded-0 text-secondary"
 
   return (
-    <Tab.Container id="left-tabs-example" defaultActiveKey={activeTabNumber}>
+    <Tab.Container id="left-tabs-example" defaultActiveKey={activeTabNumber} activeKey={activeTabNumber}>
       <Nav ref={tabsRef} className="shadow px-5" variant="pills" >
       {Children.map(children, (child, idx) => {
         return(

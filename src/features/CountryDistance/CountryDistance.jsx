@@ -56,8 +56,10 @@ export default function CountryDistance({data, map, isActiveTab}) {
   
   // Fix for map not rendering on start
   const svgRef = useRef()
-  const [svgHasMounted, setSvgHasMounted] = useState(false)
-  useRenderOnSvgMount(svgRef, svgHasMounted, setSvgHasMounted, isActiveTab)
+  const svgHasMounted = useRenderOnSvgMount(svgRef, isActiveTab)
+
+  const svgLegendRef = useRef(null)
+  const svgLegendHasMounted = useRenderOnSvgMount(svgLegendRef, isActiveTab)
 
   const categoryStatistics = data.country_values_stats();
   const colors = { left: colorScheme.middle, right: colorScheme.right };
@@ -92,7 +94,7 @@ export default function CountryDistance({data, map, isActiveTab}) {
                 category={distance}
                 brushRange={[-2.0,2.0]}
               />
-              {svgRef.current &&
+              { svgRef.current &&
               <Legend
                 svgRef={svgRef}
                 range={range}
@@ -106,6 +108,22 @@ export default function CountryDistance({data, map, isActiveTab}) {
           }
       </svg>
   );
+
+  const legend = (
+    <svg ref={svgLegendRef} height='100%' width='100%'>
+      {svgLegendHasMounted && svgLegendRef.current && 
+              <Legend
+              svgRef={svgLegendRef}
+              range={range}
+              category={distance}
+              categoryStatistics={categoryStatistics}
+              selected={null}
+              colors={colors}
+              markers={markers}
+              zoomCall={()=>{}}
+        />}
+    </svg>
+  )
 
   //multi-select of categories
   function selectAll() {
@@ -131,7 +149,6 @@ export default function CountryDistance({data, map, isActiveTab}) {
     />
   ));
   return (
-    isActiveTab && (
       <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
         <div className="d-flex flex-column flex-grow-1 position-relative">
           {svg}
@@ -144,7 +161,7 @@ export default function CountryDistance({data, map, isActiveTab}) {
             </InputGroup.Text>
             <InfoPopover
               title={distance.name_short || distance.name}
-              info={distance.info}
+              info={distance.info} isActiveTab={isActiveTab}
             />
           </InputGroup>
           {selected === null ? (
@@ -172,7 +189,7 @@ export default function CountryDistance({data, map, isActiveTab}) {
           </p>
           <Button
             onClick={(e) => {
-              setDoReset(true);
+              setDoResetZoom(true);
             }}
             hidden={!zoomLevel || !(zoomLevel < 0.5 || zoomLevel > 2)}
           >
@@ -180,13 +197,17 @@ export default function CountryDistance({data, map, isActiveTab}) {
           </Button>
         </div>
         {/* 
+        <div className="position-absolute start-0 bottom-0 w-100" style={{ background: 'linear-gradient(360deg, rgb(256,256,256,0.5) 80%, transparent)', backdropFilter: 'blur(1px)', height: '25%'}}>
+        {legend}
+      </div>
+      */}
+        {/* 
       <div className="w-25 mx-3">
         <p className="fs-4 mb-2 border-bottom">{categoriesObjects[category].title}</p>
         <p>{categoriesObjects[category].info}</p>
       </div>
       */}
       </div>
-    )
   );
 }
 
