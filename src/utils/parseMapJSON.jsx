@@ -3,14 +3,16 @@ import { json } from "d3";
 import { feature } from "topojson-client";
 import iso from "iso-3166-1";
 
-const mapJSON = "https://unpkg.com/world-atlas@2.0.2/countries-110m.json";
+const mapJSON = "/src/utils/countries-50m.json";
+
 //gets a dataHandler-data-object
 //will only be executed once (App useEffect)
 export async function parseJSON(data) {
-
-  return json(mapJSON).then((jsonData) => {
-    const { features } = feature(jsonData, jsonData.objects.countries);
+    return fetch(mapJSON).then((response) => response.json()).then((jsonData) => {
+        //console.log(jsonData);
+        const { features } = feature(jsonData, jsonData.objects.countries);
     //[{ "alpha3": "FJI", "name": "Fiji", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]]]] }]
+    console.log("hi!")
     const iso_countries = features
       .filter((d) => d.id !== undefined)
       .reduce((acc, d) => {

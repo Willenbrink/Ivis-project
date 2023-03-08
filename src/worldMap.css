@@ -2,8 +2,20 @@
 	height: 100%;
 }
 
+
+.hoverCountry {
+	fill-opacity: 0;
+	stroke-opacity: 0;
+}
+
+.hoverCountry:hover {
+	fill-opacity: 100;
+	stroke-opacity: 100;
+
+}
+
 .mark .earthSphere {
-  fill: #eeeeee;
+	fill: #eeeeee;
 }
 
 .mark .graticule {
