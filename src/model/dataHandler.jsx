@@ -1,6 +1,7 @@
 // data is an object of form: {keys: id list, countries: (id -> data) object}.
 // Where keys is a list of 3-letter country code
 // and data is an object containing a countrys id and a (key -> float) mapping with the keys defined before.
+
 //ES6 class:
 class Data {
   // @fields: json_data, keys
@@ -37,10 +38,19 @@ class Data {
     }
     return { min, max, range: max - min };
   }
+  get_cluster_data() {
+    if (!this.json_data)
+      return null;
+    return this.json_data;
+  }
 }
 /*
  * fetch data from json, @return Data
  */
 export async function fetch_data() {
   return fetch("CountriesChangePr.json").then((x) => x.json()).then(x => new Data(x));
+}
+
+export async function fetch_cluster_data() {
+  return fetch("cluster_tree.json").then((x) => x.json()).then(x => new Data(x));
 }
