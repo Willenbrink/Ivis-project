@@ -61,7 +61,7 @@ export function LineDraw({ mapWithData: { iso_countries, non_iso_countries }, sv
     const zoomName = "countryZoom" + (zoomLevel < 1 ? 0 : (zoomLevel < 2.5 ? 1 : (zoomLevel < 7 ? 2 : (zoomLevel < 20 ? 3 : (zoomLevel < 50 ? 4 : (zoomLevel < 100 ? 5 : 6))))));
     let count = 0;
     Object.values(iso_countries).forEach(a => { if (a.hasData) count++ });
-    console.log(count)
+    // console.log(count)
   return (
       <g className="mark" ref={gRef} >
           <path 

@@ -101,7 +101,6 @@ export default function CountryDistance({data, map, isActiveTab}) {
                 selected={null}
                 colors={colors}
                 markers={markers}
-                zoomCall={()=>{}}
             />}
           </>
           }
