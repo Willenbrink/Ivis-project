@@ -92,7 +92,7 @@ export default function Cluster({clusterData, map, isActiveTab}) {
 
   const clusters = clustersOfLevel(clusterData.get_cluster_data(), numClusters);
   // console.log(clusterData.get_cluster_data());
-  console.log(clusters);
+  //console.log(clusters);
   // console.log(clusters.map((x) => x.length));
   function countryToColor(country, _) {
     // console.log(country);
@@ -158,7 +158,7 @@ export default function Cluster({clusterData, map, isActiveTab}) {
             </div>
             <div className="d-flex flex-column w-100">
               <div className='d-flex justify-content-between'>
-                {colors.map((obj, idx) => <p className="m-0">{idx + 1}</p>)}
+                {colors.map((obj, idx) => <p key={idx} className="m-0">{idx + 1}</p>)}
               </div>
               <input type="range" min="1" max={colors.length} value={numClusters} onChange={(ev) => {setNumClusters(ev.target.valueAsNumber)}} style={{pointerEvents: 'auto'}}/>
               <div className='d-flex justify-content-between mt-4 flex-wrap'>
