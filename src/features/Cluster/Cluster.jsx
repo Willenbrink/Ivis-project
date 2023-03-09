@@ -77,17 +77,36 @@ export default function Cluster({clusterData, map, isActiveTab}) {
 "#cf9f68"]
 ;
   const colors = colors_7;
+  function clusterSize(cluster) {
+    if (cluster[0] === "Leaf") return 1;
+    return cluster[4];
+  }
+  function clustersOfLevel(tree, amount) {
+    // tree: ["node", countries: [str], left: tree, right: tree, size] | ["leaf", country: [str] ]
+    if (tree[0] === "Leaf") return [tree[1]]
 
-  function clustersOfLevel(tree, depth) {
-    // console.log(tree);
-    const [label, cluster, left, right] = tree;
-    if(label === "Node" && depth > 1) {
-      const recurse = left[1].length > right[1].length ? left : right;
-      const non_recurse = left[1].length > right[1].length ? right : left;
-      return [].concat([non_recurse[1]], clustersOfLevel(recurse, depth - 1));
-    } else {
-      return [cluster];
+    //we minimize the max. cluster size: greedily split the largest cluster
+    var clusters = [tree];
+    
+    while (clusters.length < amount) {
+      //find the largest cluster
+      var largestClusterIndex = 0;
+      for (var i = 1; i < clusters.length; i++) {
+        if (clusterSize(clusters[i]) > clusterSize(clusters[largestClusterIndex])) {
+          largestClusterIndex = i;
+        }
+      }
+      //split the largest cluster.
+      if (clusters[largestClusterIndex][0] === "Leaf") {
+        break;
+      }
+      var left = clusters[largestClusterIndex][2];
+      var right = clusters[largestClusterIndex][3];
+      //to make the colors more obvious, one of the sub-clusters keeps the old color (=index of cluster)
+      clusters[largestClusterIndex] = left;
+      clusters.push(right);
     }
+    return clusters.map((x) => x[1]);
   }
 
   const clusters = clustersOfLevel(clusterData.get_cluster_data(), numClusters);
