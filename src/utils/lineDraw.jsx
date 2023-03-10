@@ -49,7 +49,7 @@ class svgHandler {
     );
     this.non_iso_countries_paths =
       //example country: {"geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
-      non_iso_countries.map((c, idx) => {
+      this.non_iso_pathCountries.map((c, idx) => {
         return (
           <path
             vectorEffect="non-scaling-stroke"
@@ -58,13 +58,13 @@ class svgHandler {
             className="no_iso_country"
             stroke={colorScheme.border}
             strokeWidth={` ${borderLineWidth}px`}
-            d={this.pathCountries[c.name]}
+            d={c}
           />
         );
       });
     this.iso_countries_paths =
       //example country: {"color": "#040", "id": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
-      Object.values(iso_countries).map((c) => {
+      Object.values(this.iso_countries).map((c) => {
         const cInRange = countryToColor(c) !== colorScheme.outOfRange;
         return (
           <path
@@ -75,7 +75,7 @@ class svgHandler {
             fillOpacity={cInRange ? "100%" : "10%"}
             strokeOpacity={cInRange ? "100%" : "10%"}
             className={c.hasData ? "country" : "unselectableCountry"}
-            d={this.pathCountries[c.name]}
+            d={this.iso_pathCountries[c.id]}
             stroke={colorScheme.border}
             strokeWidth={` ${borderLineWidth}px`}
             /*onMouseOver={() => {
@@ -91,23 +91,27 @@ class svgHandler {
     ];
     this.hover_paths =
       //example country: {"color": "#040", "id": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
-      Object.values(iso_countries)
+      Object.values(this.iso_countries)
         .filter((c) => c.hasData)
-        .map((c) => (
+        .map((c) => {
+          console.log("countryname")
+          return (
           <path
             vectorEffect="non-scaling-stroke"
             key={c.id}
             id={c.id}
             fill={countryToColor(c)}
             className="hoverCountry"
-            d={this.pathCountries[c.name]}
+            d={this.iso_pathCountries[c.id]}
             stroke={colorScheme.hoveredCountry}
             strokeWidth={` ${hoveredLineWidth}px`}
             onClick={(e) => {
+              console.log("click on country: ", e.target.id, "")
               setSelected(iso_countries[e.target.id]);
             }}
           />
-        ));
+          
+        )});
     this.selected_path = selected && (
       <path
         vectorEffect="non-scaling-stroke"
@@ -116,7 +120,7 @@ class svgHandler {
         fill="transparent"
         strokeWidth={` ${selectedLineWidth}px`}
         stroke={colorScheme.selectedCountry}
-        d={this.pathCountries(selected.id)}
+        d={this.iso_pathCountries[selected.id]}
       />
     );
     this.svg = (
@@ -146,13 +150,13 @@ class svgHandler {
     this.pathSphere = path({ type: "Sphere" });
     const graticule = geoGraticule();
     this.pathGraticule = path(graticule());
-    this.pathCountries = {};
+    this.iso_pathCountries = {};
+    this.non_iso_pathCountries = [];
     this.non_iso_countries.forEach((c) => {
-      this.pathCountries[c.name] = path(c.geometry);
+      this.non_iso_pathCountries.push(path(c.geometry));
     });
-    console.log(iso_countries);
     for (let [id, c] of Object.entries(iso_countries)) {
-      this.pathCountries[id] = path(c.geometry);
+      this.iso_pathCountries[id] = path(c.geometry);
     };
   }
 }
