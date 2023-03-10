@@ -10,61 +10,53 @@ import React, { useEffect } from "react";
 import { useRef } from "react";
 import colorScheme from "./colorScheme";
 
-class worldMapSVG {
-  svg; //svg dom element: the world map.
-  updateCallbacks = {}; //countryToColor, selected
-  update(toUpdate) {
-    for (const [key, value] of Object.entries(toUpdate)) {
-      //check if key is in updateCallbacks
-      if (key in this.updateCallbacks) this.updateCallbacks[key](value);
-      else console.log("[lineDraw] key not in updateCallbacks", key);
-    }
-  }
-  constructor( 
-    iso_countries, 
-    non_iso_countries,
-    gRef,
-    path,
-    countryToColor,
-    selected,
-    setSelected,
-        ) {
-      // Line width variables
-      const selectedLineWidth = 2;
-      const hoveredLineWidth = 2.6;
-      const borderLineWidth = 1;
+const selectedLineWidth = 2;
+const hoveredLineWidth = 2.6;
+const borderLineWidth = 1;
 
+class svgHandler {
+  svg; //svg dom element: the world map.
+  non_iso_countries_paths; //paths for non-iso countries
+  selected_path; //path for selected country
+
+  //since JSX elements are immutable, we have to rebuild the whole tree.
+  //this method is executed on rerender.
+  //TODO: move as much as possible to constructor. (building of paths, ...)
+  colorize = (countryToColor, selected) => {
+      const gRef = this.gRef;
+      const path = this.path;
+      const iso_countries = this.iso_countries;
+      const non_iso_countries = this.non_iso_countries;
+      const setSelected = this.setSelected;
+
+
+      // Line width variables
       const graticule = geoGraticule();
       
-      const earthSphere_path = <path
-      vector-effect="non-scaling-stroke"
+      this.earthSphere_path = <path
+      vectorEffect="non-scaling-stroke"
       className="earthSphere"
       d={path({ type: "Sphere" })}
       //onMouseOver={() => setHovered(null)}
       onClick={() => setSelected(null)}
     />;
-      const graticule_path = <path
-      vector-effect="non-scaling-stroke"
+      this.graticule_path = <path
+      vectorEffect="non-scaling-stroke"
         className="graticule"
         d={path(graticule())}
         strokeWidth="0.4"
         //onMouseOver={() => setHovered(null)}
         onClick={() => setSelected(null)}
       />   
-      
-      const filtered_map = countryToColor() === colorScheme.outOfRange 
-      const no_iso_countries_paths = 
+      this.non_iso_countries_paths = 
         //example country: {"geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
         non_iso_countries.map((c, idx) => { 
           
           return (
             <path
-              vector-effect="non-scaling-stroke"
+              vectorEffect="non-scaling-stroke"
               key={`no_iso_country_${idx}`}
               id={c.name}
-              fill={countryToColor()}
-              fillOpacity={filtered_map ? "10%" : "100%"}
-              strokeOpacity={filtered_map ? "10%" : "100%"}
               className="no_iso_country"
               stroke={colorScheme.border}
               strokeWidth={` ${borderLineWidth}px`}
@@ -72,13 +64,13 @@ class worldMapSVG {
             />
           );
         })
-        const iso_countries_paths = 
+        this.iso_countries_paths = 
         //example country: {"color": "#040", "id": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
           Object.values(iso_countries).map((c) => {
             const cInRange = countryToColor(c) !== colorScheme.outOfRange;
             return (
             <path
-              vector-effect="non-scaling-stroke"
+              vectorEffect="non-scaling-stroke"
               key={c.id}
               id={c.id}
               fill={
@@ -97,12 +89,12 @@ class worldMapSVG {
             />
           );
         })
-      const all_countries_paths = [...iso_countries_paths, ...no_iso_countries_paths]
-      const hover_paths = 
+      this.all_countries_paths = [...this.iso_countries_paths, ...this.non_iso_countries_paths]
+      this.hover_paths = 
         //example country: {"color": "#040", "id": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
         Object.values(iso_countries).filter(c => c.hasData).map((c) => 
           <path
-          vector-effect="non-scaling-stroke"
+          vectorEffect="non-scaling-stroke"
             key={c.id}
             id={c.id}
             fill={countryToColor(c)}
@@ -115,9 +107,9 @@ class worldMapSVG {
             }}
           />
       )
-      var selected_path = (
+      this.selected_path = selected && (
         <path
-          vector-effect="non-scaling-stroke"
+          vectorEffect="non-scaling-stroke"
           key="selected"
           id="selectedCountryBorder"
           fill="transparent"
@@ -126,15 +118,30 @@ class worldMapSVG {
           d={path(selected ? selected.geometry : null)}
         />
       )
-      const selected_path_or_nothing = selected && selected_path
-      
       this.svg = <g className="mark" ref={gRef}>
-        {earthSphere_path},
-        {graticule_path},
-        {all_countries_paths},
-        {hover_paths},
-        {selected_path_or_nothing}
+        {this.earthSphere_path}
+        {this.graticule_path}
+        {this.all_countries_paths}
+        {this.hover_paths}
+        {this.selected_path}
     </g>
+
+  }
+
+  constructor( 
+    iso_countries, 
+    non_iso_countries,
+    gRef,
+    path,
+    setSelected,
+        ) {
+
+        this.gRef = gRef
+        this.path = path;
+        this.iso_countries = iso_countries;
+        this.non_iso_countries = non_iso_countries;
+        this.setSelected = setSelected;
+        this.svg = "";
   }
 }
 
@@ -176,15 +183,12 @@ export function LineDraw({
   //const zoomFactor = 1 / (Math.max(1, zoomLevel) * zoomLineStrength);
 
   //of course we are very efficcient and only generate the whole SVG thing once :)
-  const [almightySVG, _] = React.useState(() => new worldMapSVG(
+  const [svg_handler, _] = React.useState(() => new svgHandler(
     iso_countries,
     non_iso_countries,
     gRef,
     path,
-    countryToColor,
-    selected,
     setSelected,
-    category,
   ));
 
   function ZoomCall() {
@@ -232,10 +236,6 @@ export function LineDraw({
       setZoomLevel(null);
     }
   }
-
-  if (zoomLevel >= 2) {
-    console.log("UPDATE :)")
-    
-  }
-  return almightySVG.svg;
+  svg_handler.colorize(countryToColor, selected);
+  return svg_handler.svg;
 }
