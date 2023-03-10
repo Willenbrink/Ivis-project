@@ -50,8 +50,12 @@ class svgHandler {
     this.non_iso_countries_paths =
       //example country: {"geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
       this.non_iso_pathCountries.map((c, idx) => {
+        const cInRange = countryToColor() !== colorScheme.outOfRange;      
         return (
           <path
+            fill={countryToColor(c)}
+            fillOpacity={cInRange ? "100%" : "10%"}
+            strokeOpacity={cInRange ? "100%" : "10%"}
             vectorEffect="non-scaling-stroke"
             key={`no_iso_country_${idx}`}
             id={c.name}
@@ -94,19 +98,16 @@ class svgHandler {
       Object.values(this.iso_countries)
         .filter((c) => c.hasData)
         .map((c) => {
-          console.log("countryname")
           return (
           <path
             vectorEffect="non-scaling-stroke"
             key={c.id}
             id={c.id}
-            fill={countryToColor(c)}
             className="hoverCountry"
             d={this.iso_pathCountries[c.id]}
             stroke={colorScheme.hoveredCountry}
             strokeWidth={` ${hoveredLineWidth}px`}
             onClick={(e) => {
-              console.log("click on country: ", e.target.id, "")
               setSelected(iso_countries[e.target.id]);
             }}
           />

@@ -62,6 +62,7 @@ export default function WorldMap({data, map, isActiveTab}) {
     const absolute_value = Math.abs(relative_value);
     return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
   };
+
   function countryToColor(country) {
     const isBrushOn = brushRange[0] > -2;
     if (!country) {
