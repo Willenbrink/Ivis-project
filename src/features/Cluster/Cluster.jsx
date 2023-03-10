@@ -8,13 +8,13 @@ import { categories } from "../../utils/categories";
 import ResetZoomButton from "./ResetZoomButton";
 import useRenderOnSvgMount from "../../hooks/useRenderOnSvgMount";
 import './Input.css'
-
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
 
 
 export default function Cluster({clusterData, map, isActiveTab}) {
   const [numClusters, setNumClusters] = useState(3);
+  const [countryColorDict, _] = useState({});
   //currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
@@ -24,7 +24,8 @@ export default function Cluster({clusterData, map, isActiveTab}) {
   const [zoomLevel, setZoomLevel] = useState(null);
   const [doResetZoom, setDoResetZoom] = useState(false); // Reset zoom/pan
   const [zoomCall, setZoomCall] = useState(()=>{}) // Turn on zoom/pan callback
-  // Brushing
+
+  //TODO: Brushing
   const [brushRange, setBrushRange] = useState([-2.0,2.0]) // when brush is off, range is [-2,2]. When brush is on, the range is maximum [-1,1]
 
   // Render map when svg element has mounted
@@ -81,6 +82,16 @@ export default function Cluster({clusterData, map, isActiveTab}) {
     if (cluster[0] === "Leaf") return 1;
     return cluster[4];
   }
+  function updateCountryColorDict() {
+    const number = numClusters;
+    const clusters = clustersOfLevel(clusterData.get_cluster_data(), numClusters);
+    countryColorDict[number] = {};
+    for (let i = 0; i < clusters.length; i++) {
+      for (let j = 0; j < clusters[i].length; j++) {
+        countryColorDict[number][clusters[i][j]] = colors[i];
+      } 
+    }
+  }
   function clustersOfLevel(tree, amount) {
     // tree: ["node", countries: [str], left: tree, right: tree, size] | ["leaf", country: [str] ]
     if (tree[0] === "Leaf") return [tree[1]]
@@ -109,18 +120,19 @@ export default function Cluster({clusterData, map, isActiveTab}) {
     return clusters.map((x) => x[1]);
   }
 
-  const clusters = clustersOfLevel(clusterData.get_cluster_data(), numClusters);
   // console.log(clusterData.get_cluster_data());
   //console.log(clusters);
   // console.log(clusters.map((x) => x.length));
-  function countryToColor(country, _) {
-    // console.log(country);
-    for(let i = 0; i < clusters.length; i++) {
-      if(clusters[i].includes(country.id)) {
-        return colors[i];
-      }
+  function countryToColor(country) {
+    if (!country) {
+      return colorScheme.noData
     }
-    return colorScheme.noData;
+    // console.log(country);
+    if (countryColorDict[numClusters] === undefined) {
+      updateCountryColorDict(numClusters);
+    }
+    const val = countryColorDict[numClusters][country.id]
+    return val ? val : colorScheme.noData;
   };
 
   const svg = (
@@ -141,7 +153,6 @@ export default function Cluster({clusterData, map, isActiveTab}) {
                 setDoResetZoom={setDoResetZoom}
                 setZoomCall={setZoomCall}
                 category={category}
-                brushRange={brushRange}
               />
               {/*svgRef.current && 
               <ClusterLegend svgRef={svgRef} numClusters={numClusters} setNumClusters={setNumClusters}/>
