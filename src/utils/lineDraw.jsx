@@ -10,15 +10,9 @@ import React, { useEffect } from "react";
 import { useRef } from "react";
 import colorScheme from "./colorScheme";
 
-
-
-  const zoomLineStrength = 0.5;
-  const zoomInScaleLimit = 150;
-  const zoomOutScaleLimit = 0.12;
-  
 class worldMapSVG {
   svg; //svg dom element: the world map.
-  updateCallbacks = {}; //countryToColor, selected, zoomFactor
+  updateCallbacks = {}; //countryToColor, selected
   update(toUpdate) {
     for (const [key, value] of Object.entries(toUpdate)) {
       //check if key is in updateCallbacks
@@ -27,7 +21,6 @@ class worldMapSVG {
     }
   }
   constructor( 
-    zoomFactor,
     iso_countries, 
     non_iso_countries,
     gRef,
@@ -37,19 +30,21 @@ class worldMapSVG {
     setSelected,
         ) {
       // Line width variables
-      const selectedLineWidth = 1;
-      const hoveredLineWidthZ = 1.3 * zoomFactor;
-      const borderLineWidthZ = 0.5 * zoomFactor;
+      const selectedLineWidth = 2;
+      const hoveredLineWidth = 2.6;
+      const borderLineWidth = 1;
 
       const graticule = geoGraticule();
       
       const earthSphere_path = <path
+      vector-effect="non-scaling-stroke"
       className="earthSphere"
       d={path({ type: "Sphere" })}
       //onMouseOver={() => setHovered(null)}
       onClick={() => setSelected(null)}
     />;
       const graticule_path = <path
+      vector-effect="non-scaling-stroke"
         className="graticule"
         d={path(graticule())}
         strokeWidth="0.4"
@@ -64,6 +59,7 @@ class worldMapSVG {
           
           return (
             <path
+              vector-effect="non-scaling-stroke"
               key={`no_iso_country_${idx}`}
               id={c.name}
               fill={countryToColor()}
@@ -71,7 +67,7 @@ class worldMapSVG {
               strokeOpacity={filtered_map ? "10%" : "100%"}
               className="no_iso_country"
               stroke={colorScheme.border}
-              strokeWidth={` ${borderLineWidthZ}px`}
+              strokeWidth={` ${borderLineWidth}px`}
               d={path(c.geometry)}
             />
           );
@@ -82,7 +78,7 @@ class worldMapSVG {
             const cInRange = countryToColor(c) !== colorScheme.outOfRange;
             return (
             <path
-            
+              vector-effect="non-scaling-stroke"
               key={c.id}
               id={c.id}
               fill={
@@ -93,7 +89,7 @@ class worldMapSVG {
               className={c.hasData ? "country" : "unselectableCountry"}
               d={path(c.geometry)}
               stroke={colorScheme.border}
-              strokeWidth={` ${borderLineWidthZ}px`}
+              strokeWidth={` ${borderLineWidth}px`}
               /*onMouseOver={() => {
                   if (c.hasData) setHovered(c);
                   else setHovered(null);
@@ -106,13 +102,14 @@ class worldMapSVG {
         //example country: {"color": "#040", "id": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
         Object.values(iso_countries).filter(c => c.hasData).map((c) => 
           <path
+          vector-effect="non-scaling-stroke"
             key={c.id}
             id={c.id}
             fill={countryToColor(c)}
             className="hoverCountry"
             d={path(c.geometry)}
             stroke={colorScheme.hoveredCountry}
-            strokeWidth={` ${hoveredLineWidthZ}px`}
+            strokeWidth={` ${hoveredLineWidth}px`}
             onClick={(e) => {
               setSelected(iso_countries[e.target.id]);
             }}
@@ -120,18 +117,15 @@ class worldMapSVG {
       )
       var selected_path = (
         <path
+          vector-effect="non-scaling-stroke"
           key="selected"
           id="selectedCountryBorder"
           fill="transparent"
-          strokeWidth={` ${selectedLineWidth * zoomFactor}px`}
+          strokeWidth={` ${selectedLineWidth}px`}
           stroke={colorScheme.selectedCountry}
           d={path(selected ? selected.geometry : null)}
         />
       )
-      this.updateCallbacks["zoomFactor"] = (newZoomFactor) => {
-        //selected_path.props.strokeWidth = `${selectedLineWidth * newZoomFactor}px` 
-        console.log("new stroke width")
-      }
       const selected_path_or_nothing = selected && selected_path
       
       this.svg = <g className="mark" ref={gRef}>
@@ -179,11 +173,10 @@ export function LineDraw({
 
   const gRef = useRef();
   // Zooming and panning
-  const zoomFactor = 1 / (Math.max(1, zoomLevel) * zoomLineStrength);
+  //const zoomFactor = 1 / (Math.max(1, zoomLevel) * zoomLineStrength);
 
   //of course we are very efficcient and only generate the whole SVG thing once :)
   const [almightySVG, _] = React.useState(() => new worldMapSVG(
-    zoomFactor,
     iso_countries,
     non_iso_countries,
     gRef,
@@ -195,6 +188,9 @@ export function LineDraw({
   ));
 
   function ZoomCall() {
+    const zoomInScaleLimit = 150;
+    const zoomOutScaleLimit = 0.12;
+
     const svg = select(svgRef.current);
     const g = select(gRef.current);
     svg.call(
@@ -239,7 +235,7 @@ export function LineDraw({
 
   if (zoomLevel >= 2) {
     console.log("UPDATE :)")
-    almightySVG.update({zoomFactor});
+    
   }
   return almightySVG.svg;
 }
