@@ -23,125 +23,137 @@ class svgHandler {
   //this method is executed on rerender.
   //TODO: move as much as possible to constructor. (building of paths, ...)
   colorize = (countryToColor, selected) => {
-      const gRef = this.gRef;
-      const path = this.path;
-      const iso_countries = this.iso_countries;
-      const non_iso_countries = this.non_iso_countries;
-      const setSelected = this.setSelected;
+    const iso_countries = this.iso_countries;
+    const non_iso_countries = this.non_iso_countries;
+    const setSelected = this.setSelected;
 
 
-      // Line width variables
-      const graticule = geoGraticule();
-      
-      this.earthSphere_path = <path
-      vectorEffect="non-scaling-stroke"
-      className="earthSphere"
-      d={path({ type: "Sphere" })}
-      //onMouseOver={() => setHovered(null)}
-      onClick={() => setSelected(null)}
-    />;
-      this.graticule_path = <path
-      vectorEffect="non-scaling-stroke"
+    this.earthSphere_path = (
+      <path
+        vectorEffect="non-scaling-stroke"
+        className="earthSphere"
+        d={this.pathSphere}
+        //onMouseOver={() => setHovered(null)}
+        onClick={() => setSelected(null)}
+      />
+    );
+    this.graticule_path = (
+      <path
+        vectorEffect="non-scaling-stroke"
         className="graticule"
-        d={path(graticule())}
+        d={this.pathGraticule}
         strokeWidth="0.4"
         //onMouseOver={() => setHovered(null)}
         onClick={() => setSelected(null)}
-      />   
-      this.non_iso_countries_paths = 
-        //example country: {"geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
-        non_iso_countries.map((c, idx) => { 
-          
-          return (
-            <path
-              vectorEffect="non-scaling-stroke"
-              key={`no_iso_country_${idx}`}
-              id={c.name}
-              className="no_iso_country"
-              stroke={colorScheme.border}
-              strokeWidth={` ${borderLineWidth}px`}
-              d={path(c.geometry)}
-            />
-          );
-        })
-        this.iso_countries_paths = 
-        //example country: {"color": "#040", "id": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
-          Object.values(iso_countries).map((c) => {
-            const cInRange = countryToColor(c) !== colorScheme.outOfRange;
-            return (
-            <path
-              vectorEffect="non-scaling-stroke"
-              key={c.id}
-              id={c.id}
-              fill={
-                countryToColor(c)
-              }
-              fillOpacity={cInRange ? "100%" : "10%"}
-              strokeOpacity={cInRange ? "100%" : "10%"}
-              className={c.hasData ? "country" : "unselectableCountry"}
-              d={path(c.geometry)}
-              stroke={colorScheme.border}
-              strokeWidth={` ${borderLineWidth}px`}
-              /*onMouseOver={() => {
+      />
+    );
+    this.non_iso_countries_paths =
+      //example country: {"geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
+      non_iso_countries.map((c, idx) => {
+        return (
+          <path
+            vectorEffect="non-scaling-stroke"
+            key={`no_iso_country_${idx}`}
+            id={c.name}
+            className="no_iso_country"
+            stroke={colorScheme.border}
+            strokeWidth={` ${borderLineWidth}px`}
+            d={this.pathCountries[c.name]}
+          />
+        );
+      });
+    this.iso_countries_paths =
+      //example country: {"color": "#040", "id": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
+      Object.values(iso_countries).map((c) => {
+        const cInRange = countryToColor(c) !== colorScheme.outOfRange;
+        return (
+          <path
+            vectorEffect="non-scaling-stroke"
+            key={c.id}
+            id={c.id}
+            fill={countryToColor(c)}
+            fillOpacity={cInRange ? "100%" : "10%"}
+            strokeOpacity={cInRange ? "100%" : "10%"}
+            className={c.hasData ? "country" : "unselectableCountry"}
+            d={this.pathCountries[c.name]}
+            stroke={colorScheme.border}
+            strokeWidth={` ${borderLineWidth}px`}
+            /*onMouseOver={() => {
                   if (c.hasData) setHovered(c);
                   else setHovered(null);
                 }}*/
-            />
-          );
-        })
-      this.all_countries_paths = [...this.iso_countries_paths, ...this.non_iso_countries_paths]
-      this.hover_paths = 
-        //example country: {"color": "#040", "id": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
-        Object.values(iso_countries).filter(c => c.hasData).map((c) => 
+          />
+        );
+      });
+    this.all_countries_paths = [
+      ...this.iso_countries_paths,
+      ...this.non_iso_countries_paths,
+    ];
+    this.hover_paths =
+      //example country: {"color": "#040", "id": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
+      Object.values(iso_countries)
+        .filter((c) => c.hasData)
+        .map((c) => (
           <path
-          vectorEffect="non-scaling-stroke"
+            vectorEffect="non-scaling-stroke"
             key={c.id}
             id={c.id}
             fill={countryToColor(c)}
             className="hoverCountry"
-            d={path(c.geometry)}
+            d={this.pathCountries[c.name]}
             stroke={colorScheme.hoveredCountry}
             strokeWidth={` ${hoveredLineWidth}px`}
             onClick={(e) => {
               setSelected(iso_countries[e.target.id]);
             }}
           />
-      )
-      this.selected_path = selected && (
-        <path
-          vectorEffect="non-scaling-stroke"
-          key="selected"
-          id="selectedCountryBorder"
-          fill="transparent"
-          strokeWidth={` ${selectedLineWidth}px`}
-          stroke={colorScheme.selectedCountry}
-          d={path(selected ? selected.geometry : null)}
-        />
-      )
-      this.svg = <g className="mark" ref={gRef}>
+        ));
+    this.selected_path = selected && (
+      <path
+        vectorEffect="non-scaling-stroke"
+        key="selected"
+        id="selectedCountryBorder"
+        fill="transparent"
+        strokeWidth={` ${selectedLineWidth}px`}
+        stroke={colorScheme.selectedCountry}
+        d={this.pathCountries(selected.id)}
+      />
+    );
+    this.svg = (
+      <g className="mark" ref={this.gRef}>
         {this.earthSphere_path}
         {this.graticule_path}
         {this.all_countries_paths}
         {this.hover_paths}
         {this.selected_path}
-    </g>
+      </g>
+    );
+  };
 
-  }
+  constructor(iso_countries, non_iso_countries, gRef, path, setSelected) {
+    this.gRef = gRef;
+    
+    //path is "consumed" here.
+    //this.path = path;
+    
+    this.iso_countries = iso_countries;
+    this.non_iso_countries = non_iso_countries;
+    this.setSelected = setSelected;
+    this.svg = "";
 
-  constructor( 
-    iso_countries, 
-    non_iso_countries,
-    gRef,
-    path,
-    setSelected,
-        ) {
 
-        this.gRef = gRef
-        this.path = path;
-        this.iso_countries = iso_countries;
-        this.non_iso_countries = non_iso_countries;
-        this.setSelected = setSelected;
-        this.svg = "";
+    //path:
+    this.pathSphere = path({ type: "Sphere" });
+    const graticule = geoGraticule();
+    this.pathGraticule = path(graticule());
+    this.pathCountries = {};
+    this.non_iso_countries.forEach((c) => {
+      this.pathCountries[c.name] = path(c.geometry);
+    });
+    console.log(iso_countries);
+    for (let [id, c] of Object.entries(iso_countries)) {
+      this.pathCountries[id] = path(c.geometry);
+    };
   }
 }
 
@@ -156,7 +168,6 @@ export function LineDraw({
   doResetZoom,
   setDoResetZoom,
   setZoomCall,
-  category,
 }) {
   /*
   selected: null OR {id: 'BRA', intervention: 0.0301955307022192, passengers: .... 
@@ -168,7 +179,6 @@ export function LineDraw({
     (everything else should be in class.)
   */
   // Create projection after the svg's size
-
 
   const projection = geoNaturalEarth1()
     .scale((249.5 * svgRef.current.clientHeight) / 950)
@@ -183,13 +193,10 @@ export function LineDraw({
   //const zoomFactor = 1 / (Math.max(1, zoomLevel) * zoomLineStrength);
 
   //of course we are very efficcient and only generate the whole SVG thing once :)
-  const [svg_handler, _] = React.useState(() => new svgHandler(
-    iso_countries,
-    non_iso_countries,
-    gRef,
-    path,
-    setSelected,
-  ));
+  const [svg_handler, _] = React.useState(
+    () =>
+      new svgHandler(iso_countries, non_iso_countries, gRef, path, setSelected)
+  );
 
   function ZoomCall() {
     const zoomInScaleLimit = 150;
@@ -226,7 +233,7 @@ export function LineDraw({
 
   //first we need the SVG to be created.
   useEffect(initSVG, []);
-  
+
   //resetting the zoom
   if (doResetZoom) {
     setDoResetZoom(false);
