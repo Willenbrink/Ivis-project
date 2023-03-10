@@ -51,20 +51,26 @@ export default function WorldMap({data, map, isActiveTab}) {
     var relative_value;
     if(range.selected) {
       relative_value = (value - range.selected) / (range.max - range.min);
-      //if (!colorForLegend && (relative_value < brushRange[0] || relative_value) > brushRange[1]) return colorScheme.outOfRange    
     } else {
       // If range.selected is null, we have our reference at 0.
       // But, this means that the extreme ends are only "half the bar" away from the reference.
       // Therefore, we multiply by 2
       relative_value = 2 * value / (range.max - range.min);
-      // if (!colorForLegend && (relative_value < brushRange[0] || relative_value) > brushRange[1]) return colorScheme.outOfRange    
     }
     const extreme_color = relative_value < 0 ? colorScheme.left : colorScheme.right;
     //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
     const absolute_value = Math.abs(relative_value);
     return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
   };
-  function countryToColor(country, _) {
+
+  function countryToColor(country) {
+    const isBrushOn = brushRange[0] > -2;
+    if (!country) {
+      return isBrushOn ? colorScheme.outOfRange : colorScheme.noData
+    }
+    if (!isInRange(country[category.id], brushRange)) {
+      return colorScheme.outOfRange;
+    }
     return valueToColor(country[category.id]);
   };
 
@@ -89,7 +95,6 @@ export default function WorldMap({data, map, isActiveTab}) {
                 setDoResetZoom={setDoResetZoom}
                 setZoomCall={setZoomCall}
                 category={category}
-                brushRange={brushRange}
               />
               { svgRef.current &&
               <Legend
@@ -164,3 +169,9 @@ export const useD3 = (renderChartFn, dependencies) => {
   return ref;
 };
 */
+
+function isInRange(val, brushRange) {
+  if (!val && brushRange[0] > -2) return false;
+  if (val < brushRange[0] || val > brushRange[1]) return false;
+  else return true;
+}
