@@ -263,7 +263,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
   }
 
   function infoTooltip() {
-        const infoString = "All countries' avarage answers"
+        const infoString = "The range of all countries' avarage answers"
         const x = rangeBox.x + rangeBox.width + 7;
         const y = svgHeight - padding.y - paddingColorBox.y - boxHeight - 18;
         const width = 3;
