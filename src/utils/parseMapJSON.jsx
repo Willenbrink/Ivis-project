@@ -12,7 +12,7 @@ export async function parseJSON(data) {
         //console.log(jsonData);
         const { features } = feature(jsonData, jsonData.objects.countries);
     //[{ "alpha3": "FJI", "name": "Fiji", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]]]] }]
-    console.log("hi!")
+    //console.log("hi!")
     const iso_countries = features
       .filter((d) => d.id !== undefined)
       .reduce((acc, d) => {

@@ -13,14 +13,15 @@ import useRenderOnSvgMount from "../../hooks/useRenderOnSvgMount";
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
 
-/*
- * selectedCategories: array of ids (strings) of categories. country to draw: country-object, selected: country-object
- */
-const countryToColor = (selectedCategories) => (country, selected) => {
+ /*
+   * selectedCategories: array of ids (strings) of categories. country to draw: country-object, selected: country-object
+   */
+ const countryToColor = (selectedCategories, selectedCountry) => (country) => {
   //console.log("countryToColor", country, selected)
+  if (!country) return colorScheme.noData;
   if (selectedCategories.length === 0) return colorScheme.noData;
   if (!country.hasData) return colorScheme.noData;
-  if (!selected) return colorScheme.middle;
+  if (!selectedCountry) return colorScheme.middle;
 
   var relative_value;
   var dist_sq = 0;
@@ -31,7 +32,7 @@ const countryToColor = (selectedCategories) => (country, selected) => {
   // With exponent = 2, B is closer as (0.25 + 0.25)^0.5 < 0.9^2^0.5 = 0.9
   const exponent = 2;
   for (const k of selectedCategories) {
-    dist_sq += Math.abs(country[k] - selected[k]) ** exponent;
+    dist_sq += Math.abs(country[k] - selectedCountry[k]) ** exponent;
   }
   relative_value = exponent * dist_sq ** (1 / exponent);
   const extreme_color =
@@ -41,8 +42,7 @@ const countryToColor = (selectedCategories) => (country, selected) => {
   return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
 };
 
-
-export default function CountryDistance({data, map, isActiveTab}) {
+export default function CountryDistance({ data, map, isActiveTab }) {
   //currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
@@ -51,15 +51,17 @@ export default function CountryDistance({data, map, isActiveTab}) {
   const [zoomLevel, setZoomLevel] = useState(null);
   const [doResetZoom, setDoResetZoom] = useState(false);
 
-   // which checkboxes are checked
-   const [selectedCategories, setSelectedCategories] = useState(data.keys.map(_ => true))
-  
-  // Fix for map not rendering on start
-  const svgRef = useRef()
-  const svgHasMounted = useRenderOnSvgMount(svgRef, isActiveTab)
+  // which checkboxes are checked
+  const [selectedCategories, setSelectedCategories] = useState(
+    data.keys.map((_) => true)
+  );
 
-  const svgLegendRef = useRef(null)
-  const svgLegendHasMounted = useRenderOnSvgMount(svgLegendRef, isActiveTab)
+  // Fix for map not rendering on start
+  const svgRef = useRef();
+  const svgHasMounted = useRenderOnSvgMount(svgRef, isActiveTab);
+
+  const svgLegendRef = useRef(null);
+  const svgLegendHasMounted = useRenderOnSvgMount(svgLegendRef, isActiveTab);
 
   const categoryStatistics = data.country_values_stats();
   const colors = { left: colorScheme.middle, right: colorScheme.right };
@@ -75,55 +77,65 @@ export default function CountryDistance({data, map, isActiveTab}) {
     : { min: -1, selected: null, max: 1 };
 
   const svg = (
-      <svg width='100%' height='100%' ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
-          {svgHasMounted &&
-          <>
-              <LineDraw
-                mapWithData={map}
-                svgRef={svgRef}
-                countryToColor={countryToColor(data.keys.filter((_, idx) => selectedCategories[idx]))} //countryToColor(names of selected categories)
-                selected={selected}
-                setSelected={setSelected}
-                hovered={hovered}
-                setHovered={setHovered}
-                zoomLevel={zoomLevel}
-                setZoomLevel={setZoomLevel}
-                doResetZoom={doResetZoom}
-                setDoResetZoom={setDoResetZoom}
-                setZoomCall={()=>{}}
-                category={distance}
-                brushRange={[-2.0,2.0]}
-              />
-              { svgRef.current &&
-              <Legend
-                svgRef={svgRef}
-                range={range}
-                category={distance}
-                categoryStatistics={categoryStatistics}
-                selected={null}
-                colors={colors}
-                markers={markers}
-            />}
-          </>
-          }
-      </svg>
-  );
-
-  const legend = (
-    <svg ref={svgLegendRef} height='100%' width='100%'>
-      {svgLegendHasMounted && svgLegendRef.current && 
-              <Legend
-              svgRef={svgLegendRef}
+    <svg
+      width="100%"
+      height="100%"
+      ref={svgRef}
+      onMouseLeave={() => {
+        setHovered(null);
+      }}
+    >
+      {svgHasMounted && (
+        <>
+          <LineDraw
+            mapWithData={map}
+            svgRef={svgRef}
+            countryToColor={countryToColor(
+              data.keys.filter((_, idx) => selectedCategories[idx]), selected)} 
+              //countryToColor(names of selected categories, selected country)
+            selected={selected}
+            setSelected={setSelected}
+            hovered={hovered}
+            setHovered={setHovered}
+            zoomLevel={zoomLevel}
+            setZoomLevel={setZoomLevel}
+            doResetZoom={doResetZoom}
+            setDoResetZoom={setDoResetZoom}
+            setZoomCall={() => {}}
+            category={distance}
+          />
+          {svgRef.current && (
+            <Legend
+              svgRef={svgRef}
               range={range}
               category={distance}
               categoryStatistics={categoryStatistics}
               selected={null}
               colors={colors}
               markers={markers}
-              zoomCall={()=>{}}
-        />}
+            />
+          )}
+        </>
+      )}
     </svg>
-  )
+  );
+
+  const legend = (
+    <svg ref={svgLegendRef} height="100%" width="100%">
+      {svgLegendHasMounted && svgLegendRef.current && (
+        <Legend
+          svgRef={svgLegendRef}
+          range={range}
+          category={distance}
+          categoryStatistics={categoryStatistics}
+          selected={null}
+          colors={colors}
+          markers={markers}
+          zoomCall={() => {}}
+        />
+      )}
+    </svg>
+  );
 
   //multi-select of categories
   function selectAll() {
@@ -148,66 +160,83 @@ export default function CountryDistance({data, map, isActiveTab}) {
       onChange={() => toggleCathegory(idx)}
     />
   ));
-  return (
-      <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
-        <div className="d-flex flex-column flex-grow-1 position-relative">
-          {svg}
-        </div>
 
-        <div className="px-5 pt-2 position-absolute" id="cd_control">
-          <InputGroup>
-            <InputGroup.Text id="basic-addon2" className="bg-light">
-              Country distance
-            </InputGroup.Text>
-            <InfoPopover
-              title={distance.name_short || distance.name}
-              info={distance.info} isActiveTab={isActiveTab}
-            />
-          </InputGroup>
-          {selected === null ? (
-            <div style={{ textAlign: "center", borderRadius: ".3em", borderStyle: "solid", borderWidth: ".2em", padding: ".2em", margin: ".2em", marginLeft: "0", borderColor:colorScheme.hoveredCountry}}>
-              Please select a country as reference point.
-            </div>
-          ) : (
-            <div>
-              {checkboxes}
-              {selectedCategories.every(Boolean) ? 
-              <Button variant="light" size="sm" onClick={selectNone}>Select none</Button> : 
+  return (
+    <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
+      <div className="d-flex flex-column flex-grow-1 position-relative">
+        {svg}
+      </div>
+
+      <div className="px-5 pt-2 position-absolute" id="cd_control">
+        <InputGroup>
+          <InputGroup.Text id="basic-addon2" className="bg-light">
+            Country distance
+          </InputGroup.Text>
+          <InfoPopover
+            title={distance.name_short || distance.name}
+            info={distance.info}
+            isActiveTab={isActiveTab}
+          />
+        </InputGroup>
+        {selected === null ? (
+          <div
+            style={{
+              textAlign: "center",
+              borderRadius: ".3em",
+              borderStyle: "solid",
+              borderWidth: ".2em",
+              padding: ".2em",
+              margin: ".2em",
+              marginLeft: "0",
+              borderColor: colorScheme.hoveredCountry,
+            }}
+          >
+            Please select a country as reference point.
+          </div>
+        ) : (
+          <div>
+            {checkboxes}
+            {selectedCategories.every(Boolean) ? (
+              <Button variant="light" size="sm" onClick={selectNone}>
+                Select none
+              </Button>
+            ) : (
               <Button variant="primary" size="sm" onClick={selectAll}>
                 Select all
-              </Button>}
-            </div>
-          )}
-        </div>
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
 
-        <div
-          id="zoomDiv"
-          style={{ position: "absolute", margin: "10px", right: 0 }}
+      <div
+        id="zoomDiv"
+        style={{ position: "absolute", margin: "10px", right: 0 }}
+      >
+        <p hidden={true} style={{ textAlign: "right" }}>
+          Zoom: {zoomLevel ? zoomLevel.toFixed(2) : "1.00"}
+        </p>
+        <Button
+          onClick={(e) => {
+            setDoResetZoom(true);
+          }}
+          hidden={!zoomLevel || !(zoomLevel < 0.5 || zoomLevel > 2)}
         >
-          <p hidden={true} style={{ textAlign: "right" }}>
-            Zoom: {zoomLevel ? zoomLevel.toFixed(2) : "1.00"}
-          </p>
-          <Button
-            onClick={(e) => {
-              setDoResetZoom(true);
-            }}
-            hidden={!zoomLevel || !(zoomLevel < 0.5 || zoomLevel > 2)}
-          >
-            Reset Map
-          </Button>
-        </div>
-        {/* 
+          Reset Map
+        </Button>
+      </div>
+      {/* 
         <div className="position-absolute start-0 bottom-0 w-100" style={{ background: 'linear-gradient(360deg, rgb(256,256,256,0.5) 80%, transparent)', backdropFilter: 'blur(1px)', height: '25%'}}>
         {legend}
       </div>
       */}
-        {/* 
+      {/* 
       <div className="w-25 mx-3">
         <p className="fs-4 mb-2 border-bottom">{categoriesObjects[category].title}</p>
         <p>{categoriesObjects[category].info}</p>
       </div>
       */}
-      </div>
+    </div>
   );
 }
 
