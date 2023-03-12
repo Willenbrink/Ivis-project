@@ -1,15 +1,14 @@
-import { zoomIdentity, geoNaturalEarth1, geoPath, geoGraticule, select, zoom, svg, interpolateRgb } from "d3";
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRef } from "react";
 import { categories } from "../utils/categories";
 import colorScheme from "./colorScheme"
 import * as d3 from "d3"
-import AgeFrom from "../assets/legendImages/age/AgeFrom";
-import SpeciesFrom from "../assets/legendImages/species/SpeciesFrom";
-import SpeciesTo from "../assets/legendImages/species/SpeciesTo";
+import useRenderOnSvgMount from "../hooks/useRenderOnSvgMount";
+
 
 export function Legend({svgRef, category, categoryStatistics, range, showRange, selected, colors, markers, zoomCall=false, brushActive=false, setBrushRange, showScaleNumbers=false}){
   const [labelWidths, setLabelWidths] = useState(null)
+  const [showInfo, setShowInfo] = useState(false)
   const legendRef = useRef()
 
   // Get max widths for all left labels and right labels --> this assigns fixed widths for the labels no matter the chosen category
@@ -18,8 +17,10 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
     setLabelWidths({ left, right })
   },[])
 
+  const svgHasMounted = useRenderOnSvgMount(legendRef, true)
+
   useEffect(()=>{
-    if (brushActive && legendRef.current !== null) {
+    if (brushActive && legendRef?.current != undefined) {
       const brush = d3.brushX()
       .on("brush", brushed)
       .on("end", brushended)
@@ -36,9 +37,8 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
           svg.dispatch("input");
         }
       }
-      const gb = svg.append("g")
-          .call(brush)
-          // .call(brush.move, [-2.0,2.0])
+      const gb = svg.call(brush)
+      //.call(brush.move, [-2.0,2.0])
 
       function brushended({selection}) {
         if (!selection) {
@@ -48,7 +48,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
       }
 
     }
-    },[legendRef?.current])
+    },[legendRef?.current, svgHasMounted])
 
     if (!svgRef.current || labelWidths == null || svgRef.current.getBoundingClientRect().width === 0) return
 
@@ -65,7 +65,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
   const boxMargins = 5;
   const fontFamily = 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"'
   const textPadding = 30
-  const roundedCorners = '3px'
+  const roundedCorners = '1px'
   const scaleText = parseInt(fontSize) + 10
 
   const padding = {
@@ -246,7 +246,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
       Object.keys(markers).map(id => {
         const m = markers[id]
         const x = rangeBox.x + m.value * rangeBox.width;
-        const y = svgHeight - padding.y - paddingColorBox.y;
+        const y = svgHeight - padding.y - paddingColorBox.y - boxHeight;
         const width = 3;
         const labelWidth = GetWidth(m.name)
 
@@ -260,6 +260,21 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
         </g>);
       })
     }</>);
+  }
+
+  function infoTooltip() {
+        const infoString = "All countries' avarage answers"
+        const x = rangeBox.x + rangeBox.width + 7;
+        const y = svgHeight - padding.y - paddingColorBox.y - boxHeight - 18;
+        const width = 3;
+        const labelWidth = parseInt(fontSize) + 10 + GetWidth(infoString)
+
+    return (<>
+            <path key={"tooltipboxInfo"} d={topTooltipPath(labelWidth + 20, parseInt(fontSize) * 2, 5, 10)} fill='#EEEEEE' stroke='gray' transform={`translate(${x + width/2},${y - 2})`} opacity={showInfo ? '100%' : '0%'}/>
+            <rect width={fontSize} height={fontSize} transform={`translate(${x + width/2 - labelWidth/2},${y - 18 - fontSize + 3})`} fill='none' stroke={rangeBox.color} className='dashedRect' strokeWidth="2" rx={roundedCorners} opacity={showInfo ? '100%' : '0%'}></rect>
+            <text key={"tooltiplabelInfo"} transform={`translate(${x + width/2 - labelWidth/2 + parseInt(fontSize) + 10},${y - 16})`} opacity={showInfo ? '100%' : '0%'}>{infoString}</text>
+           </>
+           );
   }
 
 
@@ -292,6 +307,17 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
     ...scaleNumberCommons,
     x: hBox.x + hBox.width
   }
+
+  const infoCircle = (
+    <svg xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" xmlSpace="preserve" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd'}}
+    viewBox="0 0 20 20">
+      <g id="UrTavla" onMouseOver={() => setShowInfo(true)} onMouseOut={() => setShowInfo(false)} style={{cursor: 'pointer'}}>
+        <circle style={{ stroke:'#000000', strokeWidth:'1', fill: 'none', strokeMiterlimit:'10', fill: 'white'}} cx="10" cy="10" r="9">
+        </circle>
+        <text x="50%" y="50%" textAnchor="middle" stroke="#000000" strokeWidth="1px" dy=".4em">i</text>
+      </g>
+    </svg>
+  )
 
   return (
     <svg height='100%' width='100%' fontFamily={fontFamily} className=''>
@@ -351,7 +377,14 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
         </>
         
         {/* Dotted range box */}
-        {showRange && <rect x={rangeBox.x} y={rangeBox.y} width={rangeBox.width} height={rangeBox.height} fill='none' strokeWidth="2" stroke={rangeBox.color} style={{ ...styleTransition }} className="dashedRect"></rect>}
+        {showRange && (
+        <>
+          <rect x={rangeBox.x} y={rangeBox.y} width={rangeBox.width} height={rangeBox.height} fill='none' strokeWidth="2" stroke={rangeBox.color} style={{ ...styleTransition }} className="dashedRect"></rect>
+          <svg x={rangeBox.x + rangeBox.width} y={rangeBox.y - fontSize - 3} height={16} width={16}>{infoCircle}</svg>
+          {infoTooltip()}
+          
+        </>
+        )}
         {/* Middle marker */}
         {/* <path strokeDasharray={`${Math.round((boxHeight + 20)/8)}`}
               strokeOpacity="70%" d={`M0 0 V${boxHeight + 20} 0`}
