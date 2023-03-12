@@ -66,6 +66,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
   const fontFamily = 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"'
   const textPadding = 30
   const roundedCorners = '3px'
+  const scaleText = parseInt(fontSize) + 10
 
   const padding = {
     x: 100,
@@ -79,7 +80,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
 
   const noDataText = {
     x: padding.x + 10,
-    y: svgHeight - padding.y + boxHeight/2 + fontSize/4,
+    y: svgHeight - padding.y - boxHeight,
     width: GetWidth(noDataStr), // this has to be measured if we change the text size or font
     color: lineColor,
     fontSize
@@ -87,27 +88,29 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
 
   const noDataBox = {
     x: padding.x + noDataText.width + textPadding,
-    y: svgHeight - padding.y,
+    y: svgHeight - padding.y - boxHeight - boxHeight/2,
     height: boxHeight_2,
     width: boxHeight_2,
   }
 
+  /*
   const rangeBoxText_1 = {
     x: padding.x - GetWidth(rangeBoxStr_1) + GetWidth(noDataStr) + 15,
-    y: svgHeight - padding.y + boxHeight_2 / 2 + fontSize / 4 - noDataBox.height - fontSize / 2 - boxMargins,
+    y: svgHeight - padding.y - noDataBox.height - fontSize / 2 - boxMargins + boxHeight_2 / 2 + fontSize / 4,
     width: GetWidth(rangeBoxStr_1), // this has to be measured if we change the text size or font
     color: lineColor,
     fontSize
   }
+  */
 
   const rangeBoxText_2 = {
     x: padding.x - GetWidth(rangeBoxStr_2) + GetWidth(noDataStr) + 15,
-    y: svgHeight - padding.y + boxHeight_2 / 2 + fontSize / 4 - noDataBox.height + fontSize / 2 - boxMargins,
+    y: svgHeight - padding.y - noDataBox.height + fontSize / 2 - boxMargins + boxHeight_2 / 2 + fontSize / 4,
     width: GetWidth(rangeBoxStr_2), // this has to be measured if we change the text size or font
     color: lineColor,
     fontSize
   }
-
+  /*
   const rangeBoxBox = {
     x: padding.x + noDataText.width + textPadding,
     y: svgHeight - noDataBox.height - padding.y - boxMargins,
@@ -115,10 +118,11 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
     width: boxHeight_2,
     color: 'rgb(56, 62, 68)'
   }
+  */
 
   const labelLeft = {
     x: noDataBox.x + noDataBox.width + 50 + textPadding,
-    y: svgHeight - padding.y + boxHeight/2 + fontSize/4 - fontSize - (category.from.length > 1 ? fontSize/2 * (Math.floor(category.from.length/2)) : 0),
+    y: svgHeight - padding.y - boxHeight/2 + fontSize/4 - fontSize - (category.from.length > 1 ? fontSize/2 * (Math.floor(category.from.length/2)) : 0),
     width: labelWidths.left, // the longest word that appears here is passengers, so this is this word's width
     color: lineColor,
     fontSize
@@ -127,7 +131,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
   const paddingLabelRight = 100
   const labelRight = {
     x: svgWidth - labelWidths.right - (padding.x * 2),
-    y: svgHeight - padding.y + boxHeight/2 + fontSize/4 - fontSize - (category.to.length > 1 ? fontSize/2 * (Math.floor(category.to.length/2)) : 0),
+    y: svgHeight - padding.y - boxHeight/2 + fontSize/4 - fontSize - (category.to.length > 1 ? fontSize/2 * (Math.floor(category.to.length/2)) : 0),
     width: labelWidths.right, // the longest word that appears here is passengers, so this is this word's width
     color: lineColor,
     fontSize
@@ -146,7 +150,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
 
   const vertLineLeft = {
     x: labelLeft.x + labelLeft.width + 5,
-    y1: svgHeight - padding.y + boxHeight,
+    y1: svgHeight - padding.y - boxHeight,
     y2: svgHeight - padding.y,
     strokeWidth: "2", // the longest word that appears here is passengers, so this is this word's width
     color: lineColor
@@ -154,7 +158,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
 
   const vertLineRight = {
     x: labelLeft.x + labelLeft.width + availableWidthLine,
-    y1: svgHeight - padding.y + boxHeight,
+    y1: svgHeight - padding.y - boxHeight,
     y2: svgHeight - padding.y,
     strokeWidth: "2", // the longest word that appears here is passengers, so this is this word's width
     color: lineColor
@@ -162,7 +166,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
 
   const hBox = {
     x: vertLineLeft.x,
-    y: vertLineLeft.y2 - paddingColorBox.y,
+    y: vertLineLeft.y2 - paddingColorBox.y - boxHeight,
     height: boxHeight,
     width: vertLineRight.x - vertLineLeft.x,
     strokeWidth: "2", // the longest word that appears here is passengers, so this is this word's width
@@ -171,21 +175,11 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
 
   const rangeBox = {
     x: labelLeft.x + labelLeft.width + lineWidthLeft,
-    y: svgHeight - padding.y - paddingColorBox.y,
+    y: svgHeight - padding.y - paddingColorBox.y - boxHeight,
     height: boxHeight,
     width: boxWidth,
     color: 'rgb(56, 62, 68)'
   }
-  /*
-  const hLineRight = {
-    x1: rangeBox.x + rangeBox.width,
-    y1: svgHeight - padding.y + boxHeight/2,
-    x2: rangeBox.x + rangeBox.width + lineWidthRight,
-    y2: svgHeight - padding.y + boxHeight/2,
-    strokeWidth: "2", // the longest word that appears here is passengers, so this is this word's width
-    color: lineColor
-  }
-  */
 
   // no selected country --> colorBox has full width
   const colorBox = selected
@@ -302,18 +296,18 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
   return (
     <svg height='100%' width='100%' fontFamily={fontFamily} className=''>
 
-        <rect x={15} y={rangeBoxBox.y - 10 -30 } width={svgWidth -30} height={100 + 30} fill='rgb(256,256,256)' rx="15" stroke='rgb(206,212,218)' strokeWidth={1} fillOpacity='100%' filter="drop-shadow(3px 5px 2px rgb(0 0 0 / 0.1))"></rect>
+       <rect x={15} y={hBox.y - 10 - 30 } width={svgWidth -30} height={50 + 32 + hBox.height + 20} fill='rgb(256,256,256)' rx="15" stroke='rgb(206,212,218)' strokeWidth={1} fillOpacity='100%' filter="drop-shadow(3px 5px 2px rgb(0 0 0 / 0.1))"></rect>
         
         <>{/* No data text */}
             <text fontSize={noDataText.fontSize} x={noDataText.x} y={noDataText.y} width={noDataText.width} height={noDataText.height} fill={noDataText.color}>{noDataStr}</text>
             <rect x={noDataBox.x} y={noDataBox.y} width={noDataBox.width} height={noDataBox.height} fill={colorScheme.noData} stroke="#333" strokeWidth="0.3" rx={roundedCorners}></rect>
           </>
-          {showRange ?
-            <>{/* Rangebox text */}
+          {/* showRange ?
+            <>
                 <text fontSize={rangeBoxText_1.fontSize} x={rangeBoxText_1.x} y={rangeBoxText_1.y} width={rangeBoxText_1.width} height={rangeBoxText_1.height} fill={rangeBoxText_1.color}>{rangeBoxStr_1}</text>
                 <text fontSize={rangeBoxText_2.fontSize} x={rangeBoxText_2.x} y={rangeBoxText_2.y} width={rangeBoxText_2.width} height={rangeBoxText_2.height} fill={rangeBoxText_2.color}>{rangeBoxStr_2}</text>
                 <rect x={rangeBoxBox.x} y={rangeBoxBox.y} width={rangeBoxBox.width} height={rangeBoxBox.height} fill='none' stroke={rangeBox.color} className='dashedRect' strokeWidth="2" rx={roundedCorners}></rect>
-            </> : ""}
+  </> : ""*/}
         <>{/* Legend box and left/right labels */}    
             <svg x={labelLeft.x} y={labelLeft.y - 50} width={labelLeft.width} height={50}>
               {category.fromIcon}

@@ -14,6 +14,7 @@ import ResetZoomButton from "./ResetZoomButton";
 import { getMarkers } from "../../utils/getMarkers";
 import { getRange } from "../../utils/getRange";
 import useRenderOnSvgMount from "../../hooks/useRenderOnSvgMount";
+import { Legend2 } from "../../utils/legend2";
 
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
