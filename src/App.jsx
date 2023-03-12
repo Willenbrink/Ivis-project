@@ -24,6 +24,20 @@ function App() {
     }
     window.addEventListener('resize', handleResize);
     fetch_data().then((data) => {
+      /* MTQ (Martinique), REU (Réunion) --> Two french departments
+        These countries have separate keys in CountriesChangePr.json
+        But in the topoJson map data they're in the same path-data as France.
+        
+        In Species: pets vs. humans, at least one of them was the most human-friendly, so
+        when brushing no country was "visible".
+
+        Solutions:
+        1. Separate the path data from France, i.e give them unique paths (TIME CONSUMING???)
+        2. Aggregate MTQ and REU's ansers to France (HOW???)
+        --> 3. Delete the countries from the data and write a disclaimer (EASIEST) 
+      */
+        delete data.json_data.countries.MTQ
+        delete data.json_data.countries.REU
       setData(data);
       parseJSON(data).then((map) => setMap(map)) //needs to be called after data is set
     });
