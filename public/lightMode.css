@@ -39,3 +39,7 @@ text {
 	border-color: lightgray;
 	border-width: 0.4px;
 }
+
+.logotext {
+	fill: black
+}
