@@ -57,8 +57,20 @@ export default function HomePage({ setActiveTabNumber }) {
               setActiveTabNumber(1);
             }}
           >
-            Start exploring
+            Start Exploring
           </Button>
+          <Button
+            onClick={() => {
+                if (document.getElementById("themeLink").getAttribute("href") == "src/lightMode.css") {
+                    document.getElementById("themeLink").setAttribute("href", "src/darkMode.css");
+                }
+                else {
+                    document.getElementById("themeLink").setAttribute("href", "src/lightMode.css");
+                }
+            }}
+          >
+          Change Theme
+        </Button>
         </div>
         <p className="mt-3">
           Disclaimer: This application is only meant to visualize the data

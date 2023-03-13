@@ -4,7 +4,7 @@ import App from './App'
 //import './index.css'
 import './worldMap.css'
 import './legend.css'
-import './darkMode.css'
+
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
