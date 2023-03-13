@@ -2,7 +2,7 @@ body {
 	background: #101010;
 	color: white;
 }
-.nav-item, .nav-links, #navigation-bar, .category-selector-text, .info-box, .popover-header, .legend, #basic-addon2, .person-card {
+.nav-item, .nav-links, #navigation-bar, .category-selector-text, .info-box, .popover-header, .legend, #basic-addon2, .person-card, .country-list-box {
 	background: #202020;
 	color: white;
 	stroke: none;
@@ -32,7 +32,7 @@ a:hover {
 	stroke: #222222;
 }
 
-.legend {
+.legendm, .country-list-box {
 	stroke: #444444;
 	border: solid;
 	border-color: #444444;
