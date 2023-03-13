@@ -57,7 +57,7 @@ function App() {
 
   return (
     <div className="h-100 vh-100 w-100 d-flex flex-column" style={{minHeight: '100%'}}>
-      <link id="themeLink" rel="stylesheet" href="public/lightMode.css" />
+      <link id="themeLink" rel="stylesheet" href="lightMode.css" />
       <TabSwitch activeTabNumber={activeTabNumber} setActiveTabNumber={setActiveTabNumber}>
         <HomePage icon={<div className='' style={{height: '2rem'}}><MMLogo/></div>} setActiveTabNumber={setActiveTabNumber}/>
         {(data !== null && map !== null) ? <WorldMap data={data} map={map} isActiveTab={activeTabNumber === 1 } icon="" title="Single Category Map"/>: <pre>"Loading..."</pre>}
