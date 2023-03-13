@@ -1,14 +1,10 @@
-import React, { useState, useCallback, useEffect } from "react";
-import ReactDom from "react-dom";
+import React, { useState } from "react";
 import { Legend } from "../../utils/legend";
 import { LineDraw } from "../../utils/lineDraw";
 import colorScheme from "../../utils/colorScheme";
-import InfoPopover from "../../utils/InfoPopover";
-import { active, interpolateRgb } from "d3";
-import { Form, InputGroup, Button } from "react-bootstrap";
+import { interpolateRgb } from "d3";
 import { useRef } from "react";
 import { categories } from "../../utils/categories";
-import useWindowDimensions from "../../hooks/windowResizeHook";
 import CategorySelectorInfo from "./CategorySelectorInfo";
 import ResetZoomButton from "./ResetZoomButton";
 import { getMarkers } from "../../utils/getMarkers";
