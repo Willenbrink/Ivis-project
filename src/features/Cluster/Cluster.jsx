@@ -59,7 +59,10 @@ const colors = colors_10;
 
 export default function Cluster({clusterData, map, isActiveTab}) {
   const [numClusters, setNumClusters] = useState(3);
-  const [countryColorDict, _] = useState({});
+  const [countryColorDict, _] = useState(updateCountryColorDict(numClusters));
+  // Use something like the following if on-the-fly clustering is implemented to precompute only one clustering
+  // It's also only computed once the Cluster view is actually shown so this is already lazy loading
+  // const [countryColorDicts, _] = useState({ all_categories: updateCountryColorDict(numClusters, all_categories) });
   //currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
@@ -85,12 +88,14 @@ export default function Cluster({clusterData, map, isActiveTab}) {
   function updateCountryColorDict() {
     const number = numClusters;
     clusters = clustersOfLevel(clusterData.get_cluster_data(), numClusters);
+    const countryColorDict = {};
     countryColorDict[number] = {};
     for (let i = 0; i < clusters.length; i++) {
       for (let j = 0; j < clusters[i].length; j++) {
         countryColorDict[number][clusters[i][j]] = colors[i];
       } 
     }
+    return countryColorDict;
   }
   function clustersOfLevel(tree, amount) {
     // tree: ["node", countries: [str], left: tree, right: tree, size] | ["leaf", country: [str] ]
@@ -123,7 +128,6 @@ export default function Cluster({clusterData, map, isActiveTab}) {
   // console.log(clusterData.get_cluster_data());
   //console.log(clusters);
   // console.log(clusters.map((x) => x.length));
-  updateCountryColorDict(numClusters);
   function countryToColor(country) {
     if (!country) {
       return colorScheme.noData
@@ -132,8 +136,7 @@ export default function Cluster({clusterData, map, isActiveTab}) {
     return val ? val : colorScheme.noData;
   };
 
-  const selectedCluster = clusters.filter((cl) => cl.includes(selected?.id))[0];
-  console.log(selectedCluster);
+  const selectedCluster = clusters.filter((cl) => cl.includes(selected?.id))[0]?.map((country) => map.iso_countries[country]);
 
   const svg = (
       <svg width="100%" height="100%" ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
