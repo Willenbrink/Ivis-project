@@ -1,0 +1,41 @@
+body {
+	background: white;
+	color: black;
+}
+.nav-item, .nav-links, #navigation-bar, .category-selector-text, .info-box, .popover-header, .legend, #basic-addon2, .person-card, .nav-link, .country-list-box {
+	background: white;
+	background-color: white;
+	color: black;
+	stroke: none;
+	fill: white;
+}
+.m-0 {
+	color: #303030;
+}
+
+text {
+	fill: black;
+}
+
+.mark .earthSphere, .tool-tip, .legendColourBackground, .country-distance {
+	fill: #eeeeee;
+}
+
+.mark .graticule {
+	fill: none;
+	stroke: #cccccc;
+}
+
+.person-card {
+	border-radius: 0.5em;
+	border: solid;
+	border-color: grey;
+	border-width: 1.2px;
+}
+
+.country-list-box {
+	border-radius: 0.5em;
+	border: solid;
+	border-color: lightgray;
+	border-width: 0.4px;
+}

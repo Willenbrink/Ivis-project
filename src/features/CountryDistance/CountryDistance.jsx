@@ -170,7 +170,7 @@ export default function CountryDistance({ data, map, isActiveTab }) {
 
       <div className="px-5 pt-2 position-absolute" id="cd_control">
         <InputGroup>
-          <InputGroup.Text id="basic-addon2" className="bg-light">
+          <InputGroup.Text id="basic-addon2" className="country-distance">
             Country distance
           </InputGroup.Text>
           <InfoPopover

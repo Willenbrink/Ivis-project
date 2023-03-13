@@ -5,6 +5,7 @@ import App from './App'
 import './worldMap.css'
 import './legend.css'
 
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <App />
