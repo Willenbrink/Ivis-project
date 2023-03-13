@@ -22,7 +22,7 @@ class svgHandler {
   //since JSX elements are immutable, we have to rebuild the whole tree.
   //this method is executed on rerender.
   //TODO: move as much as possible to constructor. (building of paths, ...)
-  colorize = (countryToColor, selected) => {
+  colorize = (countryToColor, selected, setHovered) => {
     const iso_countries = this.iso_countries;
     const non_iso_countries = this.non_iso_countries;
     const setSelected = this.setSelected;
@@ -33,7 +33,7 @@ class svgHandler {
         vectorEffect="non-scaling-stroke"
         className="earthSphere"
         d={this.pathSphere}
-        //onMouseOver={() => setHovered(null)}
+        onMouseOver={() => setHovered(null)}
         onClick={() => setSelected(null)}
       />
     );
@@ -43,7 +43,7 @@ class svgHandler {
         className="graticule"
         d={this.pathGraticule}
         strokeWidth="0.4"
-        //onMouseOver={() => setHovered(null)}
+        onMouseOver={() => setHovered(null)}
         onClick={() => setSelected(null)}
       />
     );
@@ -82,10 +82,6 @@ class svgHandler {
             d={this.iso_pathCountries[c.id]}
             stroke={colorScheme.border}
             strokeWidth={` ${borderLineWidth}px`}
-            /*onMouseOver={() => {
-                  if (c.hasData) setHovered(c);
-                  else setHovered(null);
-                }}*/
           />
         );
       });
@@ -110,6 +106,10 @@ class svgHandler {
             onClick={(e) => {
               setSelected(iso_countries[e.target.id]);
             }}
+            onMouseOver={() => {
+                  if (c.hasData) setHovered(c);
+                  else setHovered(null);
+                }}
           />
           
         )});
@@ -175,6 +175,8 @@ export function LineDraw({
   doResetZoom,
   setDoResetZoom,
   setZoomCall,
+  hovered,
+  setHovered,
 }) {
   /*
   selected: null OR {id: 'BRA', intervention: 0.0301955307022192, passengers: .... 
@@ -252,6 +254,6 @@ export function LineDraw({
       setZoomLevel(null);
     }
   }
-  svg_handler.colorize(countryToColor, selected);
+  svg_handler.colorize(countryToColor, selected, setHovered);
   return svg_handler.svg;
 }
