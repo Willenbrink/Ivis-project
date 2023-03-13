@@ -11,10 +11,56 @@ import './Input.css'
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
 
+// Created using IWantHue
+const colors_7 =
+      ["#be5dae",
+       "#61ab51",
+       "#7377cc",
+       "#a3943f",
+       "#cc566a",
+       "#4ab0aa",
+       "#cd6c39"];
+
+const colors_10 =
+      ["#c75980",
+       "#98894c",
+       "#bd5cb5",
+       "#b3a533",
+       "#798dc6",
+       "#d46f27",
+       "#4aaa86",
+       "#7a6bd5",
+       "#5cac48",
+       "#cd5a4d"];
+
+const colors_20 =
+      ["#cfa637",
+       "#6f6ada",
+       "#9bb833",
+       "#bb55c2",
+       "#5aba50",
+       "#d3529a",
+       "#448a48",
+       "#d6436a",
+       "#58c7ae",
+       "#cf4734",
+       "#6197d5",
+       "#ca7432",
+       "#745ea5",
+       "#96a857",
+       "#d08ecd",
+       "#776b27",
+       "#a04b6c",
+       "#2f8a72",
+       "#c56f62",
+       "#cf9f68"];
+
+const colors = colors_10;
 
 export default function Cluster({clusterData, map, isActiveTab}) {
   const [numClusters, setNumClusters] = useState(3);
   const [countryColorDict, _] = useState({});
+  const [clusterContainer, _2] = useState({});
   //currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
@@ -32,59 +78,14 @@ export default function Cluster({clusterData, map, isActiveTab}) {
   const svgRef = useRef(null)
   const svgHasMounted = useRenderOnSvgMount(svgRef, isActiveTab)
 
-  // Created using IWantHue
-  const colors_7 =
-        ["#be5dae",
-"#61ab51",
-"#7377cc",
-"#a3943f",
-"#cc566a",
-"#4ab0aa",
-"#cd6c39"];
-  const colors_10 =
-        ["#c75980",
-         "#98894c",
-         "#bd5cb5",
-         "#b3a533",
-         "#798dc6",
-         "#d46f27",
-         "#4aaa86",
-         "#7a6bd5",
-         "#5cac48",
-         "#cd5a4d"]
-  ;
-  const colors_20 =
-
-
-["#cfa637",
-"#6f6ada",
-"#9bb833",
-"#bb55c2",
-"#5aba50",
-"#d3529a",
-"#448a48",
-"#d6436a",
-"#58c7ae",
-"#cf4734",
-"#6197d5",
-"#ca7432",
-"#745ea5",
-"#96a857",
-"#d08ecd",
-"#776b27",
-"#a04b6c",
-"#2f8a72",
-"#c56f62",
-"#cf9f68"]
-;
-  const colors = colors_7;
   function clusterSize(cluster) {
     if (cluster[0] === "Leaf") return 1;
     return cluster[4];
   }
   function updateCountryColorDict() {
     const number = numClusters;
-    const clusters = clustersOfLevel(clusterData.get_cluster_data(), numClusters);
+    clusterContainer.clusters = clustersOfLevel(clusterData.get_cluster_data(), numClusters);
+    const clusters = clusterContainer.clusters;
     countryColorDict[number] = {};
     for (let i = 0; i < clusters.length; i++) {
       for (let j = 0; j < clusters[i].length; j++) {
@@ -127,13 +128,14 @@ export default function Cluster({clusterData, map, isActiveTab}) {
     if (!country) {
       return colorScheme.noData
     }
-    // console.log(country);
     if (countryColorDict[numClusters] === undefined) {
       updateCountryColorDict(numClusters);
     }
     const val = countryColorDict[numClusters][country.id]
     return val ? val : colorScheme.noData;
   };
+
+  const selectedCluster = clusterContainer.clusters?.filter((cl) => cl.includes(selected?.id))[0]?.map((country) => map.iso_countries[country]).filter((country) => country !== undefined);
 
   const svg = (
       <svg width="100%" height="100%" ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
@@ -143,7 +145,7 @@ export default function Cluster({clusterData, map, isActiveTab}) {
                 mapWithData={map}
                 svgRef={svgRef}
                 countryToColor={countryToColor}
-                selected={selected}
+                selected={selectedCluster}
                 setSelected={setSelected}
                 hovered={hovered}
                 setHovered={setHovered}
