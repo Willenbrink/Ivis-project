@@ -6,7 +6,7 @@ import { interpolateRgb } from "d3";
 import { useRef } from "react";
 import { categories } from "../../utils/categories";
 import CategorySelectorInfo from "./CategorySelectorInfo";
-import ResetZoomButton from "./ResetZoomButton";
+import ResetZoomButton from "../../utils/ResetZoomButton";
 import { getMarkers } from "../../utils/getMarkers";
 import { getRange } from "../../utils/getRange";
 import useRenderOnSvgMount from "../../hooks/useRenderOnSvgMount";
@@ -122,7 +122,7 @@ export default function WorldMap({data, map, isActiveTab}) {
       </div>
       <CategorySelectorInfo category={category} setCategory={setCategory} isActiveTab={isActiveTab}/>
       <ResetZoomButton zoomLevel={zoomLevel} setDoResetZoom={setDoResetZoom}/>
-      {/* 
+      {/*
       <div className="position-absolute start-0 bottom-0 w-100" style={{ background: 'linear-gradient(360deg, rgb(256,256,256,0.5) 80%, transparent)', backdropFilter: 'blur(1px)', height: '25%'}}>
         {legend}
       </div>
