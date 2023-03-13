@@ -10,6 +10,7 @@ import ResetZoomButton from "./ResetZoomButton";
 import { getMarkers } from "../../utils/getMarkers";
 import { getRange } from "../../utils/getRange";
 import useRenderOnSvgMount from "../../hooks/useRenderOnSvgMount";
+import CountryList from "./CountryList";
 
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
@@ -30,18 +31,14 @@ export default function WorldMap({data, map, isActiveTab}) {
 
   // Render map when svg element has mounted
   const svgRef = useRef(null)
-  // const [svgHasMounted, setSvgHasMounted] = useState(false)
   const svgHasMounted = useRenderOnSvgMount(svgRef, isActiveTab)
-
-  const svgLegendRef = useRef(null)
-  const svgLegendHasMounted = useRenderOnSvgMount(svgLegendRef, isActiveTab)
 
   if (!isActiveTab) return <></>
 
   const categoryStatistics = data.country_values_stats(category.id)
   const range = getRange(selected, category, categoryStatistics)
 
-  //console.log('Countries:', Object.values(map.iso_countries).filter((c) => c?.hasData && isInRange(c[category.id], brushRange)))
+  const brushedCountries = Object.values(map.iso_countries).filter((c) => c?.hasData && isInRange(c[category.id], brushRange))
 
   function valueToColor(value, colorForLegend=false) {
     if (!value)
@@ -122,6 +119,8 @@ export default function WorldMap({data, map, isActiveTab}) {
       </div>
       <CategorySelectorInfo category={category} setCategory={setCategory} isActiveTab={isActiveTab}/>
       <ResetZoomButton zoomLevel={zoomLevel} setDoResetZoom={setDoResetZoom}/>
+      <CountryList svgHeight={svgHasMounted ? svgRef.current.getBoundingClientRect().height : []} brushedCountries={brushedCountries} brushRange={brushRange}/>
+      
       {/* 
       <div className="position-absolute start-0 bottom-0 w-100" style={{ background: 'linear-gradient(360deg, rgb(256,256,256,0.5) 80%, transparent)', backdropFilter: 'blur(1px)', height: '25%'}}>
         {legend}
