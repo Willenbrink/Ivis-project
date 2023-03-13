@@ -263,7 +263,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
           <rect key={"marker" + m.id} x={x} y={y} width={width} height={boxHeight} fill={m.color} style={{...styleTransition}}></rect>
 
           {m.hasTooltip && <>
-            <path key={"tooltipbox" + m.id} d={topTooltipPath(labelWidth + 20, parseInt(fontSize) * 2, 5, 10)} fill='#EEEEEE' stroke='gray' transform={`translate(${x + width/2},${y - 2})`}/>
+            <path key={"tooltipbox" + m.id} d={topTooltipPath(labelWidth + 20, parseInt(fontSize) * 2, 5, 10)} fill='#EEEEEE' stroke='gray' className="tool-tip" transform={`translate(${x + width/2},${y - 2})`}/>
             <text key={"tooltiplabel" + m.id} transform={`translate(${x + width/2 - labelWidth/2},${y - 18})`}>{m.name}</text>
            </>}
         </g>);
@@ -279,7 +279,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
         const labelWidth = parseInt(fontSize) + 10 + GetWidth(infoString)
 
     return (<>
-            <path key={"tooltipboxInfo"} d={topTooltipPath(labelWidth + 20, parseInt(fontSize) * 2, 5, 10)} fill='#EEEEEE' stroke='gray' transform={`translate(${x + width/2},${y - 2})`} opacity={showInfo ? '100%' : '0%'}/>
+            <path className="tool-tip" key={"tooltipboxInfo"} d={topTooltipPath(labelWidth + 20, parseInt(fontSize) * 2, 5, 10)} fill='#EEEEEE' stroke='gray' transform={`translate(${x + width/2},${y - 2})`} opacity={showInfo ? '100%' : '0%'}/>
             <rect width={fontSize} height={fontSize} transform={`translate(${x + width/2 - labelWidth/2},${y - 18 - fontSize + 3})`} fill='none' stroke={rangeBox.color} className='dashedRect' strokeWidth="2" rx={roundedCorners} opacity={showInfo ? '100%' : '0%'}></rect>
             <text key={"tooltiplabelInfo"} transform={`translate(${x + width/2 - labelWidth/2 + parseInt(fontSize) + 10},${y - 16})`} opacity={showInfo ? '100%' : '0%'}>{infoString}</text>
            </>
@@ -331,7 +331,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
   return (
     <svg height='100%' width='100%' fontFamily={fontFamily} className=''>
 
-       <rect x={15} y={hBox.y - 10 - 30 } width={svgWidth -30} height={50 + 32 + hBox.height + 20} fill='rgb(256,256,256)' rx="15" stroke='rgb(206,212,218)' strokeWidth={1} fillOpacity='100%' filter="drop-shadow(3px 5px 2px rgb(0 0 0 / 0.1))"></rect>
+       <rect className="legend" x={15} y={hBox.y - 10 - 30 } width={svgWidth -30} height={50 + 32 + hBox.height + 20} fill='rgb(256,256,256)' rx="15" stroke='rgb(206,212,218)' strokeWidth={1} fillOpacity='100%' filter="drop-shadow(3px 5px 2px rgb(0 0 0 / 0.1))"></rect>
         
         <>{/* No data text */}
             <text fontSize={noDataText.fontSize} x={noDataText.x} y={noDataText.y} width={noDataText.width} height={noDataText.height} fill={noDataText.color}>{noDataStr}</text>
@@ -379,10 +379,10 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
                 <stop offset="100%" style={{stopColor: colors.right, stopOpacity:"1"}} />
             </linearGradient>
             </defs>
-            <svg ref={legendRef} x={hBox.x} y={hBox.y} width={hBox.width} height={hBox.height} onMouseOver={()=>{if(zoomCall) { //console.log('Zoom OFF'); 
-            d3.select(svgRef.current).on('.zoom', null)}}} onMouseLeave={()=>{ if(zoomCall) { //console.log('Zoom ON'); 
-            zoomCall() }}}>
-              <rect width={hBox.width} height={hBox.height} fill='white' stroke="rgb(156, 162, 168)" strokeWidth="2" rx={5}/>          
+            <svg ref={legendRef} x={hBox.x} y={hBox.y} width={hBox.width} height={hBox.height}
+              onMouseOver={()=>{if(zoomCall) { d3.select(svgRef.current).on('.zoom', null)}}}
+              onMouseLeave={()=>{ if(zoomCall) { zoomCall() }}}>
+              <rect className="legendColourBackground" width={hBox.width} height={hBox.height} fill='white' stroke="rgb(156, 162, 168)" strokeWidth="2" rx={5}/>          
               <rect x={colorBox.x} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" strokeWidth="0.3" style={{...styleTransition}} rx={roundedCorners}></rect>
             </svg>
         </>

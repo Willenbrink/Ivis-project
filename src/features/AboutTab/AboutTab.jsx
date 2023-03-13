@@ -88,7 +88,7 @@ function TeamMemberCard({name, email, linkedin, work, className}){
     )
     return (
         <div className={`${className} m-2`}>
-        <div className={`card h-100 w-100 p-3 d-flex flex-column gap-1`}>
+        <div className={`person-card h-100 w-100 p-3 d-flex flex-column gap-1`}>
             <p className="fs-5 m-0">{name}</p>
             <div className='d-flex gap-2 align-items-center'>
             <BsEnvelope size=''/>

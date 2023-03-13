@@ -2,7 +2,6 @@
 	height: 100%;
 }
 
-
 .hoverCountry {
 	fill-opacity: 0;
 	stroke-opacity: 0;
@@ -14,11 +13,6 @@
 
 }
 
-.mark .earthSphere {
-	fill: #eeeeee;
-}
-
-.mark .graticule {
-  fill: none;
-  stroke: #cccccc;
+text {
+	fill: white;
 }
