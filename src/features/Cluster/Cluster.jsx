@@ -7,55 +7,9 @@ import { useRef } from "react";
 import { categories } from "../../utils/categories";
 import ResetZoomButton from "../../utils/ResetZoomButton";
 import useRenderOnSvgMount from "../../hooks/useRenderOnSvgMount";
-import './Input.css'
+import colors from "./colorScheme"
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
-
-// Created using IWantHue
-const colors_7 =
-      ["#be5dae",
-       "#61ab51",
-       "#7377cc",
-       "#a3943f",
-       "#cc566a",
-       "#4ab0aa",
-       "#cd6c39"];
-
-const colors_10 =
-      ["#a25fc9",
-       "#d0424c",
-       "#65a547",
-       "#0173c9",
-       "#d57400",
-       "#cc4595",
-       "#46af99",
-       "#b48943",
-       "#c36f94",
-       "#8098d9"];
-
-const colors_20 =
-      ["#cfa637",
-       "#6f6ada",
-       "#9bb833",
-       "#bb55c2",
-       "#5aba50",
-       "#d3529a",
-       "#448a48",
-       "#d6436a",
-       "#58c7ae",
-       "#cf4734",
-       "#6197d5",
-       "#ca7432",
-       "#745ea5",
-       "#96a857",
-       "#d08ecd",
-       "#776b27",
-       "#a04b6c",
-       "#2f8a72",
-       "#c56f62",
-       "#cf9f68"];
-
-const colors = colors_10;
 
 export default function Cluster({clusterData, map, isActiveTab}) {
   const [numClusters, setNumClusters] = useState(3);
@@ -207,7 +161,7 @@ export default function Cluster({clusterData, map, isActiveTab}) {
       <ResetZoomButton zoomLevel={zoomLevel} setDoResetZoom={setDoResetZoom}/>
       <div className="position-absolute w-100 bottom-0 d-flex justify-content-center small" style={{pointerEvents: 'none'}}>
         <div className="w-75 p-2 px-5 bg-white rounded mx-5 my-4 d-flex flex-column border shadow">
-          <p className="fs-6 fw-bold">Clustering based on answer similarities for all cateories</p>
+          <p className="fs-6 fw-bold">Clustering based on answer similarities for all categories</p>
           <div className="d-flex gap-3">
             <div className="d-flex flex-column">
               <p className="text-nowrap">Number of clusters:</p>
@@ -227,7 +181,6 @@ export default function Cluster({clusterData, map, isActiveTab}) {
               </div>
             </div>
           </div>
-
         </div>
       </div>  
 
