@@ -5,7 +5,7 @@ import InfoPopover from "../../utils/InfoPopover";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { useRef } from "react";
 import { categories } from "../../utils/categories";
-import ResetZoomButton from "./ResetZoomButton";
+import ResetZoomButton from "../../utils/ResetZoomButton";
 import useRenderOnSvgMount from "../../hooks/useRenderOnSvgMount";
 import './Input.css'
 // Adapted from:

@@ -6,7 +6,7 @@ import { interpolateRgb } from "d3";
 import { useRef } from "react";
 import { categories } from "../../utils/categories";
 import CategorySelectorInfo from "./CategorySelectorInfo";
-import ResetZoomButton from "./ResetZoomButton";
+import ResetZoomButton from "../../utils/ResetZoomButton";
 import { getMarkers } from "../../utils/getMarkers";
 import { getRange } from "../../utils/getRange";
 import useRenderOnSvgMount from "../../hooks/useRenderOnSvgMount";

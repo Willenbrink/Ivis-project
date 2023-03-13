@@ -5,6 +5,7 @@ import { LineDraw } from "../../utils/lineDraw";
 import colorScheme from "../../utils/colorScheme";
 import { distance } from "../../utils/categories";
 import InfoPopover from "../../utils/InfoPopover";
+import ResetZoomButton from "../../utils/ResetZoomButton";
 import { interpolateRgb } from "d3";
 import { InputGroup, Button, Form } from "react-bootstrap";
 import { useRef } from "react";
@@ -209,23 +210,8 @@ export default function CountryDistance({ data, map, isActiveTab }) {
         )}
       </div>
 
-      <div
-        id="zoomDiv"
-        style={{ position: "absolute", margin: "10px", right: 0 }}
-      >
-        <p hidden={true} style={{ textAlign: "right" }}>
-          Zoom: {zoomLevel ? zoomLevel.toFixed(2) : "1.00"}
-        </p>
-        <Button
-          onClick={(e) => {
-            setDoResetZoom(true);
-          }}
-          hidden={!zoomLevel || !(zoomLevel < 0.5 || zoomLevel > 2)}
-        >
-          Reset Map
-        </Button>
-      </div>
-      {/* 
+      <ResetZoomButton zoomLevel={zoomLevel} setDoResetZoom={setDoResetZoom}/>
+      {/*
         <div className="position-absolute start-0 bottom-0 w-100" style={{ background: 'linear-gradient(360deg, rgb(256,256,256,0.5) 80%, transparent)', backdropFilter: 'blur(1px)', height: '25%'}}>
         {legend}
       </div>
