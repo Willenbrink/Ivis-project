@@ -1,6 +1,6 @@
 export default function CountryList({brushedCountries, svgHeight, brushRange}){
   const subtitle = brushRange[1] == 2 
-    ? "Countries visible with data: "
+    ? "Included countries: "
     : "Countries in selection: "
   return (
     <div className="position-absolute end-0 pe-3" style={{height: '200px', bottom: `${0.05*svgHeight + 50 + 32 + 80}px`}}>
