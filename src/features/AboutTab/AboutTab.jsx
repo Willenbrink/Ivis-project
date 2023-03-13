@@ -59,6 +59,7 @@ function AboutTab() {
                 <div className="d-flex flex-wrap mb-5">
                     {teamMembersInfo.map(member => 
                         <TeamMemberCard 
+                        key={member.name}
                         name={member.name} 
                         email={member.email}
                         linkedin={member.linkedin}
