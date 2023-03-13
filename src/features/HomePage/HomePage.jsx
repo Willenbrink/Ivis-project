@@ -61,11 +61,11 @@ export default function HomePage({ setActiveTabNumber }) {
           </Button>
           <Button
             onClick={() => {
-                if (document.getElementById("themeLink").getAttribute("href") == "src/lightMode.css") {
-                    document.getElementById("themeLink").setAttribute("href", "src/darkMode.css");
+                if (document.getElementById("themeLink").getAttribute("href") == "public/lightMode.css") {
+                    document.getElementById("themeLink").setAttribute("href", "public/darkMode.css");
                 }
                 else {
-                    document.getElementById("themeLink").setAttribute("href", "src/lightMode.css");
+                    document.getElementById("themeLink").setAttribute("href", "public/lightMode.css");
                 }
             }}
           >
