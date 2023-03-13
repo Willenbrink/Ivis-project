@@ -41,7 +41,7 @@ export default function WorldMap({data, map, isActiveTab}) {
   const categoryStatistics = data.country_values_stats(category.id)
   const range = getRange(selected, category, categoryStatistics)
 
-  console.log('Countries:', Object.values(map.iso_countries).filter((c) => c?.hasData && isInRange(c[category.id], brushRange)))
+  //console.log('Countries:', Object.values(map.iso_countries).filter((c) => c?.hasData && isInRange(c[category.id], brushRange)))
 
   function valueToColor(value, colorForLegend=false) {
     if (!value)

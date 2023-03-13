@@ -52,7 +52,8 @@ function App() {
     
   },[])
 
-  useEffect(()=>{console.log('activeTab: ', activeTabNumber)},[activeTabNumber])
+  useEffect(()=>{//console.log('activeTab: ', activeTabNumber)
+  },[activeTabNumber])
 
   return (
     <div className="h-100 vh-100 w-100 d-flex flex-column" style={{minHeight: '100%'}}>

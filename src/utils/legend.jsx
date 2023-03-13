@@ -22,7 +22,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
   useEffect(()=>{
     
     if (brushActive && svgHasMounted) {
-      console.log('BRUSH TURNS ON: ',legendRef)
+      //console.log('BRUSH TURNS ON: ',legendRef)
       //d3.select(legendRef.current).on('.brush', null).on('.end', null)
       const brush = d3.brushX()
       .on("brush", brushed)
@@ -379,7 +379,9 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
                 <stop offset="100%" style={{stopColor: colors.right, stopOpacity:"1"}} />
             </linearGradient>
             </defs>
-            <svg ref={legendRef} x={hBox.x} y={hBox.y} width={hBox.width} height={hBox.height} onMouseOver={()=>{if(zoomCall) {console.log('Zoom OFF'); d3.select(svgRef.current).on('.zoom', null)}}} onMouseLeave={()=>{ if(zoomCall) { console.log('Zoom ON'); zoomCall() }}}>
+            <svg ref={legendRef} x={hBox.x} y={hBox.y} width={hBox.width} height={hBox.height} onMouseOver={()=>{if(zoomCall) { //console.log('Zoom OFF'); 
+            d3.select(svgRef.current).on('.zoom', null)}}} onMouseLeave={()=>{ if(zoomCall) { //console.log('Zoom ON'); 
+            zoomCall() }}}>
               <rect width={hBox.width} height={hBox.height} fill='white' stroke="rgb(156, 162, 168)" strokeWidth="2" rx={5}/>          
               <rect x={colorBox.x} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" strokeWidth="0.3" style={{...styleTransition}} rx={roundedCorners}></rect>
             </svg>
