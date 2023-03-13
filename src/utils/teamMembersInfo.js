@@ -15,7 +15,7 @@ export const teamMembersInfo = [
     name: 'Samuel Sandberg Bröms',
     email: 'samuelsb@kth.se',
     linkedin: '',
-    work: 'D3'
+    work: 'D3 and Front-end'
   },
   {
     name: 'Valentin Quapil',

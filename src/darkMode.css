@@ -1,0 +1,47 @@
+body {
+	background: #101010;
+	color: white;
+}
+.nav-item, .nav-links, #navigation-bar, .category-selector-text, .info-box, .popover-header, .legend, #basic-addon2, .person-card, .country-list-box {
+	background: #202020;
+	color: white;
+	stroke: none;
+	fill: #202020;
+}
+.m-0 {
+	color: white;
+}
+a {
+	color: dodgerblue;
+}
+a:hover {
+	color: deepskyblue;
+}
+.category-form, .popover-body {
+	background: #303030;
+	color: white;
+}
+
+.mark .earthSphere, .tool-tip, .legendColourBackground, .country-distance {
+	fill: #444444;
+	background: #444444;
+}
+
+.mark .graticule {
+	fill: none;
+	stroke: #222222;
+}
+
+.legendm, .country-list-box {
+	stroke: #444444;
+	border: solid;
+	border-color: #444444;
+}
+
+.btn-light {
+	background: #202020;
+	color: white;
+}
+.person-card {
+	border-radius: 0.5em;
+}
