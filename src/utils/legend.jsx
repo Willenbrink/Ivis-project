@@ -251,10 +251,12 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
 
 
   function countryMarkers() {
+    console.log(markers, rangeBox, labelLeft, lineWidthLeft);
     return (<>{
       Object.keys(markers).map(id => {
         const m = markers[id]
-        const x = rangeBox.x + m.value * rangeBox.width;
+        /* const x = rangeBox.x + m.value * rangeBox.width; */
+        const x = rangeBox.x + m.value /* * rangeBox.width */;
         const y = svgHeight - padding.y - paddingColorBox.y - boxHeight;
         const width = 3;
         const labelWidth = GetWidth(m.name)
