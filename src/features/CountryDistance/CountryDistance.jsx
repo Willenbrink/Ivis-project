@@ -6,6 +6,7 @@ import colorScheme from "../../utils/colorScheme";
 import { distance } from "../../utils/categories";
 import InfoPopover from "../../utils/InfoPopover";
 import ResetZoomButton from "../../utils/ResetZoomButton";
+import { getMarkers, getMarkersDistance } from "../../utils/getMarkers";
 import { interpolateRgb } from "d3";
 import { InputGroup, Button, Form } from "react-bootstrap";
 import { useRef } from "react";
@@ -13,6 +14,31 @@ import useRenderOnSvgMount from "../../hooks/useRenderOnSvgMount";
 
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
+
+ const countryToDistance = (selectedCategories, selectedCountry) => (country) => {
+  //console.log("countryToColor", country, selected)
+  if (!country) return null;
+  if (selectedCategories.length === 0) return null;
+  if (!country.hasData) return null;
+  if (!selectedCountry) return null;
+
+  var relative_value;
+  var dist_sq = 0;
+  // Choose higher values to make the dimension with the largest distance play a larger role.
+  // Inspired by Shephard Interpolation: https://en.wikipedia.org/wiki/Inverse_distance_weighting#/media/File:Shepard_interpolation_2.png
+  // Image that three countries have the results A: (0,0), B: (0.5, 0.5), C: (0, 0.9)
+  // With exponent = 1, C is closer to A than B as 0.9 < 0.5 + 0.5
+  // With exponent = 2, B is closer as (0.25 + 0.25)^0.5 < 0.9^2^0.5 = 0.9
+  const exponent = 2;
+  for (const k of selectedCategories) {
+    dist_sq += Math.abs(country[k] - selectedCountry[k]) ** exponent;
+  }
+  relative_value = exponent * dist_sq ** (1 / exponent);
+  const extreme_color =
+    relative_value < 0 ? colorScheme.left : colorScheme.right;
+  //between 0 and 1. 0 is white (=similar to selected), 1 is extreme_color (=not similar to selected)
+  return Math.abs(relative_value);
+};
 
  /*
    * selectedCategories: array of ids (strings) of categories. country to draw: country-object, selected: country-object
@@ -64,18 +90,18 @@ export default function CountryDistance({ data, map, isActiveTab }) {
   const svgLegendRef = useRef(null);
   const svgLegendHasMounted = useRenderOnSvgMount(svgLegendRef, isActiveTab);
 
-  const categoryStatistics = data.country_values_stats();
+  const categoryStatistics = {min: 0, max:1, range:1};
   const colors = { left: colorScheme.middle, right: colorScheme.right };
 
-  const markers = {};
+  const markers = getMarkersDistance(selected, hovered,
+                                     countryToDistance(data.keys.filter((_, idx) => selectedCategories[idx]), selected)(hovered));
+              //countryToColor(names of selected categories, selected country)
 
-  const range = selected
-    ? {
-        min: categoryStatistics.min,
-        selected: selected[distance.id],
-        max: categoryStatistics.max,
-      }
-    : { min: -1, selected: null, max: 1 };
+  const range = {
+        min: 0,
+        selected: selected ? selected[distance.id] : null,
+        max: 1
+      };
 
   const svg = (
     <svg
@@ -117,23 +143,6 @@ export default function CountryDistance({ data, map, isActiveTab }) {
             />
           )}
         </>
-      )}
-    </svg>
-  );
-
-  const legend = (
-    <svg ref={svgLegendRef} height="100%" width="100%">
-      {svgLegendHasMounted && svgLegendRef.current && (
-        <Legend
-          svgRef={svgLegendRef}
-          range={range}
-          category={distance}
-          categoryStatistics={categoryStatistics}
-          selected={null}
-          colors={colors}
-          markers={markers}
-          zoomCall={() => {}}
-        />
       )}
     </svg>
   );
