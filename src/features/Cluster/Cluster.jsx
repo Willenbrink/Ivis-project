@@ -59,10 +59,8 @@ const colors = colors_10;
 
 export default function Cluster({clusterData, map, isActiveTab}) {
   const [numClusters, setNumClusters] = useState(3);
-  const [countryColorDict, _] = useState(updateCountryColorDict(numClusters));
-  // Use something like the following if on-the-fly clustering is implemented to precompute only one clustering
-  // It's also only computed once the Cluster view is actually shown so this is already lazy loading
-  // const [countryColorDicts, _] = useState({ all_categories: updateCountryColorDict(numClusters, all_categories) });
+  const [countryColorDict, _] = useState({});
+  const [clusterContainer, _2] = useState({});
   //currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
@@ -84,18 +82,16 @@ export default function Cluster({clusterData, map, isActiveTab}) {
     if (cluster[0] === "Leaf") return 1;
     return cluster[4];
   }
-  var clusters;
   function updateCountryColorDict() {
     const number = numClusters;
-    clusters = clustersOfLevel(clusterData.get_cluster_data(), numClusters);
-    const countryColorDict = {};
+    clusterContainer.clusters = clustersOfLevel(clusterData.get_cluster_data(), numClusters);
+    const clusters = clusterContainer.clusters;
     countryColorDict[number] = {};
     for (let i = 0; i < clusters.length; i++) {
       for (let j = 0; j < clusters[i].length; j++) {
         countryColorDict[number][clusters[i][j]] = colors[i];
       } 
     }
-    return countryColorDict;
   }
   function clustersOfLevel(tree, amount) {
     // tree: ["node", countries: [str], left: tree, right: tree, size] | ["leaf", country: [str] ]
@@ -132,11 +128,14 @@ export default function Cluster({clusterData, map, isActiveTab}) {
     if (!country) {
       return colorScheme.noData
     }
+    if (countryColorDict[numClusters] === undefined) {
+      updateCountryColorDict(numClusters);
+    }
     const val = countryColorDict[numClusters][country.id]
     return val ? val : colorScheme.noData;
   };
 
-  const selectedCluster = clusters.filter((cl) => cl.includes(selected?.id))[0]?.map((country) => map.iso_countries[country]);
+  const selectedCluster = clusterContainer.clusters?.filter((cl) => cl.includes(selected?.id))[0]?.map((country) => map.iso_countries[country]).filter((country) => country !== undefined);
 
   const svg = (
       <svg width="100%" height="100%" ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
