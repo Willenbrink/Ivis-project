@@ -114,15 +114,17 @@ class svgHandler {
           
         )});
     this.selected_path = selected && (
-      <path
+      (selected instanceof Array ? selected : [selected]).map((sel) =>
+        <path
         vectorEffect="non-scaling-stroke"
-        key="selected"
-        id="selectedCountryBorder"
+        key={sel.id}
+        id={sel.id + "CountryBorder"}
         fill="transparent"
         strokeWidth={` ${selectedLineWidth}px`}
         stroke={colorScheme.selectedCountry}
-        d={this.iso_pathCountries[selected.id]}
+        d={this.iso_pathCountries[sel.id]}
       />
+      )
     );
     this.svg = (
       <g className="mark" ref={this.gRef}>
