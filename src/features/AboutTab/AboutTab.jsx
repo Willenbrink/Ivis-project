@@ -55,6 +55,9 @@ function AboutTab() {
                             map data not separating these from France. These small Islands are still visible and always have the same colors as France, 
                             although their answers differs from France. We didn't fix this issue due to time constraints.
                         </p>
+                        <p>
+                          The code for the visualization can be found on <a href="https://github.com/Willenbrink/Ivis-project">https://github.com/Willenbrink/Ivis-project</a>.
+                        </p>
                 <p className="fs-3 text-primary mb-2">The team behind the visualizations</p>
                 <div className="d-flex flex-wrap mb-5">
                     {teamMembersInfo.map(member => 

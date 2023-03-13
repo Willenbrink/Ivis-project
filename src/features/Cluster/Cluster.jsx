@@ -180,8 +180,8 @@ export default function Cluster({clusterData, map, isActiveTab}) {
       </div>
       <div className="px-5 pt-2 position-absolute" id="cd_control">
           <InfoPopover
-            title='What is clustering? And how is it done here?'
-            info='hejhej'
+            title='Culture groups according to each countries averaged responses'
+            info='This map shows a clustering of the countries, thereby showing the "culture groups" the world can be divided into. Countries within a cluster have given similar responses. Increasing the number of clusters splits the cluster with the largest cultural difference into two.\n\nTo compute the clusters we use the same distances between countries as the Difference Map. Starting with all countries in their own cluster, we repeatedly merge the two clusters that are most similar. The similarity between two clusters is dependent on the pairwise distances. More precisely, Wards minimum variance method is used.'
             isActiveTab={isActiveTab}
           />
       </div>
