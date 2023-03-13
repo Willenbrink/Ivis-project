@@ -22,16 +22,16 @@ const colors_7 =
        "#cd6c39"];
 
 const colors_10 =
-      ["#c75980",
-       "#98894c",
-       "#bd5cb5",
-       "#b3a533",
-       "#798dc6",
-       "#d46f27",
-       "#4aaa86",
-       "#7a6bd5",
-       "#5cac48",
-       "#cd5a4d"];
+      ["#a25fc9",
+       "#d0424c",
+       "#65a547",
+       "#0173c9",
+       "#d57400",
+       "#cc4595",
+       "#46af99",
+       "#b48943",
+       "#c36f94",
+       "#8098d9"];
 
 const colors_20 =
       ["#cfa637",
@@ -60,7 +60,8 @@ const colors = colors_10;
 export default function Cluster({clusterData, map, isActiveTab}) {
   const [numClusters, setNumClusters] = useState(3);
   const [countryColorDict, _] = useState({});
-  const [clusterContainer, _2] = useState({});
+  const clusters = clustersOfLevel(clusterData.get_cluster_data(), numClusters);
+
   //currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
@@ -84,8 +85,6 @@ export default function Cluster({clusterData, map, isActiveTab}) {
   }
   function updateCountryColorDict() {
     const number = numClusters;
-    clusterContainer.clusters = clustersOfLevel(clusterData.get_cluster_data(), numClusters);
-    const clusters = clusterContainer.clusters;
     countryColorDict[number] = {};
     for (let i = 0; i < clusters.length; i++) {
       for (let j = 0; j < clusters[i].length; j++) {
@@ -135,7 +134,7 @@ export default function Cluster({clusterData, map, isActiveTab}) {
     return val ? val : colorScheme.noData;
   };
 
-  const selectedCluster = clusterContainer.clusters?.filter((cl) => cl.includes(selected?.id))[0]?.map((country) => map.iso_countries[country]).filter((country) => country !== undefined);
+  const selectedCluster = clusters.filter((cl) => cl.includes(selected?.id))[0]?.map((country) => map.iso_countries[country]).filter((country) => country !== undefined);
 
   const svg = (
       <svg width="100%" height="100%" ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
