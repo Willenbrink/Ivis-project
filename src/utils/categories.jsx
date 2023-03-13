@@ -25,7 +25,7 @@ export const distance =  {
   name: 'Total distance across all categories',
   from: ['No difference'],
   to: ['Maximal difference'],
-  info: 'This is a WIP display of the total distance between the selected and all other countries. There is no absolute value so you have to select a country first. One result visualized here that is otherwise hard to see is: Germany, Turkey and China differ a lot from each other. That is, they belong to different culture groups. This is different from e.g. Venezuela and Brazil. They differ from each other a bit but both differ significantly from the rest of the world. They share a culture group. Clustering (unimplemented as of now) will show this in more detail.'
+  info: 'Here the data of multiple categories is considered at once. We visualize the difference between the results of the experiment in the country you select and all other countries by color: The closer the countries are, the whiter the color. For calculating this proximity we interpret the selected categories as a multidimensional space and calculate the euclidean distances. The numeric values used for this are the same as in the Single Category Map. An example: When only considering law and gender, Sweden and Turkey are pretty closely aligned. But when we add species, the distance between them increases.'
   }
 
 export const categories = {
