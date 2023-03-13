@@ -173,6 +173,26 @@ export default function Cluster({clusterData, map, isActiveTab}) {
       </div>
     )
   }
+
+  const infoClusteringBody = (
+    <div>
+      <p className="fw-bold m-0">What is this?</p>
+      <p>
+        This map shows a clustering of the countries, 
+      thereby showing the "culture groups" the world can be divided into. 
+      Countries within a cluster have given similar responses. 
+      Increasing the number of clusters splits the cluster with the largest cultural difference into two.
+      </p>
+      
+      <p className="fw-bold m-0">How is it computed?</p>
+      <p>
+      To compute the clusters we use the same distances between countries as the Difference Map. 
+      Starting with all countries in their own cluster, we repeatedly merge the two clusters 
+      that are most similar. The similarity between two clusters is dependent on the pairwise 
+      distances. More precisely, Wards minimum variance method is used.
+      </p>
+    </div>
+  )
   return (
     isActiveTab && <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
       <div className="d-flex flex-column flex-grow-1 position-relative">
@@ -181,7 +201,7 @@ export default function Cluster({clusterData, map, isActiveTab}) {
       <div className="px-5 pt-2 position-absolute" id="cd_control">
           <InfoPopover
             title='Culture groups according to each countries averaged responses'
-            info='This map shows a clustering of the countries, thereby showing the "culture groups" the world can be divided into. Countries within a cluster have given similar responses. Increasing the number of clusters splits the cluster with the largest cultural difference into two.\n\nTo compute the clusters we use the same distances between countries as the Difference Map. Starting with all countries in their own cluster, we repeatedly merge the two clusters that are most similar. The similarity between two clusters is dependent on the pairwise distances. More precisely, Wards minimum variance method is used.'
+            info={infoClusteringBody}
             isActiveTab={isActiveTab}
           />
       </div>

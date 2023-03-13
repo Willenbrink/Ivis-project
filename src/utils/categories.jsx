@@ -25,7 +25,27 @@ export const distance =  {
   name: 'Total distance across all categories',
   from: ['No difference'],
   to: ['Maximal difference'],
-  info: 'Here the data of multiple categories is considered at once. We visualize the difference between the results of the experiment in the country you select and all other countries by color: The closer the countries are, the whiter the color. For calculating this proximity we interpret the selected categories as a multidimensional space and calculate the euclidean distances. The numeric values used for this are the same as in the Single Category Map. An example: When only considering law and gender, Sweden and Turkey are pretty closely aligned. But when we add species, the distance between them increases.'
+  info: (
+    <div>
+      <p className="fw-bold m-0">What is this?</p>
+      <p>
+      Here the data of multiple categories is considered at once. 
+      We visualize the difference between the results of the experiment in 
+      the country you select and all other countries by color: The closer 
+      the countries are, the whiter the color. 
+      </p>
+      <p className="fw-bold m-0">How is it computed?</p>
+      <p>
+      For calculating this proximity 
+      we interpret the selected categories as a multidimensional space and 
+      calculate the euclidean distances. The numeric values used for this 
+      are the same as in the Single Category Map. 
+      </p>
+      <p><i>An example:</i> When only 
+      considering law and gender, Sweden and Turkey are pretty closely 
+      aligned. But when we add species, the distance between them increases.
+      </p>
+    </div>)
   }
 
 export const categories = {
@@ -33,9 +53,9 @@ export const categories = {
     id: 'intervention',
     name: 'Intervention: Staying in the same lane vs. Switching lane',
     name_short: 'Intervention',
-    from: ['Staying in the same', 'lane matters most'],
-    to: ['Switching lane','matters most'],
-    info:'Is it more important to stay in the same lane or to switch?',
+    from: ['Inaction', 'matters most'],
+    to: ['Action', 'matters most'],
+    info:'Is it more important for the autonomous car to take action and switch lane, or is it more important to stay in the same lane? ',
     fromIcon: <InterventionFrom/>,
     toIcon: <InterventionTo/>
   }, 
@@ -100,8 +120,8 @@ export const categories = {
   }, 
   number: {
     id: 'number',
-    name: 'Number of casualities: Less vs. More',
-    name_short: 'Number of casualities',
+    name: 'Lives saved: Less vs. More',
+    name_short: 'Number of lives saved',
     from: ['Saving less lives', 'matters most'],
     to: ['Saving more lives', 'matters most'],
     info: 'Is it important to save more lives?',
