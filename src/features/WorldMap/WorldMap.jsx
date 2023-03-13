@@ -113,27 +113,7 @@ export default function WorldMap({data, map, isActiveTab}) {
           }
       </svg>
   )
-          /*
-  const legend = (
-    <svg ref={svgLegendRef} height='100%' width='100%'>
-      {svgLegendHasMounted && svgLegendRef.current && 
-              <Legend
-                svgRef={svgLegendRef}
-                range={range}
-                showRange={true}
-                category={category}
-                categoryStatistics={categoryStatistics}
-                selected={selected}
-                colors={colors}
-                markers={markers}
-                zoomCall={zoomCall}
-                brushActive
-                setBrushRange={setBrushRange}
-                showScaleNumbers
-          />}
-    </svg>
-  
-  )*/
+
   // backdropFilter: 'blur(2px)',
   return (
     <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column position-relative">
