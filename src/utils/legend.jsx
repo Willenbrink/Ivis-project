@@ -20,7 +20,10 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
   const svgHasMounted = useRenderOnSvgMount(legendRef, true)
 
   useEffect(()=>{
-    if (brushActive && legendRef?.current != undefined) {
+    
+    if (brushActive && svgHasMounted) {
+      console.log('BRUSH TURNS ON: ',legendRef)
+      //d3.select(legendRef.current).on('.brush', null).on('.end', null)
       const brush = d3.brushX()
       .on("brush", brushed)
       .on("end", brushended)
@@ -37,18 +40,24 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
           svg.dispatch("input");
         }
       }
-      const gb = svg.call(brush)
+      const gb = svg.append('g')
+      // gb.call(brush)
+      //brush.clear().event(d3.select(".brush"));
+      gb.call(brush)
+      
+      //setBrushRange([-2.0, 2.0])
       //.call(brush.move, [-2.0,2.0])
 
       function brushended({selection}) {
         if (!selection) {
-          // gb.call(brush.move, [-1.0,1.0])
+          // gb.call(brush.move,null)
+          // selection.call(brush.move, null);
           setBrushRange([-2.0, 2.0])
         }
       }
 
     }
-    },[legendRef?.current, svgHasMounted])
+    },[svgHasMounted])
 
     if (!svgRef.current || labelWidths == null || svgRef.current.getBoundingClientRect().width === 0) return
 
