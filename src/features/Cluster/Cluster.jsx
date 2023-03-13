@@ -176,6 +176,13 @@ export default function Cluster({clusterData, map, isActiveTab}) {
       <div className="d-flex flex-column flex-grow-1 position-relative">
         {svg}
       </div>
+      <div className="px-5 pt-2 position-absolute" id="cd_control">
+          <InfoPopover
+            title='What is clustering? And how is it done here?'
+            info='hejhej'
+            isActiveTab={isActiveTab}
+          />
+      </div>
       <ResetZoomButton zoomLevel={zoomLevel} setDoResetZoom={setDoResetZoom}/>
       <div className="position-absolute w-100 bottom-0 d-flex justify-content-center small" style={{pointerEvents: 'none'}}>
         <div className="w-75 p-2 px-5 bg-white rounded mx-5 my-4 d-flex flex-column border shadow">
