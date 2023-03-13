@@ -18,8 +18,9 @@ class svgHandler {
   svg; //svg dom element: the world map.
   non_iso_countries_paths; //paths for non-iso countries
   selected_path; //path for selected country
+  hoverable; //Keeps track of if the map should be hoverable
 
-  //since JSX elements are immutable, we have to rebuild the whole tree.
+    //since JSX elements are immutable, we have to rebuild the whole tree.
   //this method is executed on rerender.
   //TODO: move as much as possible to constructor. (building of paths, ...)
   colorize = (countryToColor, selected) => {
@@ -95,6 +96,7 @@ class svgHandler {
     ];
     this.hover_paths =
       //example country: {"color": "#040", "id": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
+        (this.hoverable ?
       Object.values(this.iso_countries)
         .filter((c) => c.hasData)
         .map((c) => {
@@ -111,8 +113,7 @@ class svgHandler {
               setSelected(iso_countries[e.target.id]);
             }}
           />
-          
-        )});
+        )}) : "");
     this.selected_path = selected && (
       <path
         vectorEffect="non-scaling-stroke"
@@ -135,7 +136,7 @@ class svgHandler {
     );
   };
 
-  constructor(iso_countries, non_iso_countries, gRef, path, setSelected) {
+    constructor(iso_countries, non_iso_countries, gRef, path, setSelected, hoverable) {
     this.gRef = gRef;
     
     //path is "consumed" here.
@@ -145,6 +146,7 @@ class svgHandler {
     this.non_iso_countries = non_iso_countries;
     this.setSelected = setSelected;
     this.svg = "";
+        this.hoverable = hoverable;
 
 
     //path:
@@ -169,6 +171,7 @@ export function LineDraw({
   selected,
   setSelected,
   zoomLevel,
+  hoverable,
   setZoomLevel,
   doResetZoom,
   setDoResetZoom,
@@ -200,7 +203,7 @@ export function LineDraw({
   //of course we are very efficcient and only generate the whole SVG thing once :)
   const [svg_handler, _] = React.useState(
     () =>
-      new svgHandler(iso_countries, non_iso_countries, gRef, path, setSelected)
+          new svgHandler(iso_countries, non_iso_countries, gRef, path, setSelected, hoverable)
   );
 
   function ZoomCall() {

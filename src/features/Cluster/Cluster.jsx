@@ -146,7 +146,8 @@ export default function Cluster({clusterData, map, isActiveTab}) {
                 selected={selected}
                 setSelected={setSelected}
                 hovered={hovered}
-                setHovered={setHovered}
+                  setHovered={setHovered}
+                  hoverable={ false }
                 zoomLevel={zoomLevel}
                 setZoomLevel={setZoomLevel}
                 doResetZoom={doResetZoom}
@@ -199,7 +200,6 @@ export default function Cluster({clusterData, map, isActiveTab}) {
               </div>
             </div>
           </div>
-
         </div>
       </div>  
 

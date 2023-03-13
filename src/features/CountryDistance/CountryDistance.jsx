@@ -97,6 +97,7 @@ export default function CountryDistance({ data, map, isActiveTab }) {
             setSelected={setSelected}
             hovered={hovered}
             setHovered={setHovered}
+            hoverable={true}
             zoomLevel={zoomLevel}
             setZoomLevel={setZoomLevel}
             doResetZoom={doResetZoom}
