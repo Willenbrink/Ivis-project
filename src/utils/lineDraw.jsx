@@ -244,7 +244,9 @@ export function LineDraw({
     setDoResetZoom(false);
     if (svgRef && gRef) {
       const g = select(gRef.current);
+      const svg = select(svgRef.current);
       g.attr("transform", zoomIdentity);
+      svg.call(zoom().transform, zoomIdentity);
       setZoomLevel(null);
     }
   }

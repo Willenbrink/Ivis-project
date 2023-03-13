@@ -22,10 +22,8 @@ export default function HomePage({ setActiveTabNumber }) {
         <div className="p-3" style={{ height: "50vh" }}>
           <AboutImage />
         </div>
-        
         <div className="d-flex flex-grow-1 flex-column align-items-center pt-4">
-        <div className="w-75 d-flex flex-grow-1 flex-column align-items-center">
-        <p className="small" style={{color: "white"}}>
+        <p className="small w-75" style={{color: "white"}}>
           <strong>Image 1:</strong> an example of a scenario which the
           participants might had to answer. The image is a redraw from the
           original images found at
@@ -35,7 +33,6 @@ export default function HomePage({ setActiveTabNumber }) {
           </a>
           .
         </p>
-        </div>
         </div>
       </div>
       <div className="w-75 d-flex flex-grow-1 flex-column align-items-center">
