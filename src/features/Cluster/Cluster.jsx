@@ -11,6 +11,51 @@ import './Input.css'
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
 
+// Created using IWantHue
+const colors_7 =
+      ["#be5dae",
+       "#61ab51",
+       "#7377cc",
+       "#a3943f",
+       "#cc566a",
+       "#4ab0aa",
+       "#cd6c39"];
+
+const colors_10 =
+      ["#c75980",
+       "#98894c",
+       "#bd5cb5",
+       "#b3a533",
+       "#798dc6",
+       "#d46f27",
+       "#4aaa86",
+       "#7a6bd5",
+       "#5cac48",
+       "#cd5a4d"];
+
+const colors_20 =
+      ["#cfa637",
+       "#6f6ada",
+       "#9bb833",
+       "#bb55c2",
+       "#5aba50",
+       "#d3529a",
+       "#448a48",
+       "#d6436a",
+       "#58c7ae",
+       "#cf4734",
+       "#6197d5",
+       "#ca7432",
+       "#745ea5",
+       "#96a857",
+       "#d08ecd",
+       "#776b27",
+       "#a04b6c",
+       "#2f8a72",
+       "#c56f62",
+       "#cf9f68"];
+
+const colors = colors_10;
 
 export default function Cluster({clusterData, map, isActiveTab}) {
   const [numClusters, setNumClusters] = useState(3);
@@ -32,51 +77,6 @@ export default function Cluster({clusterData, map, isActiveTab}) {
   const svgRef = useRef(null)
   const svgHasMounted = useRenderOnSvgMount(svgRef, isActiveTab)
 
-  // Created using IWantHue
-  const colors_7 =
-        ["#be5dae",
-         "#61ab51",
-         "#7377cc",
-         "#a3943f",
-         "#cc566a",
-         "#4ab0aa",
-         "#cd6c39"];
-
-  const colors_10 =
-        ["#c75980",
-         "#98894c",
-         "#bd5cb5",
-         "#b3a533",
-         "#798dc6",
-         "#d46f27",
-         "#4aaa86",
-         "#7a6bd5",
-         "#5cac48",
-         "#cd5a4d"];
-
-  const colors_20 =
-        ["#cfa637",
-         "#6f6ada",
-         "#9bb833",
-         "#bb55c2",
-         "#5aba50",
-         "#d3529a",
-         "#448a48",
-         "#d6436a",
-         "#58c7ae",
-         "#cf4734",
-         "#6197d5",
-         "#ca7432",
-         "#745ea5",
-         "#96a857",
-         "#d08ecd",
-         "#776b27",
-         "#a04b6c",
-         "#2f8a72",
-         "#c56f62",
-         "#cf9f68"];
-
-  const colors = colors_10;
   function clusterSize(cluster) {
     if (cluster[0] === "Leaf") return 1;
     return cluster[4];
