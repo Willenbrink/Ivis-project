@@ -381,7 +381,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
             </defs>
             <svg ref={legendRef} x={hBox.x} y={hBox.y} width={hBox.width} height={hBox.height}
               onMouseOver={()=>{if(zoomCall) { d3.select(svgRef.current).on('.zoom', null)}}}
-              onMouseLeave={()=>{ if(zoomCall) { zoomCall() }}}>
+              onMouseLeave={()=>{ if(zoomCall) { zoomCall.current() }}}>
               <rect className="legendColourBackground" width={hBox.width} height={hBox.height} fill='white' stroke="rgb(156, 162, 168)" strokeWidth="2" rx={5}/>          
               <rect x={colorBox.x} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" strokeWidth="0.3" style={{...styleTransition}} rx={roundedCorners}></rect>
             </svg>

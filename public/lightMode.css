@@ -43,3 +43,16 @@ text {
 .logotext {
 	fill: black
 }
+
+.countryList {
+	background: white
+}
+
+.countryList:hover {
+	background: lightgray;
+	cursor: pointer;
+}
+
+.countryListSelected {
+	background: lightgray;
+}

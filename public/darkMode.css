@@ -49,3 +49,17 @@ a:hover {
 .logotext {
 	fill: white
 }
+
+
+.countryList {
+	background: #202020;
+}
+
+.countryList:hover {
+	background: #444444;
+	cursor: pointer;
+}
+
+.countryListSelected {
+	background: #444444;
+}
