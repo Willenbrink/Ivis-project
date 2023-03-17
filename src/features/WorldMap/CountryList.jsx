@@ -34,7 +34,7 @@ export default function CountryList({brushedCountries, svgHeight, brushRange, zo
 
   const CountryRow = ({c}) => (
     <div className={`d-flex gap-1 align-items-center ${selected && selected.id == c.id ? 'countryListSelected' : 'countryList'}`} onClick={(e) => handleSelect(e,c)} onMouseOver={() => handleHover(c)}>
-      <BsSquareFill style={{color: countryToColor(c)}}/>
+      <BsSquareFill className='border' style={{color: countryToColor(c)}}/>
       <p className="m-0 small">
         {c.name}
       </p>

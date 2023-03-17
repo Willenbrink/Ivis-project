@@ -193,7 +193,7 @@ export function LineDraw({
   doResetZoom,
   setDoResetZoom,
   zoomCall,
-  zoomToCountry,
+  zoomToCountry=false,
   hovered,
   setHovered,
 }) {
@@ -261,7 +261,7 @@ export function LineDraw({
       // Turn on the zoom function
       ZoomCall();
       // Save the turn on zoom function to parent component
-      zoomCall.current = () => ZoomCall()
+      if (zoomCall) zoomCall.current = () => ZoomCall()
       
       function Clicked(d) {
         const svg = select(svgRef.current)
@@ -280,7 +280,8 @@ export function LineDraw({
       }
 
       // This feeds the zoom to country function to the parent (and then to the country list component)
-      zoomToCountry.current = (d) => Clicked(d) 
+      if(zoomToCountry) {
+        zoomToCountry.current = (d) => Clicked(d) }
     }
   }
 
