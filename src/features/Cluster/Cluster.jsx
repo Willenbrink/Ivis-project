@@ -8,6 +8,9 @@ import { categories } from "../../utils/categories";
 import ResetZoomButton from "../../utils/ResetZoomButton";
 import useRenderOnSvgMount from "../../hooks/useRenderOnSvgMount";
 import colors from "./colorScheme"
+// Weird import for transpiled files. See
+// https://discuss.ocaml.org/t/creating-a-library-for-use-from-js-with-js-of-ocaml/9523/5
+import "../../../public/clustering.js"
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
 
@@ -15,6 +18,8 @@ export default function Cluster({clusterData, map, isActiveTab}) {
   const [numClusters, setNumClusters] = useState(3);
   const [countryColorDict, _] = useState({});
   const clusters = clustersOfLevel(clusterData.get_cluster_data(), numClusters);
+
+  console.log(clusteringLib);
 
   //currently selected country
   const [selected, setSelected] = useState(null);

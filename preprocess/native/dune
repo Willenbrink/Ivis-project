@@ -1,0 +1,4 @@
+(executable
+ (name native)
+ (preprocess (pps ppx_deriving_yojson))
+ (libraries lib csv yojson ppx_deriving_yojson.runtime prbnmcn-clustering))
