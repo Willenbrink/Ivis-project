@@ -25,6 +25,7 @@ type country = {
 type country_assoc = (string * country) list
 
 let country_assoc_to_yojson xs = `Assoc (List.map (fun (id,c) -> id, country_to_yojson c) xs)
+let country_assoc_of_yojson ((`Assoc xs) : Yojson.Safe.t) = List.map (fun (id,c) -> id, country_of_yojson c |> Result.get_ok) xs
 
 module Country = struct
   type t = country
@@ -220,12 +221,12 @@ let clustering normalize (countries : country list) =
     else countries
   in
   let clusters = ClusterAlgo.cluster countries in
-  let depth_list =
-    ClusterAlgo.all_clusters clusters
-    (* |> List.iter (fun (cluster, depth) -> Printf.printf "%i (size: %i): %s\n" depth (CountryCluster.cardinal cluster) (CountryCluster.fold (fun c acc -> acc ^ ", " ^ c.id) cluster "")) *)
-    |> List.map (fun (cluster,depth) -> CountryCluster.to_string_list cluster, depth)
-    |> [%to_yojson: (string list * int) list]
-  in
+  (* let depth_list = *)
+  (*   ClusterAlgo.all_clusters clusters *)
+  (*   (\* |> List.iter (fun (cluster, depth) -> Printf.printf "%i (size: %i): %s\n" depth (CountryCluster.cardinal cluster) (CountryCluster.fold (fun c acc -> acc ^ ", " ^ c.id) cluster "")) *\) *)
+  (*   |> List.map (fun (cluster,depth) -> CountryCluster.to_string_list cluster, depth) *)
+  (*   |> [%to_yojson: (string list * int) list] *)
+  (* in *)
   let rec convert_cluster ({ set; tree; merged_at; _ } : ClusterAlgo.cluster) = match tree with
     | None ->
       assert (CountryCluster.cardinal set = 1);
@@ -236,4 +237,4 @@ let clustering normalize (countries : country list) =
   in
   let cluster_tree = [%to_yojson: cluster] (convert_cluster clusters) in
 
-  depth_list, cluster_tree
+  cluster_tree

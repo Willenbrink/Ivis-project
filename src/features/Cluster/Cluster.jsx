@@ -19,7 +19,12 @@ export default function Cluster({clusterData, data, map}) {
   const [countryColorDict, _] = useState({});
   const clusters = clustersOfLevel(clusterData.get_cluster_data(), numClusters);
 
-  console.log(clusteringLib);
+  const [normalize, setNormalize] = useState(true);
+  useEffect(() => {
+    if (data.json_data) {
+      console.log(JSON.parse(clusteringLib.clustering(true, JSON.stringify(data.json_data))));
+    }
+  }, [normalize]);
 
   //currently selected country
   const [selected, setSelected] = useState(null);
