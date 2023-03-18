@@ -16,7 +16,7 @@ import CountryList from "./CountryList";
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
 
 
-export default function WorldMap({data, map, isActiveTab}) {
+export default function WorldMap({data, map}) {
   //currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
@@ -31,9 +31,7 @@ export default function WorldMap({data, map, isActiveTab}) {
 
   // Render map when svg element has mounted
   const svgRef = useRef(null)
-  const svgHasMounted = useRenderOnSvgMount(svgRef, isActiveTab)
-
-  if (!isActiveTab) return <></>
+  const svgHasMounted = useRenderOnSvgMount(svgRef, true)
 
   const categoryStatistics = data.country_values_stats(category.id)
   const range = getRange(selected, category, categoryStatistics)
@@ -117,7 +115,7 @@ export default function WorldMap({data, map, isActiveTab}) {
       <div className="d-flex flex-column flex-grow-1 position-relative">
         {svg}
       </div>
-      <CategorySelectorInfo category={category} setCategory={setCategory} isActiveTab={isActiveTab}/>
+      <CategorySelectorInfo category={category} setCategory={setCategory}/>
       <ResetZoomButton zoomLevel={zoomLevel} setDoResetZoom={setDoResetZoom}/>
       <CountryList svgHeight={svgHasMounted ? svgRef.current.getBoundingClientRect().height : []} brushedCountries={brushedCountries} brushRange={brushRange}/>
       

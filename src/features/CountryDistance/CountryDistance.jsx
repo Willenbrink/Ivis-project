@@ -43,7 +43,7 @@ import useRenderOnSvgMount from "../../hooks/useRenderOnSvgMount";
   return interpolateRgb(colorScheme.middle, extreme_color)(absolute_value);
 };
 
-export default function CountryDistance({ data, map, isActiveTab }) {
+export default function CountryDistance({ data, map }) {
   //currently selected country
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
@@ -59,10 +59,10 @@ export default function CountryDistance({ data, map, isActiveTab }) {
 
   // Fix for map not rendering on start
   const svgRef = useRef();
-  const svgHasMounted = useRenderOnSvgMount(svgRef, isActiveTab);
+  const svgHasMounted = useRenderOnSvgMount(svgRef, true);
 
   const svgLegendRef = useRef(null);
-  const svgLegendHasMounted = useRenderOnSvgMount(svgLegendRef, isActiveTab);
+  const svgLegendHasMounted = useRenderOnSvgMount(svgLegendRef, true);
 
   const categoryStatistics = data.country_values_stats();
   const colors = { left: colorScheme.middle, right: colorScheme.right };
@@ -176,7 +176,6 @@ export default function CountryDistance({ data, map, isActiveTab }) {
           <InfoPopover
             title={distance.name_short || distance.name}
             info={distance.info}
-            isActiveTab={isActiveTab}
           />
         </InputGroup>
         {selected === null ? (

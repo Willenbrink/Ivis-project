@@ -14,7 +14,7 @@ import "../../../public/clustering.js"
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
 
-export default function Cluster({clusterData, map, isActiveTab}) {
+export default function Cluster({clusterData, data, map}) {
   const [numClusters, setNumClusters] = useState(3);
   const [countryColorDict, _] = useState({});
   const clusters = clustersOfLevel(clusterData.get_cluster_data(), numClusters);
@@ -36,7 +36,7 @@ export default function Cluster({clusterData, map, isActiveTab}) {
 
   // Render map when svg element has mounted
   const svgRef = useRef(null)
-  const svgHasMounted = useRenderOnSvgMount(svgRef, isActiveTab)
+  const svgHasMounted = useRenderOnSvgMount(svgRef, true)
 
   function clusterSize(cluster) {
     if (cluster[0] === "Leaf") return 1;
@@ -152,52 +152,51 @@ export default function Cluster({clusterData, map, isActiveTab}) {
     </div>
   )
   return (
-    isActiveTab && <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
-      <div className="d-flex flex-column flex-grow-1 position-relative">
-        {svg}
-      </div>
-      <div className="px-5 pt-2 position-absolute" id="cd_control">
+      <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
+        <div className="d-flex flex-column flex-grow-1 position-relative">
+          {svg}
+        </div>
+        <div className="px-5 pt-2 position-absolute" id="cd_control">
           <InfoPopover
             title='Culture groups according to each countries averaged responses'
             info={infoClusteringBody}
-            isActiveTab={isActiveTab}
           />
-      </div>
-      <ResetZoomButton zoomLevel={zoomLevel} setDoResetZoom={setDoResetZoom}/>
-      <div className="position-absolute w-100 bottom-0 d-flex justify-content-center small" style={{pointerEvents: 'none'}}>
-        <div className="legend w-75 p-2 px-5 rounded mx-5 my-4 d-flex flex-column shadow">
-          <p className="fs-6 fw-bold">Clustering based on answer similarities for all categories</p>
-          <div className="d-flex gap-3">
-            <div className="d-flex flex-column">
-              <p className="text-nowrap">Number of clusters:</p>
-              <p className=" invisible m-0">Number of clusters:</p>
-              <ColorBoxLabel color={colorScheme.noData} label="No data" visible={true}/>
-            </div>
-            <div className="d-flex flex-column w-100">
-              <div className='d-flex justify-content-between'>
-                {colors.map((obj, idx) => <p key={idx} className="m-0">{idx + 1}</p>)}
+        </div>
+        <ResetZoomButton zoomLevel={zoomLevel} setDoResetZoom={setDoResetZoom}/>
+        <div className="position-absolute w-100 bottom-0 d-flex justify-content-center small" style={{pointerEvents: 'none'}}>
+          <div className="legend w-75 p-2 px-5 rounded mx-5 my-4 d-flex flex-column shadow">
+            <p className="fs-6 fw-bold">Clustering based on answer similarities for all categories</p>
+            <div className="d-flex gap-3">
+              <div className="d-flex flex-column">
+                <p className="text-nowrap">Number of clusters:</p>
+                <p className=" invisible m-0">Number of clusters:</p>
+                <ColorBoxLabel color={colorScheme.noData} label="No data" visible={true}/>
               </div>
-              <input type="range" min="1" max={colors.length} value={numClusters} onChange={(ev) => {setNumClusters(ev.target.valueAsNumber)}} style={{pointerEvents: 'auto'}}/>
-              <div className='d-flex justify-content-between mt-4 flex-wrap'>
-                {colors.map((obj, idx) => {
-                  const label = "Cluster " + (idx + 1);
-                  return <ColorBoxLabel key={label} color={obj} label={label} visible={numClusters >= idx+1}/>;
-                })}
+              <div className="d-flex flex-column w-100">
+                <div className='d-flex justify-content-between'>
+                  {colors.map((obj, idx) => <p key={idx} className="m-0">{idx + 1}</p>)}
+                </div>
+                <input type="range" min="1" max={colors.length} value={numClusters} onChange={(ev) => {setNumClusters(ev.target.valueAsNumber)}} style={{pointerEvents: 'auto'}}/>
+                <div className='d-flex justify-content-between mt-4 flex-wrap'>
+                  {colors.map((obj, idx) => {
+                    const label = "Cluster " + (idx + 1);
+                    return <ColorBoxLabel key={label} color={obj} label={label} visible={numClusters >= idx+1}/>;
+                  })}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>  
 
 
-      {/* 
-      <div className="w-25 mx-3">
-        <p className="fs-4 mb-2 border-bottom">{categoriesObjects[category].title}</p>
-        <p>{categoriesObjects[category].info}</p>
-        HERE WE CAN PLACE A POSSIBLE COUNTRY SELECTOR FOR COMPARIONS
-      </div>
-      */}
-    </div>)
+        {/*
+           <div className="w-25 mx-3">
+           <p className="fs-4 mb-2 border-bottom">{categoriesObjects[category].title}</p>
+           <p>{categoriesObjects[category].info}</p>
+           HERE WE CAN PLACE A POSSIBLE COUNTRY SELECTOR FOR COMPARIONS
+           </div>
+         */}
+      </div>)
 }
 
 export const useD3 = (renderChartFn, dependencies) => {
