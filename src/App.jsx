@@ -60,11 +60,19 @@ function App() {
       <link id="themeLink" rel="stylesheet" href="darkMode.css" />
       <TabSwitch activeTabNumber={activeTabNumber} setActiveTabNumber={setActiveTabNumber}>
         <HomePage icon={<div className='' style={{height: '2rem'}}><MMLogo/></div>} setActiveTabNumber={setActiveTabNumber}/>
-        {(data !== null && map !== null) ? <WorldMap data={data} map={map} isActiveTab={activeTabNumber === 1 } icon="" title="Single Category Map"/>: <pre>"Loading..."</pre>}
-        {(data !== null && map !== null) ? <CountryDistance data={data} map={map} isActiveTab={activeTabNumber === 2} icon="" title="Difference Map"/> : <pre>"Loading..."</pre>}
-        {(data !== null && map !== null && clusterData !== null) ? <Cluster clusterData={clusterData} data={data} map={map} isActiveTab={activeTabNumber === 3} icon="" title="Culture Group Map"/> : <pre>"Loading..."</pre>}
+        {(data !== null && map !== null && activeTabNumber === 1)
+         ? <WorldMap data={data} map={map} icon="" title="Single Category Map"/>
+         : <div title="Single Category Map">Loading</div>}
+        {(data !== null && map !== null && activeTabNumber === 2)
+         ? <CountryDistance data={data} map={map} icon="" title="Difference Map"/>
+         : <div title="Difference Map">Loading</div>}
+        {(data !== null && map !== null && clusterData !== null && activeTabNumber === 3)
+         ? <Cluster clusterData={clusterData} data={data} map={map} icon="" title="Culture Group Map"/>
+         : <div title="Culture Group Map">Loading</div>}
         {/* <div icon="" title="RelativeToCountryViz" className='h-100'><div className='d-flex pt-5 justify-content-center h-100'>Work in progress</div></div>*/ }
-        <AboutTab isActiveTab={activeTabNumber === 4 ? true : undefined} icon="" title="About"/>
+        { activeTabNumber === 4
+          ? <AboutTab icon="" title="About"/>
+          : <div title="About">Loading</div>}
       </TabSwitch>
     </div>
   )

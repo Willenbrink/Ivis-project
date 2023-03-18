@@ -9,20 +9,13 @@ const popover = (title, info) =>
     </Popover.Body>
   </Popover>
 
-export default function InfoPopover({title, info, isActiveTab}){
+export default function InfoPopover({title, info}){
   const buttonRef = useRef()
-  const [hasBeenClosed, setHasBeenClosed] = useState(false)
+  const [open, setOpen] = useState(false)
 
-  useEffect(() => {
-    //if (buttonRef.current && !hasBeenClosed) buttonRef.current.click()
-  }, [isActiveTab])
-
-  
-  return isActiveTab 
-  ? (
-    <OverlayTrigger trigger="click" placement="bottom" rootClose overlay={popover(title, info)} show={isActiveTab && hasBeenClosed}>
-      <Button ref={buttonRef} variant="light" className='border' onClick={()=>{setHasBeenClosed(!hasBeenClosed)}}>Info</Button>
+  return (
+    <OverlayTrigger trigger="click" placement="bottom" rootClose overlay={popover(title, info)} show={open}>
+      <Button ref={buttonRef} variant="light" className='border' onClick={()=>{setOpen(!open)}}>Info</Button>
    </OverlayTrigger>
   )
-  :<></>
 }
