@@ -390,7 +390,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
         {/* Dotted range box */}
         {showRange && (
         <>
-          <rect x={rangeBox.x} y={rangeBox.y} width={rangeBox.width} height={rangeBox.height} fill='none' strokeWidth="2" stroke={rangeBox.color} style={{ ...styleTransition }} className="dashedRect"></rect>
+          <rect x={rangeBox.x} y={rangeBox.y} width={rangeBox.width} height={rangeBox.height} fill='none' strokeWidth="2" style={{ ...styleTransition }} className="dashedRect"></rect>
           <svg x={rangeBox.x + rangeBox.width} y={rangeBox.y - fontSize - 3} height={16} width={16}>{infoCircle}</svg>
           {infoTooltip()}
           

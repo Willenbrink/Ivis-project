@@ -56,3 +56,12 @@ text {
 .countryListSelected {
 	background: lightgray;
 }
+
+.dashedRect {
+  stroke-dasharray: 4;
+	stroke: rgb(56, 62, 68);
+}
+
+rect.selection {
+  fill: green;
+}

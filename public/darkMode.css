@@ -63,3 +63,12 @@ a:hover {
 .countryListSelected {
 	background: #444444;
 }
+
+.dashedRect {
+  stroke-dasharray: 4;
+	stroke: rgb(144, 0, 255);
+}
+
+rect.selection {
+  fill: green;
+}
