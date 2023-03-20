@@ -91,7 +91,7 @@ export default function Cluster({clusterData, map, isActiveTab}) {
   const selectedCluster = clusters.filter((cl) => cl.includes(selected?.id))[0]?.map((country) => map.iso_countries[country]).filter((country) => country !== undefined);
 
   const svg = (
-      <svg width="100%" height="100%" ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
+      <svg width="100%" height="100%" ref={svgRef} onMouseLeave={() => { setHovered(null) } } onClick={()=> {if (!hovered) setSelected(null)}}>
           {svgHasMounted &&
            <>
               <LineDraw

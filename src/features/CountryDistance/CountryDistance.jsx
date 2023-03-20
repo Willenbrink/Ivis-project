@@ -85,6 +85,7 @@ export default function CountryDistance({ data, map, isActiveTab }) {
       onMouseLeave={() => {
         setHovered(null);
       }}
+      onClick={()=> {if (!hovered) setSelected(null)}}
     >
       {svgHasMounted && (
         <>

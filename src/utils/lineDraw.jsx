@@ -82,6 +82,8 @@ class svgHandler {
             d={this.iso_pathCountries[c.id]}
             stroke={colorScheme.border}
             strokeWidth={` ${borderLineWidth}px`}
+            onClick={() => {if (!c.hasData) setSelected(null)}}
+
           />
         );
       });
@@ -127,7 +129,7 @@ class svgHandler {
       )
     );
     this.svg = (
-      <g className="mark" ref={this.gRef}>
+      <g className="mark" ref={this.gRef} >
         {this.earthSphere_path}
         {this.graticule_path}
         {this.all_countries_paths}

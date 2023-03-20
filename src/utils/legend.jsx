@@ -329,7 +329,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
   )
 
   return (
-    <svg height='100%' width='100%' fontFamily={fontFamily} className=''>
+    <svg height='100%' width='100%' fontFamily={fontFamily} className='' onClick={(e)=>{e.stopPropagation()}}>
 
        <rect className="legend" x={15} y={hBox.y - 10 - 30 } width={svgWidth -30} height={50 + 32 + hBox.height + 20} fill='rgb(256,256,256)' rx="15" stroke='rgb(206,212,218)' strokeWidth={1} fillOpacity='100%' filter="drop-shadow(3px 5px 2px rgb(0 0 0 / 0.1))"></rect>
         
