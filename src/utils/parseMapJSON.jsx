@@ -36,7 +36,7 @@ export async function parseJSON(data) {
     
         return acc;
       }, {});
-      // console.log('FEATURES: ', features.length)
+      // console.log('FEATURES: ', features)
 
 
     //[{ "name": "Fiji", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]]]] }]

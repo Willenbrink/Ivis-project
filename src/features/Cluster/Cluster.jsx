@@ -8,6 +8,7 @@ import { categories } from "../../utils/categories";
 import ResetZoomButton from "../../utils/ResetZoomButton";
 import useRenderOnSvgMount from "../../hooks/useRenderOnSvgMount";
 import colors from "./colorScheme"
+import ClusterLegend from "./ClusterLegend";
 // Adapted from:
 // https://www.pluralsight.com/guides/using-d3.js-inside-a-react-app
 
@@ -109,23 +110,11 @@ export default function Cluster({clusterData, map, isActiveTab}) {
                 setZoomCall={setZoomCall}
                 category={category}
               />
-              {/*svgRef.current && 
-              <ClusterLegend svgRef={svgRef} numClusters={numClusters} setNumClusters={setNumClusters}/>
-          */}
           </>
           }
       </svg>
   );
   const boxHeight = 25
-
-  function ColorBoxLabel({color='', label='', visible=false}){
-    return (
-      <div className='d-flex gap-2' style={{transition: 'opacity 3s', opacity: `${visible ? 1 : 0}`}}>
-        <div className='border rounded' style={{height: `${boxHeight}px`, width: `${boxHeight}px`, background: `${color}`}}></div>
-        <p className="text-nowrap">{label}</p>
-      </div>
-    )
-  }
 
   const infoClusteringBody = (
     <div>
@@ -146,6 +135,7 @@ export default function Cluster({clusterData, map, isActiveTab}) {
       </p>
     </div>
   )
+
   return (
     isActiveTab && <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column">
       <div className="d-flex flex-column flex-grow-1 position-relative">
@@ -159,32 +149,7 @@ export default function Cluster({clusterData, map, isActiveTab}) {
           />
       </div>
       <ResetZoomButton zoomLevel={zoomLevel} setDoResetZoom={setDoResetZoom}/>
-      <div className="position-absolute w-100 bottom-0 d-flex justify-content-center small" style={{pointerEvents: 'none'}}>
-        <div className="legend w-75 p-2 px-5 rounded mx-5 my-4 d-flex flex-column shadow">
-          <p className="fs-6 fw-bold">Clustering based on answer similarities for all categories</p>
-          <div className="d-flex gap-3">
-            <div className="d-flex flex-column">
-              <p className="text-nowrap">Number of clusters:</p>
-              <p className=" invisible m-0">Number of clusters:</p>
-              <ColorBoxLabel color={colorScheme.noData} label="No data" visible={true}/>
-            </div>
-            <div className="d-flex flex-column w-100">
-              <div className='d-flex justify-content-between'>
-                {colors.map((obj, idx) => <p key={idx} className="m-0">{idx + 1}</p>)}
-              </div>
-              <input type="range" min="1" max={colors.length} value={numClusters} onChange={(ev) => {setNumClusters(ev.target.valueAsNumber)}} style={{pointerEvents: 'auto'}}/>
-              <div className='d-flex justify-content-between mt-4 flex-wrap'>
-                {colors.map((obj, idx) => {
-                  const label = "Cluster " + (idx + 1);
-                  return <ColorBoxLabel key={label} color={obj} label={label} visible={numClusters >= idx+1}/>;
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>  
-
-
+      <ClusterLegend colors={colors} numClusters={numClusters} setNumClusters={setNumClusters} boxHeight={boxHeight}/>  
       {/* 
       <div className="w-25 mx-3">
         <p className="fs-4 mb-2 border-bottom">{categoriesObjects[category].title}</p>
@@ -194,13 +159,3 @@ export default function Cluster({clusterData, map, isActiveTab}) {
       */}
     </div>)
 }
-
-export const useD3 = (renderChartFn, dependencies) => {
-  const ref = React.useRef();
-
-  React.useEffect(() => {
-    renderChartFn(d3.select(ref.current));
-    return () => {};
-  }, dependencies);
-  return ref;
-};
