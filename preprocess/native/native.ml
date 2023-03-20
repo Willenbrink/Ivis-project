@@ -24,7 +24,7 @@ Instead, use the Google Drive link.
     concat path_public @@ file ^ ".json"
   in
   let country_json = full_path (Filename.chop_extension country_file) in
-  let depth_list_json = full_path "depth_list" in
+  (* let depth_list_json = full_path "depth_list" in *)
   let cluster_tree_json = full_path "cluster_tree" in
 
   let row_to_country = function
@@ -64,7 +64,7 @@ Instead, use the Google Drive link.
         | _ -> failwith "Invalid format")
     |> List.map row_to_country
   in
-  let depth_list, cluster_tree = clustering true countries in
+  let (* depth_list, *) cluster_tree = clustering true countries in
   let yojson : Yojson.Safe.t =
     `Assoc [
       ("keys", [%to_yojson: string list] @@ List.tl Yojson_meta_country.keys); (* We do not want to export id *)
@@ -76,6 +76,6 @@ Instead, use the Google Drive link.
     Printf.printf "Successfully wrote file to %s.\n" path;
   in
   write_file country_json yojson;
-  write_file depth_list_json depth_list;
+  (* write_file depth_list_json depth_list; *)
   write_file cluster_tree_json cluster_tree;
   (* print_endline (Yojson.Safe.to_string yojson); *)
