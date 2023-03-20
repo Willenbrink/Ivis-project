@@ -13,7 +13,7 @@ export default function ClusterLegend({colors, numClusters, setNumClusters, boxH
   )} 
 
   return (
-    <div className="position-absolute w-100 bottom-0 d-flex justify-content-center small" style={{pointerEvents: 'none'}}>
+    <div className="position-absolute w-100 bottom-0 d-flex justify-content-center small"  onClick={(e)=>{e.stopPropagation()}}>
         <div className="legend w-75 p-2 px-5 rounded mx-5 my-4 d-flex flex-column shadow">
           <p className="fs-6 fw-bold">Clustering based on answer similarities for all categories</p>
           <div className="d-flex gap-3">

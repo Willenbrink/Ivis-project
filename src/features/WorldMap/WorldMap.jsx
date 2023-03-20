@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Legend } from "../../utils/legend";
 import { LineDraw } from "../../utils/lineDraw";
 import colorScheme from "../../utils/colorScheme";

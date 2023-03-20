@@ -130,6 +130,7 @@ class svgHandler {
                   if (c.hasData) setHovered(c);
                   else setHovered(null);
                 }}
+            onMouseLeave={() => {setHovered(null)}}
           />
           
         )});
