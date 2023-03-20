@@ -15,7 +15,8 @@ import ClusterLegend from "./ClusterLegend";
 export default function Cluster({clusterData, map, isActiveTab}) {
   const [numClusters, setNumClusters] = useState(3);
   const [countryColorDict, _] = useState({});
-  const clusters = clustersOfLevel(clusterData.get_cluster_data(), numClusters);
+  const [linkage, setLinkage] = useState("ward_norm");
+  const clusters = clustersOfLevel(clusterData[linkage].get_cluster_data(), numClusters);
 
   //currently selected country
   const [selected, setSelected] = useState(null);
@@ -40,10 +41,11 @@ export default function Cluster({clusterData, map, isActiveTab}) {
   }
   function updateCountryColorDict() {
     const number = numClusters;
-    countryColorDict[number] = {};
+    countryColorDict[linkage] = {};
+    countryColorDict[linkage][number] = {};
     for (let i = 0; i < clusters.length; i++) {
       for (let j = 0; j < clusters[i].length; j++) {
-        countryColorDict[number][clusters[i][j]] = colors[i];
+        countryColorDict[linkage][number][clusters[i][j]] = colors[i];
       } 
     }
   }
@@ -82,10 +84,10 @@ export default function Cluster({clusterData, map, isActiveTab}) {
     if (!country) {
       return colorScheme.noData
     }
-    if (countryColorDict[numClusters] === undefined) {
+    if (!countryColorDict[linkage] || countryColorDict[linkage][numClusters] === undefined) {
       updateCountryColorDict(numClusters);
     }
-    const val = countryColorDict[numClusters][country.id]
+    const val = countryColorDict[linkage][numClusters][country.id]
     return val ? val : colorScheme.noData;
   };
 
@@ -149,6 +151,14 @@ export default function Cluster({clusterData, map, isActiveTab}) {
           />
       </div>
       <ResetZoomButton zoomLevel={zoomLevel} setDoResetZoom={setDoResetZoom}/>
+      <select value={linkage} onChange={(ev) => setLinkage(ev.target.value)}>
+        <option value="single">Single Linkage</option>
+        <option value="single_norm">Normalized Single Linkage</option>
+        <option value="maximum">Maximum Linkage</option>
+        <option value="maximum_norm">Normalized Maximum Linkage</option>
+        <option value="ward">Ward's Linkage</option>
+        <option value="ward_norm">Normalized Ward's Linkage</option>
+      </select>
       <ClusterLegend colors={colors} numClusters={numClusters} setNumClusters={setNumClusters} boxHeight={boxHeight}/>  
       {/* 
       <div className="w-25 mx-3">
