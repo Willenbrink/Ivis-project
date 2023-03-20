@@ -147,23 +147,29 @@ export default function Cluster({clusterData, map, isActiveTab}) {
       <div className="d-flex flex-column flex-grow-1 position-relative">
         {svg}
       </div>
-      <div className="px-5 pt-2 position-absolute" id="cd_control">
-          <InfoPopover
-            title='Culture groups according to each countries averaged responses'
-            info={infoClusteringBody}
-            isActiveTab={isActiveTab}
-          />
-      </div>
-      <ResetZoomButton zoomLevel={zoomLevel} setDoResetZoom={setDoResetZoom}/>
-      <select value={linkage} onChange={(ev) => setLinkage(ev.target.value)}>
-        {/* <option value="single">Single Linkage</option> */}
-        {/* <option value="single_norm">Normalized Single Linkage</option> */}
+
+    <InputGroup className="px-5 pt-2 position-absolute" style={{width: "90%"}}>
+      <InputGroup.Text id='basic-addon2' className='category-selector-text'>Linkage:</InputGroup.Text>
+        <Form.Select
+        aria-label="Default select example!"
+        onChange={((e) => setLinkage(e.target.value))}
+        value={linkage}
+        className='fw-bold category-form'
+        >
         <option value="maximum">Maximum Linkage</option>
         <option value="maximum_norm">Normalized Maximum Linkage</option>
         <option value="ward">Ward's Linkage</option>
         <option value="ward_norm">Normalized Ward's Linkage</option>
-      </select>
-      <ClusterLegend colors={colors} numClusters={numClusters} setNumClusters={setNumClusters} boxHeight={boxHeight}/>  
+        </Form.Select>
+          <InfoPopover
+            title='Culture groups according to each countries averaged responses'
+            info={infoClusteringBody}
+            isActiveTab={isActiveTab}
+            className="info-box"
+          />
+    </InputGroup>
+      <ResetZoomButton zoomLevel={zoomLevel} setDoResetZoom={setDoResetZoom}/>
+      <ClusterLegend colors={colors} numClusters={numClusters} setNumClusters={setNumClusters} boxHeight={boxHeight}/>
       {/* 
       <div className="w-25 mx-3">
         <p className="fs-4 mb-2 border-bottom">{categoriesObjects[category].title}</p>
