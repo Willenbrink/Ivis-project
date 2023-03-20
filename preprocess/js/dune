@@ -1,0 +1,5 @@
+(executable
+ (name main)
+ (preprocess (pps js_of_ocaml-ppx ppx_deriving_yojson))
+ (modes js)
+ (libraries lib csv yojson ppx_deriving_yojson.runtime prbnmcn-clustering brr))
