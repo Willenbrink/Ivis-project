@@ -49,3 +49,26 @@ a:hover {
 .logotext {
 	fill: white
 }
+
+
+.countryList {
+	background: #202020;
+}
+
+.countryList:hover {
+	background: #444444;
+	cursor: pointer;
+}
+
+.countryListSelected {
+	background: #444444;
+}
+
+.dashedRect {
+  stroke-dasharray: 4;
+	stroke: rgb(144, 0, 255);
+}
+
+rect.selection {
+  fill: green;
+}

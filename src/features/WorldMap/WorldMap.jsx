@@ -25,7 +25,9 @@ export default function WorldMap({data, map, isActiveTab}) {
   // Zooming/panning
   const [zoomLevel, setZoomLevel] = useState(null);
   const [doResetZoom, setDoResetZoom] = useState(false); // Reset zoom/pan
-  const [zoomCall, setZoomCall] = useState(()=>{}) // Turn on zoom/pan callback
+  const zoomCall = useRef(()=>{}) // Turn on zoom/pan callback
+  // const [zoomToCountry, setZoomToCountry] = useState(()=>{})
+  const zoomToCountry = useRef(()=>{})
   // Brushing
   const [brushRange, setBrushRange] = useState([-2.0,2.0]) // when brush is off, range is [-2,2]. When brush is on, the range is maximum [-1,1]
 
@@ -88,7 +90,8 @@ export default function WorldMap({data, map, isActiveTab}) {
                 setZoomLevel={setZoomLevel}
                 doResetZoom={doResetZoom}
                 setDoResetZoom={setDoResetZoom}
-                setZoomCall={setZoomCall}
+                zoomCall={zoomCall}
+                zoomToCountry={zoomToCountry}
                 category={category}
               />
               { svgRef.current &&
@@ -111,7 +114,6 @@ export default function WorldMap({data, map, isActiveTab}) {
       </svg>
   )
 
-  // backdropFilter: 'blur(2px)',
   return (
     <div id="WorldCanvasDiv" className="d-flex flex-grow-1 flex-column position-relative">
       <div className="d-flex flex-column flex-grow-1 position-relative">
@@ -119,33 +121,19 @@ export default function WorldMap({data, map, isActiveTab}) {
       </div>
       <CategorySelectorInfo category={category} setCategory={setCategory} isActiveTab={isActiveTab}/>
       <ResetZoomButton zoomLevel={zoomLevel} setDoResetZoom={setDoResetZoom}/>
-      <CountryList svgHeight={svgHasMounted ? svgRef.current.getBoundingClientRect().height : []} brushedCountries={brushedCountries} brushRange={brushRange}/>
-      
-      {/* 
-      <div className="position-absolute start-0 bottom-0 w-100" style={{ background: 'linear-gradient(360deg, rgb(256,256,256,0.5) 80%, transparent)', backdropFilter: 'blur(1px)', height: '25%'}}>
-        {legend}
-      </div>
-      */}
-      {/* 
-      <div className="w-25 mx-3">
-        <p className="fs-4 mb-2 border-bottom">{categoriesObjects[category].title}</p>
-        <p>{categoriesObjects[category].info}</p>
-        HERE WE CAN PLACE A POSSIBLE COUNTRY SELECTOR FOR COMPARIONS
-      </div>
-      */}
+      <CountryList 
+        svgHeight={svgHasMounted ? svgRef.current.getBoundingClientRect().height : []} 
+        brushedCountries={brushedCountries} 
+        brushRange={brushRange} 
+        zoomToCountry={zoomToCountry} 
+        selected={selected} 
+        setSelected={setSelected} 
+        setHovered={setHovered}
+        category={category}
+        countryToColor={countryToColor}
+        />
     </div>)
 }
-/*
-export const useD3 = (renderChartFn, dependencies) => {
-  const ref = React.useRef();
-
-  React.useEffect(() => {
-    renderChartFn(d3.select(ref.current));
-    return () => {};
-  }, dependencies);
-  return ref;
-};
-*/
 
 function isInRange(val, brushRange) {
   if (!val && brushRange[0] > -2) return false;

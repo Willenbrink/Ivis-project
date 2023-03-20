@@ -381,7 +381,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
             </defs>
             <svg ref={legendRef} x={hBox.x} y={hBox.y} width={hBox.width} height={hBox.height}
               onMouseOver={()=>{if(zoomCall) { d3.select(svgRef.current).on('.zoom', null)}}}
-              onMouseLeave={()=>{ if(zoomCall) { zoomCall() }}}>
+              onMouseLeave={()=>{ if(zoomCall) { zoomCall.current() }}}>
               <rect className="legendColourBackground" width={hBox.width} height={hBox.height} fill='white' stroke="rgb(156, 162, 168)" strokeWidth="2" rx={5}/>          
               <rect x={colorBox.x} width={colorBox.width} height={colorBox.height} fill="url(#gradient)" stroke="none" strokeWidth="0.3" style={{...styleTransition}} rx={roundedCorners}></rect>
             </svg>
@@ -390,7 +390,7 @@ export function Legend({svgRef, category, categoryStatistics, range, showRange, 
         {/* Dotted range box */}
         {showRange && (
         <>
-          <rect x={rangeBox.x} y={rangeBox.y} width={rangeBox.width} height={rangeBox.height} fill='none' strokeWidth="2" stroke={rangeBox.color} style={{ ...styleTransition }} className="dashedRect"></rect>
+          <rect x={rangeBox.x} y={rangeBox.y} width={rangeBox.width} height={rangeBox.height} fill='none' strokeWidth="2" style={{ ...styleTransition }} className="dashedRect"></rect>
           <svg x={rangeBox.x + rangeBox.width} y={rangeBox.y - fontSize - 3} height={16} width={16}>{infoCircle}</svg>
           {infoTooltip()}
           

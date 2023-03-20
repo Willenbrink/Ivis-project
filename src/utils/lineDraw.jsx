@@ -5,6 +5,7 @@ import {
   geoGraticule,
   select,
   zoom,
+  pointer
 } from "d3";
 import React, { useEffect } from "react";
 import { useRef } from "react";
@@ -22,10 +23,26 @@ class svgHandler {
   //since JSX elements are immutable, we have to rebuild the whole tree.
   //this method is executed on rerender.
   //TODO: move as much as possible to constructor. (building of paths, ...)
-  colorize = (countryToColor, selected, setHovered) => {
+  colorize = (countryToColor, selected, setHovered, path, svgRef, zoom_var) => {
     const iso_countries = this.iso_countries;
     const non_iso_countries = this.non_iso_countries;
     const setSelected = this.setSelected;
+
+    function clicked(event, d) {
+      const svg = select(svgRef.current)
+      const [[x0, y0], [x1, y1]] = path.bounds(d);
+      event.stopPropagation();
+      //states.transition().style("fill", null);
+      //select(this).transition().style("fill", "red");
+      svg.transition().duration(750).call(
+        zoom_var(select(document.getElementById("g-map")), svgRef).transform,
+        zoomIdentity
+          .translate(svgRef.current.clientWidth / 2, svgRef.current.clientHeight / 2)
+          .scale(Math.min(8, 0.9 / Math.max((x1 - x0) / svgRef.current.clientWidth, (y1 - y0) / svgRef.current.clientHeight)))
+          .translate(-(x0 + x1) / 2, -(y0 + y1) / 2),
+        // pointer(event, svg.node())
+      );
+    }
 
 
     this.earthSphere_path = (
@@ -105,6 +122,7 @@ class svgHandler {
             strokeWidth={` ${hoveredLineWidth}px`}
             onClick={(e) => {
               setSelected(iso_countries[e.target.id]);
+              // clicked(e, {type: 'Feature', geometry: c.geometry});
             }}
             onMouseOver={() => {
                   if (c.hasData) setHovered(c);
@@ -127,7 +145,7 @@ class svgHandler {
       )
     );
     this.svg = (
-      <g className="mark" ref={this.gRef}>
+      <g className="mark" id="g-map" ref={this.gRef}>
         {this.earthSphere_path}
         {this.graticule_path}
         {this.all_countries_paths}
@@ -174,7 +192,8 @@ export function LineDraw({
   setZoomLevel,
   doResetZoom,
   setDoResetZoom,
-  setZoomCall,
+  zoomCall,
+  zoomToCountry=false,
   hovered,
   setHovered,
 }) {
@@ -201,42 +220,68 @@ export function LineDraw({
   // Zooming and panning
   //const zoomFactor = 1 / (Math.max(1, zoomLevel) * zoomLineStrength);
 
+  // This zoom variable had to be extracted to be used in svgHandler
+
+  const zoom_var = (g, svgRef) => {
+    const zoomInScaleLimit = 150;
+    const zoomOutScaleLimit = 0.12;
+    return(
+    zoom()
+    .scaleExtent([zoomOutScaleLimit, zoomInScaleLimit])
+    .translateExtent([
+      [0, 0],
+      [svgRef.current.clientWidth, svgRef.current.clientHeight],
+    ])
+    .on("zoom", (event) => {
+      g.attr("transform", event.transform);
+      //setZoomLevel(event.transform.k)
+    })
+    .on("end", (event) => {
+      //g.attr('transform', event.transform)
+      setZoomLevel(event.transform.k);
+    })
+    )
+  }
+
+  function ZoomCall() {
+    const svg = select(svgRef.current);
+    const g = select(gRef.current);
+    svg.call(zoom_var(g, svgRef));
+  }
+
   //of course we are very efficcient and only generate the whole SVG thing once :)
   const [svg_handler, _] = React.useState(
     () =>
-      new svgHandler(iso_countries, non_iso_countries, gRef, path, setSelected)
+      new svgHandler(iso_countries, non_iso_countries, gRef, path, setSelected, zoom_var)
   );
 
-  function ZoomCall() {
-    const zoomInScaleLimit = 150;
-    const zoomOutScaleLimit = 0.12;
-
-    const svg = select(svgRef.current);
-    const g = select(gRef.current);
-    svg.call(
-      zoom()
-        .scaleExtent([zoomOutScaleLimit, zoomInScaleLimit])
-        .translateExtent([
-          [0, 0],
-          [svgRef.current.clientWidth, svgRef.current.clientHeight],
-        ])
-        .on("zoom", (event) => {
-          g.attr("transform", event.transform);
-          //setZoomLevel(event.transform.k)
-        })
-        .on("end", (event) => {
-          //g.attr('transform', event.transform)
-          setZoomLevel(event.transform.k);
-        })
-    );
-  }
 
   function initSVG() {
     if (svgRef && gRef) {
       // Turn on the zoom function
       ZoomCall();
       // Save the turn on zoom function to parent component
-      setZoomCall(() => ZoomCall);
+      if (zoomCall) zoomCall.current = () => ZoomCall()
+      
+      function Clicked(d) {
+        const svg = select(svgRef.current)
+        const [[x0, y0], [x1, y1]] = path.bounds(d);
+        // event.stopPropagation();
+        //states.transition().style("fill", null);
+        //select(this).transition().style("fill", "red");
+        svg.transition().duration(750).call(
+          zoom_var(select(gRef.current), svgRef).transform,
+          zoomIdentity
+            .translate(svgRef.current.clientWidth / 2, svgRef.current.clientHeight / 2)
+            .scale(Math.min(8, 0.9 / Math.max((x1 - x0) / svgRef.current.clientWidth, (y1 - y0) / svgRef.current.clientHeight)))
+            .translate(-(x0 + x1) / 2, -(y0 + y1) / 2),
+          //pointer(event, svg.node())
+        );
+      }
+
+      // This feeds the zoom to country function to the parent (and then to the country list component)
+      if(zoomToCountry) {
+        zoomToCountry.current = (d) => Clicked(d) }
     }
   }
 
@@ -254,6 +299,6 @@ export function LineDraw({
       setZoomLevel(null);
     }
   }
-  svg_handler.colorize(countryToColor, selected, setHovered);
+  svg_handler.colorize(countryToColor, selected, setHovered, path, svgRef, zoom_var);
   return svg_handler.svg;
 }
