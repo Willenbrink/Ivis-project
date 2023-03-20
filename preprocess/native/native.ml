@@ -25,7 +25,6 @@ Instead, use the Google Drive link.
   in
   let country_json = full_path (Filename.chop_extension country_file) in
   (* let depth_list_json = full_path "depth_list" in *)
-  let cluster_tree_json = full_path "cluster_tree" in
 
   let row_to_country = function
     | id, [
@@ -64,7 +63,7 @@ Instead, use the Google Drive link.
         | _ -> failwith "Invalid format")
     |> List.map row_to_country
   in
-  let (* depth_list, *) cluster_tree = clustering true countries in
+
   let yojson : Yojson.Safe.t =
     `Assoc [
       ("keys", [%to_yojson: string list] @@ List.tl Yojson_meta_country.keys); (* We do not want to export id *)
@@ -77,5 +76,14 @@ Instead, use the Google Drive link.
   in
   write_file country_json yojson;
   (* write_file depth_list_json depth_list; *)
-  write_file cluster_tree_json cluster_tree;
+  List.iter (fun (file, cluster) ->
+      write_file file cluster
+    ) [
+    full_path "single", clustering (module Lib.SingleLinkCluster) false countries;
+    full_path "single_norm", clustering (module Lib.SingleLinkCluster) true countries;
+    full_path "maximum", clustering (module Lib.MaxLinkCluster) false countries;
+    full_path "maximum_norm", clustering (module Lib.MaxLinkCluster) true countries;
+    full_path "ward", clustering (module Lib.WardLinkCluster) false countries;
+    full_path "ward_norm", clustering (module Lib.WardLinkCluster) true countries;
+  ]
   (* print_endline (Yojson.Safe.to_string yojson); *)

@@ -177,36 +177,10 @@ module CountryCluster = struct
   let singleton = CountrySet.singleton
   let join = CountrySet.union
 
-  let dist a b =
-    let seq =
-      CountrySet.to_seq a
-      |> Seq.flat_map (fun c1 -> CountrySet.to_seq b |> Seq.map (fun c2 -> c1,c2))
-    in
-    let single_linkage =
-      Seq.fold_left (fun acc (c1,c2) -> min acc @@ Country.dist c1 c2) Float.infinity seq
-    in
-    let maximum_linkage =
-      Seq.fold_left (fun acc (c1,c2) -> max acc @@ Country.dist c1 c2) 0. seq
-    in
-    let ward_linkage =
-      let open Country in
-      let card_a = float_of_int @@ CountrySet.cardinal a in
-      let card_b = float_of_int @@ CountrySet.cardinal b in
-      let mean_a = CountrySet.fold (fun acc x -> acc +| x) a null /| card_a in
-      let mean_b = CountrySet.fold (fun acc x -> acc +| x) b null /| card_b in
-      norm_2 (mean_a -| mean_b) *. sqrt (2. *. card_a *. card_b /. (card_a +. card_b))
-    in
-    ward_linkage
-
-
   let to_string_list set =
       to_seq set |> Seq.map (fun c -> c.id) |> List.of_seq
   let to_yojson set =
       to_string_list set |> [%to_yojson: string list]
-end
-
-module ClusterAlgo = struct
-  include Clustering.Agglomerative.Make (Country) (CountryCluster)
 end
 
 type cluster =
@@ -214,20 +188,58 @@ type cluster =
   | Leaf of CountryCluster.t [@@deriving to_yojson]
 
 
-let clustering normalize (countries : country list) =
+let single_linkage a b =
+  let seq =
+    CountrySet.to_seq a
+    |> Seq.flat_map (fun c1 -> CountrySet.to_seq b |> Seq.map (fun c2 -> c1,c2))
+  in
+  Seq.fold_left (fun acc (c1,c2) -> min acc @@ Country.dist c1 c2) Float.infinity seq
+
+let maximum_linkage a b =
+  let seq =
+    CountrySet.to_seq a
+    |> Seq.flat_map (fun c1 -> CountrySet.to_seq b |> Seq.map (fun c2 -> c1,c2))
+  in
+  Seq.fold_left (fun acc (c1,c2) -> max acc @@ Country.dist c1 c2) 0. seq
+
+let ward_linkage a b =
+  let open Country in
+  let card_a = float_of_int @@ CountrySet.cardinal a in
+  let card_b = float_of_int @@ CountrySet.cardinal b in
+  let mean_a = CountrySet.fold (fun acc x -> acc +| x) a null /| card_a in
+  let mean_b = CountrySet.fold (fun acc x -> acc +| x) b null /| card_b in
+  norm_2 (mean_a -| mean_b) *. sqrt (2. *. card_a *. card_b /. (card_a +. card_b))
+
+module SingleLinkCluster = struct
+  include Clustering.Agglomerative.Make (Country) (struct include CountryCluster let dist = single_linkage end)
+end
+
+module MaxLinkCluster = struct
+  include Clustering.Agglomerative.Make (Country) (struct include CountryCluster let dist = maximum_linkage end)
+end
+module WardLinkCluster = struct
+  include Clustering.Agglomerative.Make (Country) (struct include CountryCluster let dist = ward_linkage end)
+end
+
+module type Link = sig
+  type cluster = { uid: int; merged_at: float; set: CountrySet.t; tree: (cluster * cluster) option; }
+  val cluster : Country.t list -> cluster
+end
+
+let clustering (module Linkage : Link) normalize (countries : country list) =
   let countries =
     if normalize
     then Country.normalize countries
     else countries
   in
-  let clusters = ClusterAlgo.cluster countries in
+  let clusters = Linkage.cluster countries in
   (* let depth_list = *)
   (*   ClusterAlgo.all_clusters clusters *)
   (*   (\* |> List.iter (fun (cluster, depth) -> Printf.printf "%i (size: %i): %s\n" depth (CountryCluster.cardinal cluster) (CountryCluster.fold (fun c acc -> acc ^ ", " ^ c.id) cluster "")) *\) *)
   (*   |> List.map (fun (cluster,depth) -> CountryCluster.to_string_list cluster, depth) *)
   (*   |> [%to_yojson: (string list * int) list] *)
   (* in *)
-  let rec convert_cluster ({ set; tree; merged_at; _ } : ClusterAlgo.cluster) = match tree with
+  let rec convert_cluster ({ set; tree; merged_at; _ } : Linkage.cluster) = match tree with
     | None ->
       assert (CountryCluster.cardinal set = 1);
       (* Leaf ((CountryCluster.choose set).id) *)
