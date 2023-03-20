@@ -133,7 +133,11 @@ export default function Cluster({clusterData, map, isActiveTab}) {
       To compute the clusters we use the same distances between countries as the Difference Map. 
       Starting with all countries in their own cluster, we repeatedly merge the two clusters 
       that are most similar. The similarity between two clusters is dependent on the pairwise 
-      distances. More precisely, Wards minimum variance method is used.
+      distances using a linkage.
+      </p>
+      <p className="fw-bold m-0">What are linkages and which are available?</p>
+      <p>
+        A linkage describes the distance between two clusters and is based on the pairwise distances between countries. The single linkage method states that two clusters are as similar as their closest two countries (i.e. the minimum distance that can be found between two countries in both clusters). The maximum linkage method uses the maximum difference between the clusters. This means that all countries must be close to another for clusters to be considered close. Ward's minimum variance method can be considered as a point in between both methods, aiming to minimize the variance within each cluster. The normalized variants wheigh each category identically, even if the ranges are smaller. We advise against this method and include it mainly for consistency with the Moral Machine paper that uses the normalized Ward's linkage.
       </p>
     </div>
   )
