@@ -11,7 +11,7 @@ export const teamMembersInfo = [
     email: 'stwi@kth.se',
     linkedin: '',
     work: 'Preprocessing and React',
-    learning: ''
+    learning: 'Learning about React and preprocessing and clustering of data.'
   },
   {
     name: 'Samuel Sandberg Bröms',
@@ -25,7 +25,7 @@ export const teamMembersInfo = [
     email: 'quapil@kth.se',
     linkedin: '',
     work: 'React and D3',
-    learning: ''
+    learning: 'I was new to developing in React, so it was one of my objectives to develop in React. For my LO "User Interaction" i had the chance to try out different interaction mechanism and think a lot about what is intuitive for the user.'
   },
   {
     name: 'Alex Modee',
