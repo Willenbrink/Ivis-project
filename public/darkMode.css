@@ -72,3 +72,7 @@ a:hover {
 rect.selection {
   fill: green;
 }
+
+.primary-text {
+	color: lightsteelblue;
+}

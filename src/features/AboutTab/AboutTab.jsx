@@ -9,7 +9,7 @@ function AboutTab() {
             <div className="w-75 d-flex flex-column pt-5">
                 <div className='d-flex'>
                     <div className='col-8 pe-3'>
-                        <p className="fs-3 mb-2 text-primary">The Moral Machine project</p>
+                        <p className="fs-3 mb-2 primary-text">The Moral Machine project</p>
                         <p>The Moral Machine data was collected between 2016 and 2018 through &nbsp;
                             <a href='https://www.moralmachine.net/'>https://www.moralmachine.net/</a>,
                             where participants got to decide what the autonomous car should do,
@@ -44,7 +44,7 @@ function AboutTab() {
                         </div>
                     </div>
                 </div>
-                <p className="fs-3 mb-2 text-primary">The data</p>
+                <p className="fs-3 mb-2 primary-text">The data</p>
                         <p>The data was extracted from <a href='https://osf.io/3hvt2/?view_only='>https://osf.io/3hvt2/?view_only=</a>.</p>
                         <p>The data we use in the visualizations are the <i>Average Marginal Causal Effect</i> (AMCE) of each attribute. 
                         For example, "Gender (Male/Female)" represents the change in probability 
@@ -58,7 +58,7 @@ function AboutTab() {
                         <p>
                           The code for the visualization can be found on <a href="https://github.com/Willenbrink/Ivis-project">https://github.com/Willenbrink/Ivis-project</a>.
                         </p>
-                <p className="fs-3 text-primary mb-2">The team behind the visualizations</p>
+                <p className="fs-3 primary-text mb-2">The team behind the visualizations</p>
                 <div className="d-flex flex-wrap mb-5">
                     {teamMembersInfo.map(member => 
                         <TeamMemberCard 
