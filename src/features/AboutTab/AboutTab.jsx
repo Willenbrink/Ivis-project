@@ -57,7 +57,10 @@ function AboutTab() {
                         </p>
                         <p>
                           The code for the visualization can be found on <a href="https://github.com/Willenbrink/Ivis-project">https://github.com/Willenbrink/Ivis-project</a>.
-                        </p>
+                </p>
+                <p className="fs-3 mb-2 primary-text">Demo</p>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/XbBkv5c-QKs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                <p>A short walkthrough of the project</p>
                 <p className="fs-3 primary-text mb-2">The team behind the visualizations</p>
                 <div className="d-flex flex-wrap mb-5">
                     {teamMembersInfo.map(member => 
