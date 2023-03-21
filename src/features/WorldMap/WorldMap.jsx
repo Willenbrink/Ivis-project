@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Legend } from "../../utils/legend";
 import { LineDraw } from "../../utils/lineDraw";
 import colorScheme from "../../utils/colorScheme";
@@ -75,7 +75,7 @@ export default function WorldMap({data, map, isActiveTab}) {
   const markers = getMarkers(selected, hovered, category, categoryStatistics)
 
   const svg = (
-      <svg width="100%" height="100%" ref={svgRef} onMouseLeave={() => { setHovered(null) } }>
+      <svg width="100%" height="100%" ref={svgRef} onMouseLeave={() => { setHovered(null) } } onClick={()=> {if (!hovered) setSelected(null)}}>
           {svgHasMounted &&
            <>
               <LineDraw

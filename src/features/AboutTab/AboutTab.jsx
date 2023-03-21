@@ -65,6 +65,7 @@ function AboutTab() {
                         key={member.name}
                         name={member.name} 
                         email={member.email}
+                        learning={member.learning}
                         linkedin={member.linkedin}
                         work={member.work}
                         className='col-5 col-md-4 col-lg-3 col-xl-3 col-xxl-3'
@@ -77,7 +78,7 @@ function AboutTab() {
     )
 }
 
-function TeamMemberCard({name, email, linkedin, work, className}){
+function TeamMemberCard({name, email, linkedin, work, learning, className}){
     const linkedInRef = useRef()
 
     const linkedInButton = (
@@ -97,6 +98,8 @@ function TeamMemberCard({name, email, linkedin, work, className}){
             {linkedin && linkedInButton}
             <p className="fw-bold m-0">Work distribution:</p>
             <p>{work}</p>
+            <p className="fw-bold m-0">Learning objectives:</p>
+            <p>{learning}</p>
 
         </div>
         </div>

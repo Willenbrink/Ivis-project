@@ -99,6 +99,8 @@ class svgHandler {
             d={this.iso_pathCountries[c.id]}
             stroke={colorScheme.border}
             strokeWidth={` ${borderLineWidth}px`}
+            onClick={() => {if (!c.hasData) setSelected(null)}}
+
           />
         );
       });
@@ -128,6 +130,7 @@ class svgHandler {
                   if (c.hasData) setHovered(c);
                   else setHovered(null);
                 }}
+            onMouseLeave={() => {setHovered(null)}}
           />
           
         )});
