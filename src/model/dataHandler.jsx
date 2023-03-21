@@ -52,5 +52,19 @@ export async function fetch_data() {
 }
 
 export async function fetch_cluster_data() {
-  return fetch("cluster_tree.json").then((x) => x.json()).then(x => new Data(x));
+  const single = fetch("single.json").then((x) => x.json()).then(x => new Data(x));
+  const single_norm = fetch("single_norm.json").then((x) => x.json()).then(x => new Data(x));
+  const maximum = fetch("maximum.json").then((x) => x.json()).then(x => new Data(x));
+  const maximum_norm = fetch("maximum_norm.json").then((x) => x.json()).then(x => new Data(x));
+  const ward = fetch("ward.json").then((x) => x.json()).then(x => new Data(x));
+  const ward_norm = fetch("ward_norm.json").then((x) => x.json()).then(x => new Data(x));
+
+  return {
+    single: await single,
+    single_norm: await single_norm,
+    maximum: await maximum,
+    maximum_norm: await maximum_norm,
+    ward: await ward,
+    ward_norm: await ward_norm,
+  }
 }

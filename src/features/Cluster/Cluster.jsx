@@ -15,7 +15,8 @@ import ClusterLegend from "./ClusterLegend";
 export default function Cluster({clusterData, map, isActiveTab}) {
   const [numClusters, setNumClusters] = useState(3);
   const [countryColorDict, _] = useState({});
-  const clusters = clustersOfLevel(clusterData.get_cluster_data(), numClusters);
+  const [linkage, setLinkage] = useState("ward_norm");
+  const clusters = clustersOfLevel(clusterData[linkage].get_cluster_data(), numClusters);
 
   //currently selected country
   const [selected, setSelected] = useState(null);
@@ -40,10 +41,11 @@ export default function Cluster({clusterData, map, isActiveTab}) {
   }
   function updateCountryColorDict() {
     const number = numClusters;
-    countryColorDict[number] = {};
+    countryColorDict[linkage] = {};
+    countryColorDict[linkage][number] = {};
     for (let i = 0; i < clusters.length; i++) {
       for (let j = 0; j < clusters[i].length; j++) {
-        countryColorDict[number][clusters[i][j]] = colors[i];
+        countryColorDict[linkage][number][clusters[i][j]] = colors[i];
       } 
     }
   }
@@ -82,10 +84,10 @@ export default function Cluster({clusterData, map, isActiveTab}) {
     if (!country) {
       return colorScheme.noData
     }
-    if (countryColorDict[numClusters] === undefined) {
+    if (!countryColorDict[linkage] || countryColorDict[linkage][numClusters] === undefined) {
       updateCountryColorDict(numClusters);
     }
-    const val = countryColorDict[numClusters][country.id]
+    const val = countryColorDict[linkage][numClusters][country.id]
     return val ? val : colorScheme.noData;
   };
 
@@ -131,7 +133,11 @@ export default function Cluster({clusterData, map, isActiveTab}) {
       To compute the clusters we use the same distances between countries as the Difference Map. 
       Starting with all countries in their own cluster, we repeatedly merge the two clusters 
       that are most similar. The similarity between two clusters is dependent on the pairwise 
-      distances. More precisely, Wards minimum variance method is used.
+      distances using a linkage.
+      </p>
+      <p className="fw-bold m-0">What are linkages and which are available?</p>
+      <p>
+        A linkage describes the distance between two clusters and is based on the pairwise distances between countries. The maximum linkage method uses the maximum difference between the countries of the clusters. This means that all countries must be close to another for clusters to be considered close. Ward's minimum variance method aims to minimize the variance within each cluster and is generally superior. The normalized variants weigh each category identically, even if the ranges are smaller. This causes "irrelevant" categories to strongly influence the results. We advise against normalization and include it mainly for consistency with the Moral Machine paper that uses the normalized Ward's linkage.
       </p>
     </div>
   )
@@ -141,15 +147,29 @@ export default function Cluster({clusterData, map, isActiveTab}) {
       <div className="d-flex flex-column flex-grow-1 position-relative">
         {svg}
       </div>
-      <div className="px-5 pt-2 position-absolute" id="cd_control">
+
+    <InputGroup className="px-5 pt-2 position-absolute" style={{width: "90%"}}>
+      <InputGroup.Text id='basic-addon2' className='category-selector-text'>Linkage:</InputGroup.Text>
+        <Form.Select
+        aria-label="Default select example!"
+        onChange={((e) => setLinkage(e.target.value))}
+        value={linkage}
+        className='fw-bold category-form'
+        >
+        <option value="maximum">Maximum Linkage</option>
+        <option value="maximum_norm">Normalized Maximum Linkage</option>
+        <option value="ward">Ward's Linkage</option>
+        <option value="ward_norm">Normalized Ward's Linkage</option>
+        </Form.Select>
           <InfoPopover
             title='Culture groups according to each countries averaged responses'
             info={infoClusteringBody}
             isActiveTab={isActiveTab}
+            className="info-box"
           />
-      </div>
+    </InputGroup>
       <ResetZoomButton zoomLevel={zoomLevel} setDoResetZoom={setDoResetZoom}/>
-      <ClusterLegend colors={colors} numClusters={numClusters} setNumClusters={setNumClusters} boxHeight={boxHeight}/>  
+      <ClusterLegend colors={colors} numClusters={numClusters} setNumClusters={setNumClusters} boxHeight={boxHeight}/>
       {/* 
       <div className="w-25 mx-3">
         <p className="fs-4 mb-2 border-bottom">{categoriesObjects[category].title}</p>

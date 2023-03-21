@@ -25,6 +25,7 @@ type country = {
 type country_assoc = (string * country) list
 
 let country_assoc_to_yojson xs = `Assoc (List.map (fun (id,c) -> id, country_to_yojson c) xs)
+let country_assoc_of_yojson ((`Assoc xs) : Yojson.Safe.t) = List.map (fun (id,c) -> id, country_of_yojson c |> Result.get_ok) xs
 
 module Country = struct
   type t = country
@@ -176,36 +177,10 @@ module CountryCluster = struct
   let singleton = CountrySet.singleton
   let join = CountrySet.union
 
-  let dist a b =
-    let seq =
-      CountrySet.to_seq a
-      |> Seq.flat_map (fun c1 -> CountrySet.to_seq b |> Seq.map (fun c2 -> c1,c2))
-    in
-    let single_linkage =
-      Seq.fold_left (fun acc (c1,c2) -> min acc @@ Country.dist c1 c2) Float.infinity seq
-    in
-    let maximum_linkage =
-      Seq.fold_left (fun acc (c1,c2) -> max acc @@ Country.dist c1 c2) 0. seq
-    in
-    let ward_linkage =
-      let open Country in
-      let card_a = float_of_int @@ CountrySet.cardinal a in
-      let card_b = float_of_int @@ CountrySet.cardinal b in
-      let mean_a = CountrySet.fold (fun acc x -> acc +| x) a null /| card_a in
-      let mean_b = CountrySet.fold (fun acc x -> acc +| x) b null /| card_b in
-      norm_2 (mean_a -| mean_b) *. sqrt (2. *. card_a *. card_b /. (card_a +. card_b))
-    in
-    ward_linkage
-
-
   let to_string_list set =
       to_seq set |> Seq.map (fun c -> c.id) |> List.of_seq
   let to_yojson set =
       to_string_list set |> [%to_yojson: string list]
-end
-
-module ClusterAlgo = struct
-  include Clustering.Agglomerative.Make (Country) (CountryCluster)
 end
 
 type cluster =
@@ -213,16 +188,58 @@ type cluster =
   | Leaf of CountryCluster.t [@@deriving to_yojson]
 
 
-let clustering (countries : country list) =
-  let countries = Country.normalize countries in
-  let clusters = ClusterAlgo.cluster countries in
-  let depth_list =
-    ClusterAlgo.all_clusters clusters
-    (* |> List.iter (fun (cluster, depth) -> Printf.printf "%i (size: %i): %s\n" depth (CountryCluster.cardinal cluster) (CountryCluster.fold (fun c acc -> acc ^ ", " ^ c.id) cluster "")) *)
-    |> List.map (fun (cluster,depth) -> CountryCluster.to_string_list cluster, depth)
-    |> [%to_yojson: (string list * int) list]
+let single_linkage a b =
+  let seq =
+    CountrySet.to_seq a
+    |> Seq.flat_map (fun c1 -> CountrySet.to_seq b |> Seq.map (fun c2 -> c1,c2))
   in
-  let rec convert_cluster ({ set; tree; merged_at; _ } : ClusterAlgo.cluster) = match tree with
+  Seq.fold_left (fun acc (c1,c2) -> min acc @@ Country.dist c1 c2) Float.infinity seq
+
+let maximum_linkage a b =
+  let seq =
+    CountrySet.to_seq a
+    |> Seq.flat_map (fun c1 -> CountrySet.to_seq b |> Seq.map (fun c2 -> c1,c2))
+  in
+  Seq.fold_left (fun acc (c1,c2) -> max acc @@ Country.dist c1 c2) 0. seq
+
+let ward_linkage a b =
+  let open Country in
+  let card_a = float_of_int @@ CountrySet.cardinal a in
+  let card_b = float_of_int @@ CountrySet.cardinal b in
+  let mean_a = CountrySet.fold (fun acc x -> acc +| x) a null /| card_a in
+  let mean_b = CountrySet.fold (fun acc x -> acc +| x) b null /| card_b in
+  norm_2 (mean_a -| mean_b) *. sqrt (2. *. card_a *. card_b /. (card_a +. card_b))
+
+module SingleLinkCluster = struct
+  include Clustering.Agglomerative.Make (Country) (struct include CountryCluster let dist = single_linkage end)
+end
+
+module MaxLinkCluster = struct
+  include Clustering.Agglomerative.Make (Country) (struct include CountryCluster let dist = maximum_linkage end)
+end
+module WardLinkCluster = struct
+  include Clustering.Agglomerative.Make (Country) (struct include CountryCluster let dist = ward_linkage end)
+end
+
+module type Link = sig
+  type cluster = { uid: int; merged_at: float; set: CountrySet.t; tree: (cluster * cluster) option; }
+  val cluster : Country.t list -> cluster
+end
+
+let clustering (module Linkage : Link) normalize (countries : country list) =
+  let countries =
+    if normalize
+    then Country.normalize countries
+    else countries
+  in
+  let clusters = Linkage.cluster countries in
+  (* let depth_list = *)
+  (*   ClusterAlgo.all_clusters clusters *)
+  (*   (\* |> List.iter (fun (cluster, depth) -> Printf.printf "%i (size: %i): %s\n" depth (CountryCluster.cardinal cluster) (CountryCluster.fold (fun c acc -> acc ^ ", " ^ c.id) cluster "")) *\) *)
+  (*   |> List.map (fun (cluster,depth) -> CountryCluster.to_string_list cluster, depth) *)
+  (*   |> [%to_yojson: (string list * int) list] *)
+  (* in *)
+  let rec convert_cluster ({ set; tree; merged_at; _ } : Linkage.cluster) = match tree with
     | None ->
       assert (CountryCluster.cardinal set = 1);
       (* Leaf ((CountryCluster.choose set).id) *)
@@ -232,84 +249,4 @@ let clustering (countries : country list) =
   in
   let cluster_tree = [%to_yojson: cluster] (convert_cluster clusters) in
 
-  depth_list, cluster_tree
-
-let () =
-  let path_data =
-    let error () = failwith {|
-No or incorrect path passed as argument.
-Pass the path to the "Moral Machine Data" directory.
-The data is not shared via Github.
-Instead, use the Google Drive link.
-|}
-    in
-    if Array.length Sys.argv <= 1
-    then error ();
-    let file = Sys.argv.(1) in
-    if not @@ Sys.file_exists file
-    then error ();
-    file
-  in
-  let country_file = "CountriesChangePr.csv" in
-  let path_public = Filename.concat path_data "../../../public" in
-  let country_csv = Filename.concat path_data country_file in
-  let full_path file =
-    let open Filename in
-    concat path_public @@ file ^ ".json"
-  in
-  let country_json = full_path (Filename.chop_extension country_file) in
-  let depth_list_json = full_path "depth_list" in
-  let cluster_tree_json = full_path "cluster_tree" in
-
-  let row_to_country = function
-    | id, [
-        "[Omission -> Commission]: Estimates", intervention;
-        "[Passengers -> Pedestrians]: Estimates", passengers;
-        "Law [Illegal -> Legal]: Estimates", law;
-        "Gender [Male -> Female]: Estimates", gender;
-        "Fitness [Large -> Fit]: Estimates", fitness;
-        "Social Status [Low -> High]: Estimates", status;
-        "Age [Elderly -> Young]: Estimates", age;
-        "No. Characters [Less -> More]: Estimates", number;
-        "Species [Pets -> Humans]: Estimates", species;
-        "[Omission -> Commission]: se", intervention_se;
-        "[Passengers -> Pedestrians]: se", passengers_se;
-        "Law [Illegal -> Legal]: se", law_se;
-        "Gender [Male -> Female]: se", gender_se;
-        "Fitness [Large -> Fit]: se", fitness_se;
-        "Social Status [Low -> High]: se", status_se;
-        "Age [Elderly -> Young]: se", age_se;
-        "No. Characters [Less -> More]: se", number_se;
-        "Species [Pets -> Humans]: se", species_se;
-      ]
-      ->
-      { id;
-        intervention; passengers; law; gender; fitness; status; age; number; species;
-        (* intervention_se; passengers_se; law_se; gender_se; fitness_se; status_se; age_se; number_se; species_se; *)
-      }
-    | _ -> failwith "Invalid format"
-  in
-  let csv = Csv.Rows.load ~has_header:true country_csv in
-  let countries =
-    csv
-    |> List.map Csv.Row.to_assoc
-    |> List.map (function
-        | ("",id)::data -> (id, List.map (fun (x,y) -> x, float_of_string y) data)
-        | _ -> failwith "Invalid format")
-    |> List.map row_to_country
-  in
-  let depth_list, cluster_tree = clustering countries in
-  let yojson : Yojson.Safe.t =
-    `Assoc [
-      ("keys", [%to_yojson: string list] @@ List.tl Yojson_meta_country.keys); (* We do not want to export id *)
-      ("countries", [%to_yojson: country_assoc] @@ List.map (fun c -> (c.id, c)) countries);
-    ]
-  in
-  let write_file path data =
-    Yojson.Safe.to_file ~std:true path data;
-    Printf.printf "Successfully wrote file to %s.\n" path;
-  in
-  write_file country_json yojson;
-  write_file depth_list_json depth_list;
-  write_file cluster_tree_json cluster_tree;
-  (* print_endline (Yojson.Safe.to_string yojson); *)
+  cluster_tree
