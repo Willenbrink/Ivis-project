@@ -99,7 +99,7 @@ class svgHandler {
             strokeOpacity={cInRange ? (cInCluster ? "100%" : "30%") : "10%"}
             className={c.hasData ? "country" : "unselectableCountry"}
             d={this.iso_pathCountries[c.id]}
-            stroke={colorScheme.border}
+                stroke={(selectedCluster != null && selectedCluster.includes(c)) ? "yellow" : colorScheme.border}
             strokeWidth={` ${borderLineWidth}px`}
             onClick={() => {if (!c.hasData) setSelected(null)}}
 
