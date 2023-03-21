@@ -101,7 +101,8 @@ export default function Cluster({clusterData, map, isActiveTab}) {
                 mapWithData={map}
                 svgRef={svgRef}
                 countryToColor={countryToColor}
-                selected={selectedCluster}
+                selected={selected}
+                selectedCluster={selectedCluster}
                 setSelected={setSelected}
                 hovered={hovered}
                 setHovered={setHovered}

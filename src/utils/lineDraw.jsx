@@ -23,7 +23,7 @@ class svgHandler {
   //since JSX elements are immutable, we have to rebuild the whole tree.
   //this method is executed on rerender.
   //TODO: move as much as possible to constructor. (building of paths, ...)
-  colorize = (countryToColor, selected, setHovered, path, svgRef, zoom_var) => {
+  colorize = (countryToColor, selected,selectedCluster, setHovered, path, svgRef, zoom_var) => {
     const iso_countries = this.iso_countries;
     const non_iso_countries = this.non_iso_countries;
     const setSelected = this.setSelected;
@@ -67,12 +67,13 @@ class svgHandler {
     this.non_iso_countries_paths =
       //example country: {"geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
       this.non_iso_pathCountries.map((c, idx) => {
-        const cInRange = countryToColor() !== colorScheme.outOfRange;      
+        const cInRange = countryToColor() !== colorScheme.outOfRange;
+        const cInCluster = selectedCluster == null;
         return (
           <path
             fill={countryToColor(c)}
-            fillOpacity={cInRange ? "100%" : "10%"}
-            strokeOpacity={cInRange ? "100%" : "10%"}
+            fillOpacity={cInRange ? (cInCluster ? "100%" : "30%") : "10%"}
+            strokeOpacity={cInRange ? (cInCluster ? "100%" : "30%") : "10%"}
             vectorEffect="non-scaling-stroke"
             key={`no_iso_country_${idx}`}
             id={c.name}
@@ -87,14 +88,15 @@ class svgHandler {
       //example country: {"color": "#040", "id": "FJI", "geometry": {"type": "MultiPolygon","coordinates": [[[[100,-10]...]]]
       Object.values(this.iso_countries).map((c) => {
         const cInRange = countryToColor(c) !== colorScheme.outOfRange;
+        const cInCluster = (selectedCluster == null || selectedCluster.includes(c));
         return (
           <path
             vectorEffect="non-scaling-stroke"
             key={c.id}
             id={c.id}
             fill={countryToColor(c)}
-            fillOpacity={cInRange ? "100%" : "10%"}
-            strokeOpacity={cInRange ? "100%" : "10%"}
+            fillOpacity={cInRange ? (cInCluster ? "100%" : "30%") : "10%"}
+            strokeOpacity={cInRange ? (cInCluster ? "100%" : "30%") : "10%"}
             className={c.hasData ? "country" : "unselectableCountry"}
             d={this.iso_pathCountries[c.id]}
             stroke={colorScheme.border}
@@ -196,7 +198,8 @@ export function LineDraw({
   doResetZoom,
   setDoResetZoom,
   zoomCall,
-  zoomToCountry=false,
+    zoomToCountry = false,
+  selectedCluster = null,
   hovered,
   setHovered,
 }) {
@@ -301,7 +304,7 @@ export function LineDraw({
       svg.call(zoom().transform, zoomIdentity);
       setZoomLevel(null);
     }
-  }
-  svg_handler.colorize(countryToColor, selected, setHovered, path, svgRef, zoom_var);
+    }
+    svg_handler.colorize(countryToColor, selected, selectedCluster, setHovered, path, svgRef, zoom_var);
   return svg_handler.svg;
 }
